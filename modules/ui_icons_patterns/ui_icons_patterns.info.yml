@@ -1,0 +1,7 @@
+name: 'UI Icons for UI Patterns'
+type: module
+description: 'Icons integration with UI Patterns 1.x and UI Patterns 2.x'
+package: UI
+core_version_requirement: ^10 || ^11
+dependencies:
+  - ui_icons:ui_icons
