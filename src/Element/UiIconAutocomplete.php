@@ -64,6 +64,7 @@ class UiIconAutocomplete extends FormElementBase {
       '#theme_wrappers' => ['form_element'],
       '#allowed_iconset' => [],
       '#show_settings' => FALSE,
+      '#return_id' => FALSE,
     ];
   }
 
@@ -220,7 +221,12 @@ class UiIconAutocomplete extends FormElementBase {
       $settings[$iconset_id] = $input['icon_settings'][$iconset_id];
     }
 
-    $form_state->setValueForElement($element, ['icon' => $icon, 'settings' => $settings]);
+    if (TRUE === $element['#return_id']) {
+      $form_state->setValueForElement($element, ['icon' => $icon->getId(), 'settings' => $settings]);
+    }
+    else {
+      $form_state->setValueForElement($element, ['icon' => $icon, 'settings' => $settings]);
+    }
   }
 
 }

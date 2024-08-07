@@ -5,6 +5,7 @@ namespace Drupal\ui_icons_patterns\Plugin\UIPatterns\SettingType;
 use Drupal\ui_patterns_settings\Definition\PatternDefinitionSetting;
 use Drupal\ui_patterns_settings\Plugin\PatternSettingTypeBase;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Icon setting type.
@@ -24,10 +25,12 @@ class IconSettingType extends PatternSettingTypeBase {
     $form[$def->getName()] = [
       '#type' => 'ui_icon_autocomplete',
       '#title' => $def->getLabel(),
-      '#default_value' => isset($value['icon']) ? $value['icon']->getId() : '',
+      '#default_value' => isset($value['icon']) ? $value['icon'] : '',
       '#default_settings' => $value['settings'] ?? [],
       '#show_settings' => TRUE,
+      '#return_id' => TRUE,
     ];
+
     return $form;
   }
 
@@ -53,12 +56,11 @@ class IconSettingType extends PatternSettingTypeBase {
       ];
     }
     // Data coming from ::settingsForm() have an IconDefinition objects.
-    $icon = $value['icon'];
+    [$icon_id, $iconset_id] = explode(':', $value['icon']);
     return [
-      "iconset" => $icon->getIconsetId(),
-      "icon" => $icon->getName(),
+      "iconset" => $iconset_id ?? '',
+      "icon" => $icon_id ?? '',
       "options" => $value['settings'] ?? [],
     ];
   }
-
 }
