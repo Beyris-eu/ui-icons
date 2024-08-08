@@ -1,0 +1,30 @@
+name: "Button to test icons"
+slots:
+  label:
+    title: Label
+props:
+  type: object
+  properties:
+    icon1:
+      title: "Icon 1"
+      $ref: ui-patterns://icon
+    icon2:
+      title: "Icon 2"
+      type: object
+      properties:
+        iconset: {type: "string"}
+        icon: {type: "string"}
+stories:
+  preview:
+    title: Preview
+    slots:
+      label: Hello world
+    props:
+      icon1:
+        iconset: "iconset_example_svg"
+        icon: "local_svg_Wordmark2_blue_RGB"
+        options: {}
+      icon2:
+        iconset: "iconset_example_svg"
+        icon: "local_svg_Wordmark2_blue_RGB"
+        options: {}

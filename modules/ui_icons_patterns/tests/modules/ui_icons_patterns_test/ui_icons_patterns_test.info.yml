@@ -1,0 +1,6 @@
+name: "UI Icons Patterns Test"
+type: module
+description: "Provides a component to test UI Icons integration with UI Patterns."
+package: "Testing"
+dependencies:
+  - ui_icons:ui_icons_test
