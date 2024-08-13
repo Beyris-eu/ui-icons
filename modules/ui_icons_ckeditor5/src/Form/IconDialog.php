@@ -41,14 +41,14 @@ final class IconDialog extends FormBase {
     $form['#prefix'] = '<div id="editor-icon-dialog-form">';
     $form['#suffix'] = '</div>';
 
-    $allowed_iconset = $filter_format->filters('icon_embed')->getConfiguration()['settings']['allowed_iconset'];
+    $allowed_icon_pack = $filter_format->filters('icon_embed')->getConfiguration()['settings']['allowed_icon_pack'];
 
     $form['icon'] = [
-      '#type' => 'ui_icon_autocomplete',
+      '#type' => 'icon_autocomplete',
       '#title' => $this->t('Icon Name'),
       '#size' => 35,
       '#required' => TRUE,
-      '#allowed_iconset' => $allowed_iconset,
+      '#allowed_icon_pack' => $allowed_icon_pack,
       '#show_settings' => TRUE,
     ];
 
@@ -97,7 +97,7 @@ final class IconDialog extends FormBase {
         $values = [
           'settings' => [
             'icon' => $icon->getId(),
-            'icon_settings' => $value['settings'][$icon->getIconsetId()] ?? [],
+            'icon_settings' => $value['settings'][$icon->getIconPackId()] ?? [],
           ],
         ];
       }

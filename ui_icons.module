@@ -50,24 +50,24 @@ function ui_icons_theme(array $existing, string $type, string $theme, string $pa
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
  *
- * @see src/Element/UiIconAutocomplete.php
+ * @see src/Element/IconAutocomplete.php
  */
 function template_preprocess_input__icon(array &$variables): void {
   $variables['has_settings'] = $variables['element']['#show_settings'];
   $variables['icon_form'] = $variables['element']['icon_id'];
 
   if (isset($variables['element']['#default_value'])) {
-    [$iconset_id, $icon_id] = explode(':', $variables['element']['#default_value']);
-    $variables['iconset_id'] = $iconset_id;
+    [$icon_pack_id, $icon_id] = explode(':', $variables['element']['#default_value']);
+    $variables['icon_pack_id'] = $icon_pack_id;
     $variables['icon_id'] = $icon_id;
   }
   elseif (isset($variables['element']['#value']['icon_id'])) {
-    [$iconset_id, $icon_id] = explode(':', $variables['element']['#value']['icon_id']);
-    $variables['iconset_id'] = $iconset_id;
+    [$icon_pack_id, $icon_id] = explode(':', $variables['element']['#value']['icon_id']);
+    $variables['icon_pack_id'] = $icon_pack_id;
     $variables['icon_id'] = $icon_id;
   }
   elseif (isset($variables['element']['#value']['object']) && $variables['element']['#value']['object'] instanceof IconDefinitionInterface) {
-    $variables['iconset_id'] = $variables['element']['#value']['object']->getIconsetId();
+    $variables['icon_pack_id'] = $variables['element']['#value']['object']->getIconPackId();
     $variables['icon_id'] = $variables['element']['#value']['object']->getId();
   }
 

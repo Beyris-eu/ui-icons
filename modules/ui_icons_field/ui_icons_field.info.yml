@@ -1,8 +1,9 @@
-name: 'UI Icons Field'
+name: 'UI Icons'
 type: module
-description: 'Provide field integration for icon selection.'
-package: User interface
+description: 'Field type Icon and field type Link integration.'
+package: Field types
 core_version_requirement: ^10.3 || ^11
 dependencies:
   - drupal:field
+  - drupal:link
   - ui_icons:ui_icons

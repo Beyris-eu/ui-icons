@@ -6,7 +6,7 @@ namespace Drupal\ui_icons_ckeditor5\Controller;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\ui_icons\Plugin\UiIconsetManagerInterface;
+use Drupal\ui_icons\Plugin\IconPackManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,10 +18,10 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 final class IconFilterController implements ContainerInjectionInterface {
 
   public function __construct(
-    protected UiIconsetManagerInterface $pluginManagerUiIconset,
+    protected IconPackManagerInterface $pluginManagerIconPack,
     protected RendererInterface $renderer,
   ) {
-    $this->pluginManagerUiIconset = $pluginManagerUiIconset;
+    $this->pluginManagerIconPack = $pluginManagerIconPack;
     $this->renderer = $renderer;
   }
 
@@ -30,7 +30,7 @@ final class IconFilterController implements ContainerInjectionInterface {
    */
   public static function create(ContainerInterface $container): self {
     return new static(
-      $container->get('plugin.manager.ui_iconset'),
+      $container->get('plugin.manager.ui_icons_pack'),
       $container->get('renderer'),
     );
   }
@@ -56,11 +56,11 @@ final class IconFilterController implements ContainerInjectionInterface {
       $settings = json_decode($query_settings, TRUE);
     }
 
-    $icon = $this->pluginManagerUiIconset->getIcon($icon_id);
+    $icon = $this->pluginManagerIconPack->getIcon($icon_id);
     // Use default settings if none set.
     if (empty($settings)) {
-      [$iconset_id] = explode(':', $icon_id);
-      $settings = $this->pluginManagerUiIconset->getExtractorFormDefaults($iconset_id);
+      [$icon_pack_id] = explode(':', $icon_id);
+      $settings = $this->pluginManagerIconPack->getExtractorFormDefaults($icon_pack_id);
     }
 
     $build = $icon->getRenderable($settings);

@@ -1,6 +1,6 @@
 ## INTRODUCTION
 
-The UI Icons Remix icon module provider for UI Icons.
+The Remix icon module provider for UI Icons.
 
 ## INSTALLATION
 

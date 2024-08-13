@@ -1,6 +1,6 @@
 ## INTRODUCTION
 
-The UI Icons DSFR module provider for UI Icons.
+The DSFR icons module provider for UI Icons.
 
 ## INSTALLATION
 

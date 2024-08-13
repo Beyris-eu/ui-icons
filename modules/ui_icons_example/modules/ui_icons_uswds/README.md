@@ -1,6 +1,6 @@
 ## INTRODUCTION
 
-The UI Icons USWDS module provider for UI Icons.
+The USWDS icons module provider for UI Icons.
 
 ## INSTALLATION
 

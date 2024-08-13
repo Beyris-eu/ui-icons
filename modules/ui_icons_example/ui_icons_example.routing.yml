@@ -2,7 +2,7 @@ ui_icons_example.form_example:
   path: '/admin/appearance/ui-icons/example'
   defaults:
     _title: 'UI Icons Form Example'
-    _form: 'Drupal\ui_icons_example\Form\UiIconsExampleForm'
+    _form: 'Drupal\ui_icons_example\Form\IconExampleForm'
   requirements:
     _permission: 'access content'
 
@@ -10,6 +10,6 @@ ui_icons_example.build_example:
   path: '/ui-icons-example/build'
   defaults:
     _title: 'UI Icons Build Example'
-    _controller: '\Drupal\ui_icons_example\Controller\UiIconsExampleController'
+    _controller: '\Drupal\ui_icons_example\Controller\IconExampleController'
   requirements:
     _permission: 'access content'

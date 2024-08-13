@@ -7,7 +7,7 @@ namespace Drupal\ui_icons_library\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Pager\PagerManagerInterface;
-use Drupal\ui_icons\Plugin\UiIconsetManagerInterface;
+use Drupal\ui_icons\Plugin\IconPackManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 final class LibrarySearchForm extends FormBase {
 
   public function __construct(
-    private readonly UiIconsetManagerInterface $pluginManagerUiIconset,
+    private readonly IconPackManagerInterface $pluginManagerIconPack,
     private readonly PagerManagerInterface $pagerManager,
   ) {}
 
@@ -27,7 +27,7 @@ final class LibrarySearchForm extends FormBase {
    */
   public static function create(ContainerInterface $container): self {
     return new static(
-      $container->get('plugin.manager.ui_iconset'),
+      $container->get('plugin.manager.ui_icons_pack'),
       $container->get('pager.manager'),
     );
   }
@@ -46,16 +46,16 @@ final class LibrarySearchForm extends FormBase {
     $session = $this->getRequest()->getSession();
     $values = $session->get('ui_icons_library_search');
     $search = $values['search'] ?? '';
-    $iconset = $values['iconset'] ?? '';
+    $iconPack = $values['icon_pack'] ?? '';
     $group = $values['group'] ?? '';
     $num_per_page = $values['num_per_page'] ?? 200;
 
-    $form['iconset'] = [
+    $form['icon_pack'] = [
       '#type' => 'select',
       '#title_display' => 'invisible',
-      '#title' => $this->t('Iconset'),
-      '#default_value' => $iconset,
-      '#options' => ['' => $this->t('- Select Icons -')] + $this->pluginManagerUiIconset->listIconsetOptions(),
+      '#title' => $this->t('Icon Pack'),
+      '#default_value' => $iconPack,
+      '#options' => ['' => $this->t('- Select Icon Pack -')] + $this->pluginManagerIconPack->listIconPackOptions(),
       '#weight' => -11,
     ];
 
@@ -83,14 +83,14 @@ final class LibrarySearchForm extends FormBase {
 
     $form['actions']['#weight'] = -9;
 
-    $icons_list = $this->pluginManagerUiIconset->getIcons();
+    $icons_list = $this->pluginManagerIconPack->getIcons();
 
     $form['#access'] = !empty($icons_list);
 
-    if (!empty($iconset)) {
+    if (!empty($iconPack)) {
       $group_options = [];
       foreach ($icons_list as $icon) {
-        if ($iconset !== $icon->getIconsetId()) {
+        if ($iconPack !== $icon->getIconPackId()) {
           continue;
         }
         $group_id = $icon->getGroup();
@@ -115,7 +115,7 @@ final class LibrarySearchForm extends FormBase {
       'width' => 50,
       'height' => 50,
     ];
-    $icons = $this->filterIcons($icons_list, $iconset, $group, $display_options);
+    $icons = $this->filterIcons($icons_list, $iconPack, $group, $display_options);
 
     $total = count($icons);
     if ($total > 200) {
@@ -181,7 +181,7 @@ final class LibrarySearchForm extends FormBase {
    *
    * @param array $icons_list
    *   The list of icons to filter.
-   * @param string $iconset
+   * @param string $iconPack
    *   The icon set to filter by.
    * @param string $group
    *   The group to filter by.
@@ -191,10 +191,10 @@ final class LibrarySearchForm extends FormBase {
    * @return array
    *   The filtered list of icons.
    */
-  private function filterIcons(array $icons_list, string $iconset, string $group, array $display_options): array {
+  private function filterIcons(array $icons_list, string $iconPack, string $group, array $display_options): array {
     $icons = [];
     foreach ($icons_list as $id => $icon) {
-      if (!empty($iconset) && $iconset !== $icon->getIconsetId()) {
+      if (!empty($iconPack) && $iconPack !== $icon->getIconPackId()) {
         continue;
       }
       if (!empty($group) && $group !== $icon->getGroup()) {

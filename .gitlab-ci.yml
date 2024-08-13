@@ -1,6 +1,5 @@
 variables:
-  _CSPELL_IGNORE_PATHS: 'modules/ui_icons_ckeditor5/js/build/icon.js, modules/ui_icons_example/assets/**/*.json, **/*.svg'
-  _CSPELL_WORDS: 'corge, Iconset, iconset, mogtofu, Valverde, svgs, gouvfr, heroicon, octicon'
+  _CSPELL_IGNORE_PATHS: '**/build/icon.js, *.json, **/*.svg'
 
 include:
   - project: $_GITLAB_TEMPLATES_REPO

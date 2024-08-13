@@ -1,5 +1,5 @@
-iconset_example_drupal_core:
-  label: Drupal core Icons
+icon_pack_example_drupal_core:
+  label: Example Drupal core Icons
   description: Drupal core icons available within Drupal.
   extractor: path
   config:
@@ -45,8 +45,8 @@ iconset_example_drupal_core:
       title: "Alt text"
       description: "Accessibility alternative text, leave empty for decorative icon."
 
-iconset_example_local:
-  label: Local files mixed
+icon_pack_example_local:
+  label: Example png
   description: Local files available, relative to UI Icons example.
   extractor: path
   config:
@@ -71,7 +71,7 @@ iconset_example_local:
       title: "Alt text"
       description: "Accessibility alternative text, leave empty for decorative icon."
 
-iconset_example_svg:
+icon_pack_example_svg:
   label: Example SVG
   description: SVG files, relative to UI Icons example.
   extractor: svg
@@ -103,7 +103,7 @@ iconset_example_svg:
       {{ content }}
     </svg>
 
-iconset_example_svg_sprite:
+icon_pack_example_svg_sprite:
   label: Example SVG sprite
   description: SVG from a sprite, relative to UI Icons example.
   extractor: svg_sprite
@@ -133,13 +133,13 @@ iconset_example_svg_sprite:
       <use xlink:href="{{ source }}#{{ icon_id }}"/>
     </svg>
 
-iconset_example_settings:
-  label: Icon with all settings type
+icon_pack_example_settings:
+  label: Example settings
   description: Provide a single icon with all settings types.
   extractor: path
   config:
     sources:
-      - assets/icons/local_svg_group/group_3/sub_group/local_svg_group_3_10.0_{icon_id}.svg
+      - assets/icons/settings_svg/{icon_id}.svg
   settings:
     width:
       title: "Width"
@@ -194,16 +194,16 @@ iconset_example_settings:
       suffix: 100
       step: 10
 
-iconset_example_no_settings:
-  label: Icon with no settings
+icon_pack_example_no_settings:
+  label: Example no settings
   description: Provide a single icon with no settings.
   extractor: path
   config:
     sources:
       - assets/icons/local_svg_group/group_3/sub_group/local_svg_group_3_10.0_{icon_id}.svg
 
-# iconset_example_drupal_core_sprite:
-#   label: Drupal core sprite
+# icon_pack_example_drupal_core_sprite:
+#   label: Example Drupal core sprite
 #   description: Drupal core icons available within Drupal.
 #   extractor: path
 #   config:

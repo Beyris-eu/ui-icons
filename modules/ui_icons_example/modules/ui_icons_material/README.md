@@ -1,6 +1,6 @@
 ## INTRODUCTION
 
-The UI Icons Material Symbols module provider for UI Icons.
+The Material Symbols module provider for UI Icons.
 
 ## INSTALLATION
 

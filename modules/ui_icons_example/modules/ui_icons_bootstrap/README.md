@@ -1,6 +1,6 @@
 ## INTRODUCTION
 
-The UI Icons Bootstrap module provider for UI Icons.
+The Bootstrap icons module provider for UI Icons.
 
 ## INSTALLATION
 

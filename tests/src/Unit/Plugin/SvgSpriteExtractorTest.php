@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_icons\Unit;
 
 use Drupal\Tests\UnitTestCase;
-use Drupal\ui_icons\Exception\IconsetConfigErrorException;
+use Drupal\ui_icons\Exception\IconPackConfigErrorException;
 use Drupal\ui_icons\IconDefinitionInterface;
-use Drupal\ui_icons\Plugin\UiIconsExtractor\SvgSpriteExtractor;
-use Drupal\ui_icons\UiIconsFinder;
+use Drupal\ui_icons\IconFinder;
+use Drupal\ui_icons\Plugin\IconExtractor\SvgSpriteExtractor;
 
 /**
  * Tests ui_icons svg_sprite extractor plugin.
@@ -28,9 +28,9 @@ class SvgSpriteExtractorTest extends UnitTestCase {
         'label' => 'Test',
         'description' => 'Test description',
       ],
-      $this->createMock(UiIconsFinder::class),
+      $this->createMock(IconFinder::class),
     );
-    $this->expectException(IconsetConfigErrorException::class);
+    $this->expectException(IconPackConfigErrorException::class);
     $this->expectExceptionMessage('Missing `config: sources` in your definition, extractor test_extractor require this value.');
     $svgSpriteExtractorPlugin->getIcons();
   }
@@ -48,9 +48,9 @@ class SvgSpriteExtractorTest extends UnitTestCase {
         'label' => 'Test',
         'description' => 'Test description',
       ],
-      $this->createMock(UiIconsFinder::class),
+      $this->createMock(IconFinder::class),
     );
-    $this->expectException(IconsetConfigErrorException::class);
+    $this->expectException(IconPackConfigErrorException::class);
     $this->expectExceptionMessage('Missing `config: sources` in your definition, extractor test_extractor require this value.');
     $svgSpriteExtractorPlugin->getIcons();
   }
@@ -69,9 +69,9 @@ class SvgSpriteExtractorTest extends UnitTestCase {
         'label' => 'Test',
         'description' => 'Test description',
       ],
-      $this->createMock(UiIconsFinder::class),
+      $this->createMock(IconFinder::class),
     );
-    $this->expectException(IconsetConfigErrorException::class);
+    $this->expectException(IconPackConfigErrorException::class);
     $this->expectExceptionMessage('Could not retrieve paths for extractor test_extractor.');
     $svgSpriteExtractorPlugin->getIcons();
   }
@@ -80,7 +80,7 @@ class SvgSpriteExtractorTest extends UnitTestCase {
    * Test the getIcons method.
    */
   public function testGetIconsInvalid(): void {
-    $uiIconsFinder = $this->createMock(UiIconsFinder::class);
+    $iconFinder = $this->createMock(IconFinder::class);
 
     $icons_list = [
       'baz' => [
@@ -91,9 +91,9 @@ class SvgSpriteExtractorTest extends UnitTestCase {
         'group' => NULL,
       ],
     ];
-    $uiIconsFinder->method('getFilesFromSource')->willReturn($icons_list);
+    $iconFinder->method('getFilesFromSource')->willReturn($icons_list);
     $svg_data = 'Not valid svg';
-    $uiIconsFinder->method('getFileContents')->willReturn($svg_data);
+    $iconFinder->method('getFileContents')->willReturn($svg_data);
 
     $svgSpriteExtractorPlugin = new SvgSpriteExtractor(
       [
@@ -103,14 +103,14 @@ class SvgSpriteExtractorTest extends UnitTestCase {
           'absolute_path' => '/_ROOT_/web/modules/my_module',
           'relative_path' => 'modules/my_module',
         ],
-        'iconset_id' => 'svg_sprite',
+        'icon_pack_id' => 'svg_sprite',
       ],
       'test_extractor',
       [
         'label' => 'Test',
         'description' => 'Test description',
       ],
-      $uiIconsFinder,
+      $iconFinder,
     );
 
     $icons = $svgSpriteExtractorPlugin->getIcons();
@@ -122,8 +122,8 @@ class SvgSpriteExtractorTest extends UnitTestCase {
    * Test the getIcons method.
    */
   public function testGetIconsEmpty(): void {
-    $uiIconsFinder = $this->createMock(UiIconsFinder::class);
-    $uiIconsFinder->method('getFilesFromSource')->willReturn([]);
+    $iconFinder = $this->createMock(IconFinder::class);
+    $iconFinder->method('getFilesFromSource')->willReturn([]);
 
     $svgSpriteExtractorPlugin = new SvgSpriteExtractor(
       [
@@ -133,14 +133,14 @@ class SvgSpriteExtractorTest extends UnitTestCase {
           'absolute_path' => '/_ROOT_/web/modules/my_module',
           'relative_path' => 'modules/my_module',
         ],
-        'iconset_id' => 'svg_sprite',
+        'icon_pack_id' => 'svg_sprite',
       ],
       'test_extractor',
       [
         'label' => 'Test',
         'description' => 'Test description',
       ],
-      $uiIconsFinder,
+      $iconFinder,
     );
     $icons = $svgSpriteExtractorPlugin->getIcons();
 
@@ -151,7 +151,7 @@ class SvgSpriteExtractorTest extends UnitTestCase {
    * Test the getIcons method.
    */
   public function testGetIcons(): void {
-    $uiIconsFinder = $this->createMock(UiIconsFinder::class);
+    $iconFinder = $this->createMock(IconFinder::class);
 
     $icons_list = [
       'baz' => [
@@ -162,11 +162,11 @@ class SvgSpriteExtractorTest extends UnitTestCase {
         'group' => NULL,
       ],
     ];
-    $uiIconsFinder->method('getFilesFromSource')->willReturn($icons_list);
+    $iconFinder->method('getFilesFromSource')->willReturn($icons_list);
 
     $svg_expected = '<title>test</title><symbol id="foo"></symbol><symbol id="bar"></symbol>';
     $svg_data = '<svg xmlns="http://www.w3.org/2000/svg">' . $svg_expected . '</svg>';
-    $uiIconsFinder->method('getFileContents')->willReturn($svg_data);
+    $iconFinder->method('getFileContents')->willReturn($svg_data);
 
     $svgSpriteExtractorPlugin = new SvgSpriteExtractor(
       [
@@ -176,14 +176,14 @@ class SvgSpriteExtractorTest extends UnitTestCase {
           'absolute_path' => '/_ROOT_/web/modules/my_module',
           'relative_path' => 'modules/my_module',
         ],
-        'iconset_id' => 'svg_sprite',
+        'icon_pack_id' => 'svg_sprite',
       ],
       'test_extractor',
       [
         'label' => 'Test',
         'description' => 'Test description',
       ],
-      $uiIconsFinder,
+      $iconFinder,
     );
     $icons = $svgSpriteExtractorPlugin->getIcons();
 

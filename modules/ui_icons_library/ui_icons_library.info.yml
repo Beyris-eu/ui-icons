@@ -1,6 +1,6 @@
 name: 'UI Icons Library'
 type: module
-description: 'Provide an overview of all UI Icons.'
+description: 'Provide an overview of all Icons.'
 package: User interface
 core_version_requirement: ^10.3 || ^11
 dependencies:

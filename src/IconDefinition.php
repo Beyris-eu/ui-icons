@@ -45,7 +45,7 @@ class IconDefinition implements IconDefinitionInterface {
    * {@inheritdoc}
    */
   public function getId(): string {
-    return $this->getIconsetId() . ':' . $this->name;
+    return $this->getIconPackId() . ':' . $this->name;
   }
 
   /**
@@ -79,15 +79,15 @@ class IconDefinition implements IconDefinitionInterface {
   /**
    * {@inheritdoc}
    */
-  public function getIconsetId(): string {
-    return $this->data['iconset_id'];
+  public function getIconPackId(): string {
+    return $this->data['icon_pack_id'];
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getIconsetLabel(): string {
-    return $this->data['iconset_label'] ?? '';
+  public function getIconPackLabel(): string {
+    return $this->data['icon_pack_label'] ?? '';
   }
 
   /**
@@ -98,7 +98,7 @@ class IconDefinition implements IconDefinitionInterface {
       'icon_id' => $this->name,
       'source' => $this->source,
       'content' => new FormattableMarkup($this->getContent(), []),
-      'iconset_label' => $this->getIconsetLabel(),
+      'icon_pack_label' => $this->getIconPackLabel(),
     ];
 
     if (!isset($this->data['template']) || empty($this->data['template'])) {
@@ -143,8 +143,8 @@ class IconDefinition implements IconDefinitionInterface {
       $errors[] = 'Empty source provided';
     }
 
-    if (!isset($data['iconset_id'])) {
-      $errors[] = 'Missing Iconset Id in data';
+    if (!isset($data['icon_pack_id'])) {
+      $errors[] = 'Missing Icon Pack Id in data';
     }
 
     if ($errors) {

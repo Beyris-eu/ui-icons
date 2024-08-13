@@ -1,8 +1,0 @@
-name: 'UI Icons Field Link'
-type: module
-description: 'Provide field of type link integration for icon selection.'
-package: User interface
-core_version_requirement: ^10.3 || ^11
-dependencies:
-  - drupal:link
-  - ui_icons:ui_icons_field

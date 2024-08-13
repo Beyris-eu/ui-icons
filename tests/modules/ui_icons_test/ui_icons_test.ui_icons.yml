@@ -59,7 +59,7 @@ test_local_svg_sprite:
       - icons/sprite/{icon_id}.svg
   template: '<svg width="{{ width }}" height="{{ height }}" fill="currentColor"><use xlink:href="{{ source }}#{{ icon_id }}"/></svg>'
 
-test_disabled_iconset:
+test_disabled_icon_pack:
   label: Disabled
   extractor: path
   enabled: false

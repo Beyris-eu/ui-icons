@@ -1,14 +1,14 @@
-field.widget.settings.ui_icon_link_attributes_widget:
+field.widget.settings.icon_link_attributes_widget:
   type: mapping
-  label: 'UI icon link attributes widget settings'
+  label: 'icon link attributes widget settings'
   mapping:
-    # @see ui_icons_field_link/config/schema/ui_icons_field_link.schema.yml
-    allowed_iconset:
+    # @see ui_icons_field/config/schema/ui_icons_field_link.schema.yml
+    allowed_icon_pack:
       type: sequence
-      label: 'Iconset limitation for selection'
+      label: 'IconPack limitation for selection'
       sequence:
         type: string
-        label: 'Iconset id'
+        label: 'IconPack id'
     show_settings:
       type: string
       label: 'Show extractor settings'
@@ -17,7 +17,7 @@ field.widget.settings.ui_icon_link_attributes_widget:
       label: 'Set icon required'
     icon_position:
       type: string
-      label: 'Allow iconset display selection'
+      label: 'Allow icon pack display selection'
     # @see core/modules/link/config/schema/link.schema.yml
     placeholder_url:
       type: string

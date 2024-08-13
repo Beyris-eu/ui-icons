@@ -30,7 +30,7 @@ interface IconDefinitionInterface {
    * Get the Icon id.
    *
    * @return string
-   *   The icon id as iconset_id:icon_id.
+   *   The icon id as icon_pack_id:icon_id.
    */
   public function getId(): string;
 
@@ -67,20 +67,20 @@ interface IconDefinitionInterface {
   public function getContent(): string;
 
   /**
-   * Get the Iconset id.
+   * Get the Icon Pack id.
    *
    * @return string
-   *   The Iconset id.
+   *   The Icon Pack id.
    */
-  public function getIconsetId(): string;
+  public function getIconPackId(): string;
 
   /**
-   * Get the Iconset label.
+   * Get the Icon Pack label.
    *
    * @return string
-   *   The Iconset label.
+   *   The Icon Pack label.
    */
-  public function getIconsetLabel(): string;
+  public function getIconPackLabel(): string;
 
   /**
    * Get the Icon renderable array.

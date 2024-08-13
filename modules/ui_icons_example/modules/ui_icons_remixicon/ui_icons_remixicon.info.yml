@@ -1,6 +1,6 @@
 name: 'Ui Icons Remixicon'
 type: module
-description: 'Remixicon icons provider for UI Icons.'
+description: 'Remixicon icons pack, see README for installation.'
 package: User interface Icon packs
 core_version_requirement: ^10 || ^11
 dependencies:

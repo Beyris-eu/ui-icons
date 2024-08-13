@@ -3,12 +3,12 @@ parameters:
 		-
 			message: "#^Access to an undefined property Drupal\\\\Core\\\\Field\\\\FieldItemInterface\\:\\:\\$settings\\.$#"
 			count: 1
-			path: modules/ui_icons_field/src/Plugin/Field/FieldWidget/UiIconWidget.php
+			path: modules/ui_icons_field/src/Plugin/Field/FieldWidget/IconWidget.php
 
 		-
 			message: "#^Access to an undefined property Drupal\\\\Core\\\\Field\\\\FieldItemInterface\\:\\:\\$target_id\\.$#"
 			count: 1
-			path: modules/ui_icons_field/src/Plugin/Field/FieldWidget/UiIconWidget.php
+			path: modules/ui_icons_field/src/Plugin/Field/FieldWidget/IconWidget.php
 
 		-
 			message: "#^Method Drupal\\\\ui_icons_text\\\\Plugin\\\\Filter\\\\IconEmbed\\:\\:tips\\(\\) should return string\\|null but returns Drupal\\\\Core\\\\StringTranslation\\\\TranslatableMarkup\\.$#"
@@ -18,17 +18,17 @@ parameters:
 		-
 			message: "#^Call to an undefined method Drupal\\\\Component\\\\Plugin\\\\PluginInspectionInterface\\:\\:buildConfigurationForm\\(\\)\\.$#"
 			count: 1
-			path: src/PluginForm/UiIconsetExtractorForm.php
+			path: src/PluginForm/IconPackExtractorForm.php
 
 		-
 			message: "#^Call to an undefined method Drupal\\\\Component\\\\Plugin\\\\PluginInspectionInterface\\:\\:submitConfigurationForm\\(\\)\\.$#"
 			count: 1
-			path: src/PluginForm/UiIconsetExtractorForm.php
+			path: src/PluginForm/IconPackExtractorForm.php
 
 		-
 			message: "#^Call to an undefined method Drupal\\\\Component\\\\Plugin\\\\PluginInspectionInterface\\:\\:validateConfigurationForm\\(\\)\\.$#"
 			count: 1
-			path: src/PluginForm/UiIconsetExtractorForm.php
+			path: src/PluginForm/IconPackExtractorForm.php
 
 		-
 			message: "#^Function ui_icons_menu_help\\(\\) should return string but return statement is missing\\.$#"

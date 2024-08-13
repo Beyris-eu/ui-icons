@@ -1,6 +1,6 @@
-name: 'UI Icons Examples'
+name: 'UI Icons Example'
 type: module
-description: 'Provide examples for UI Icons module.'
+description: 'Provide example icons.'
 package: User interface Example
 core_version_requirement: ^10.3 || ^11
 dependencies:

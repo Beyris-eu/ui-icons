@@ -1,13 +1,13 @@
 ui_icons.autocomplete:
   path: '/ui-icons/ajax/autocomplete/icons'
   defaults:
-    _controller: '\Drupal\ui_icons\Controller\UiIconsAutocompleteController::handleSearchIcons'
+    _controller: '\Drupal\ui_icons\Controller\IconAutocompleteController::handleSearchIcons'
   requirements:
     _permission: 'access ui icons library'
 
 ui_icons.icon:
   path: '/ui-icons/ajax/icon'
   defaults:
-    _controller: '\Drupal\ui_icons\Controller\UiIconsAutocompleteController::handleRenderIcon'
+    _controller: '\Drupal\ui_icons\Controller\IconAutocompleteController::handleRenderIcon'
   requirements:
     _permission: 'access ui icons library'

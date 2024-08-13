@@ -1,6 +1,6 @@
 name: 'UI Icons Text'
 type: module
-description: 'Provide text filter integration for icon selection.'
+description: 'Provide text filter integration.'
 package: User interface
 core_version_requirement: ^10.3 || ^11
 dependencies:

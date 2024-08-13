@@ -1,6 +1,6 @@
 ## INTRODUCTION
 
-The UI Icons Phosphor Icons module provider for UI Icons.
+The Phosphor Icons module provider for UI Icons.
 
 ## INSTALLATION
 

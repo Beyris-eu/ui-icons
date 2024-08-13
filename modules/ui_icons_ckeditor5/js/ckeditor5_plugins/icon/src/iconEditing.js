@@ -40,7 +40,7 @@ export default class IconEditing extends Plugin {
   }
 
   /**
-   * Registers uiIcon as an element in the DOM converter.
+   * Registers drupalIcon as an element in the DOM converter.
    *
    * @private
    */

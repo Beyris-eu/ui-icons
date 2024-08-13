@@ -7,7 +7,7 @@
   /**
    * Fetches the SVG icon preview.
    *
-   * @param {string} iconSetID
+   * @param {string} iconPackId
    *   The ID of the icon set.
    * @param {string} iconID
    *   The ID of the icon.
@@ -16,8 +16,8 @@
    * @return {Promise<string|null>}
    *   The SVG icon as a string, or null if an error occurs.
    */
-  const fetchIcon = async (iconSetID, iconID, settings) => {
-    const url = `${settings.path.baseUrl}ui-icons/ajax/icon?q=${iconSetID}:${iconID}`;
+  const fetchIcon = async (iconPackId, iconID, settings) => {
+    const url = `${settings.path.baseUrl}ui-icons/ajax/icon?q=${iconPackId}:${iconID}`;
 
     try {
       const response = await fetch(url);
@@ -61,15 +61,15 @@
    * Handles the closing event of an autocomplete component by updating the icon preview and settings display.
    *
    * @async
-   * @param {String} iconSetID
-   *   The icon iconset id.
+   * @param {String} iconPackId
+   *   The icon pack id.
    * @param {HTMLElement} iconSelector
    *   The HTML element that contains the selected icon's value.
    *
    * @return {Promise<void>}
    *   A promise that resolves when the function completes.
    */
-  async function processAutocompleteSettings(iconSetID, iconSelector) {
+  async function processAutocompleteSettings(iconPackId, iconSelector) {
     const iconSettingsWrapper = findNearest(
       iconSelector,
       // @see ui_icons/templates/input--icon.html.twig
@@ -81,23 +81,23 @@
       return;
     }
 
-    const iconsetSettings = iconSettingsWrapper.querySelectorAll(
+    const iconPackSettings = iconSettingsWrapper.querySelectorAll(
       '[name^=icon-settings--]',
     );
 
-    if (!iconsetSettings) {
+    if (!iconPackSettings) {
       return;
     }
 
     let found = false;
-    iconsetSettings.forEach((iconsetSetting) => {
+    iconPackSettings.forEach((iconPackSetting) => {
       if (
-        `icon-settings--${iconSetID}` === iconsetSetting.getAttribute('name')
+        `icon-settings--${iconPackId}` === iconPackSetting.getAttribute('name')
       ) {
         found = true;
-        iconsetSetting.classList.remove('hidden');
+        iconPackSetting.classList.remove('hidden');
       } else {
-        iconsetSetting.classList.add('hidden');
+        iconPackSetting.classList.add('hidden');
       }
     });
 
@@ -126,21 +126,21 @@
       '.ui-icons-preview',
       'form-type--ui-icon-autocomplete',
     );
-    const [iconSetID, iconID] = iconSelector.value.split(':');
+    const [iconPackId, iconID] = iconSelector.value.split(':');
 
-    if (!iconSetID || !iconID) {
+    if (!iconPackId || !iconID) {
       if (iconPreviewElement) {
         iconPreviewElement.innerHTML = '';
       }
-      processAutocompleteSettings(iconSetID, iconSelector);
+      processAutocompleteSettings(iconPackId, iconSelector);
       return;
     }
 
-    fetchIcon(iconSetID, iconID, settings).then((icon) => {
+    fetchIcon(iconPackId, iconID, settings).then((icon) => {
       if (iconPreviewElement) {
         iconPreviewElement.innerHTML = icon;
       }
-      processAutocompleteSettings(iconSetID, iconSelector);
+      processAutocompleteSettings(iconPackId, iconSelector);
     });
   }
 
@@ -149,11 +149,11 @@
    *
    * Bind the autocomplete form element to get the icon preview when selected
    * and match the visibility of settings if enable to show only settings for
-   * the selected iconset.
+   * the selected icon pack.
    *
    * @type {Drupal~behavior}
    */
-  Drupal.behaviors.UiIconsPreview = {
+  Drupal.behaviors.IconPreview = {
     attach(context, settings) {
       const iconSelectors = once(
         'setIconPreview',
@@ -168,8 +168,8 @@
       iconSelectors.forEach((iconSelector) => {
         // Form is loaded with an existing value.
         if (iconSelector.value && iconSelector.value.indexOf(':') > -1) {
-          const [iconSetID] = iconSelector.value.split(':');
-          processAutocompleteSettings(iconSetID, iconSelector);
+          const [iconPackId] = iconSelector.value.split(':');
+          processAutocompleteSettings(iconPackId, iconSelector);
         }
         // Current Drupal core autocomplete is based on jQuery UI.
         // @see https://api.jqueryui.com/autocomplete/

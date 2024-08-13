@@ -1,6 +1,6 @@
 name: 'UI Icons IcoMoon'
 type: module
-description: 'Provide IcoMoon icons to UI Icons.'
+description: 'Provide IcoMoon pack, see README for installation.'
 package: User interface Icon packs
 core_version_requirement: ^10.3 || ^11
 dependencies:

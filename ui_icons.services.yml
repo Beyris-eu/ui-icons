@@ -1,6 +1,6 @@
 services:
-  plugin.manager.ui_iconset:
-    class: Drupal\ui_icons\Plugin\UiIconsetManager
+  plugin.manager.ui_icons_pack:
+    class: Drupal\ui_icons\Plugin\IconPackManager
     arguments:
       [
         '@module_handler',
@@ -9,21 +9,21 @@ services:
         '@plugin.manager.ui_icons_extractor',
         '%app.root%',
       ]
-  Drupal\ui_icons\Plugin\UiIconsetManagerInterface: '@plugin.manager.ui_iconset'
+  Drupal\ui_icons\Plugin\IconPackManagerInterface: '@plugin.manager.ui_icons_pack'
 
   plugin.manager.ui_icons_extractor:
-    class: Drupal\ui_icons\Plugin\UiIconsExtractorPluginManager
+    class: Drupal\ui_icons\Plugin\IconExtractorPluginManager
     parent: default_plugin_manager
     arguments: ['@plugin_form.factory']
-  Drupal\ui_icons\Plugin\UiIconsExtractorPluginInterface: '@plugin.manager.ui_icons_extractor'
+  Drupal\ui_icons\Plugin\IconExtractorPluginInterface: '@plugin.manager.ui_icons_extractor'
 
   ui_icons.twig_extension:
-    class: Drupal\ui_icons\Template\UiIconsTwigExtension
-    arguments: ['@plugin.manager.ui_iconset']
+    class: Drupal\ui_icons\Template\IconTwigExtension
+    arguments: ['@plugin.manager.ui_icons_pack']
     tags:
       - { name: twig.extension }
 
   ui_icons.finder:
-    class: Drupal\ui_icons\UiIconsFinder
+    class: Drupal\ui_icons\IconFinder
     autowire: true
     arguments: ['@file_system', '@file_url_generator']

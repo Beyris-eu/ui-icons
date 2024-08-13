@@ -2,9 +2,9 @@ filter_settings.icon_embed:
   type: mapping
   label: 'Icon Embed'
   mapping:
-    allowed_iconset:
+    allowed_icon_pack:
       type: sequence
-      label: 'Iconset allowed for selection'
+      label: 'IconPack allowed for selection'
       sequence:
         type: string
-        label: 'Iconset id'
+        label: 'IconPack id'

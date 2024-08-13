@@ -30,9 +30,9 @@ function ui_icons_menu_help(string $route_name, RouteMatchInterface $route_match
 function ui_icons_menu_entity_base_field_info_alter(array &$fields, EntityTypeInterface $entity_type): void {
   if ($entity_type->id() === 'menu_link_content') {
     $moduleDiscovery = \Drupal::service('module_handler');
-    $type = 'ui_icon_link_widget';
+    $type = 'icon_link_widget';
     if ($moduleDiscovery->moduleExists('link_attributes')) {
-      $type = 'ui_icon_link_attributes_widget';
+      $type = 'icon_link_attributes_widget';
     }
     $fields['link']->setDisplayOptions('form', [
       'type' => $type,
@@ -93,8 +93,8 @@ function ui_icons_menu__preprocess_menu_item(array &$item): void {
     $icon_display = $options['icon_display'] ?? 'before';
 
     $icon_settings = [];
-    if (isset($options['value']['settings'][$icon->getIconsetId()])) {
-      $icon_settings = $options['value']['settings'][$icon->getIconsetId()];
+    if (isset($options['value']['settings'][$icon->getIconPackId()])) {
+      $icon_settings = $options['value']['settings'][$icon->getIconPackId()];
     }
     $icon = $icon->getRenderable($icon_settings);
 

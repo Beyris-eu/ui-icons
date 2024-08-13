@@ -1,6 +1,6 @@
 name: 'UI Icons Font Awesome'
 type: module
-description: 'Provide Font Awesome icons to UI Icons.'
+description: 'Provide Font Awesome pack, see README for installation.'
 package: User interface Icon packs
 core_version_requirement: ^10.3 || ^11
 dependencies:

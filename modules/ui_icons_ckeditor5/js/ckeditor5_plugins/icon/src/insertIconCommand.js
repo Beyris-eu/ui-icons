@@ -21,7 +21,7 @@ function createDrupalIcon(writer, attributes) {
  *
  * @example
  *    editor.execute('InsertIconCommand', {
- *      'data-icon-id': 'iconset_id:icon_id',
+ *      'data-icon-id': 'icon_pack_id:icon_id',
  *      'data-icon-settings': '{key: value, key_2: value_2}',
  *    });
  *

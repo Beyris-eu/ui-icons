@@ -1,6 +1,6 @@
 name: 'Ui Icons Octicons'
 type: module
-description: 'Octicons icons provider for UI Icons.'
+description: 'Octicons icons pack, see README for installation.'
 package: User interface Icon packs
 core_version_requirement: ^10 || ^11
 dependencies:

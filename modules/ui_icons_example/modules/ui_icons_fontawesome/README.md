@@ -1,6 +1,6 @@
 ## INTRODUCTION
 
-The UI Icons Font Awesome module provider for UI Icons.
+The Font Awesome icons module provider for UI Icons.
 
 ## INSTALLATION
 

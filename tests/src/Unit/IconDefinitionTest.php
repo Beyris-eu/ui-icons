@@ -21,11 +21,11 @@ class IconDefinitionTest extends TestCase {
    */
   public function testGetRenderable(): void {
     $icon = IconDefinition::create(
-      'test_iconset:test',
+      'test_icon_pack:test',
       '/foo/bar',
       [
-        'iconset_id' => 'test_iconset',
-        'iconset_label' => 'Baz',
+        'icon_pack_id' => 'test_icon_pack',
+        'icon_pack_label' => 'Baz',
         'template' => 'test_template',
         'library' => 'test_library',
         'content' => 'test_content',
@@ -38,10 +38,10 @@ class IconDefinitionTest extends TestCase {
       '#template' => 'test_template',
       '#attached' => ['library' => ['test_library']],
       '#context' => [
-        'icon_id' => 'test_iconset:test',
+        'icon_id' => 'test_icon_pack:test',
         'source' => '/foo/bar',
         'content' => 'test_content',
-        'iconset_label' => 'Baz',
+        'icon_pack_label' => 'Baz',
         'foo' => 'bar',
       ],
     ];
@@ -69,9 +69,9 @@ class IconDefinitionTest extends TestCase {
 
     $this->assertInstanceOf(IconDefinitionInterface::class, $actual);
 
-    $this->assertEquals($icon_data['data']['iconset_id'] . ':' . $icon_data['name'], $actual->getId());
-    $this->assertEquals($icon_data['data']['iconset_id'], $actual->getIconsetId());
-    $this->assertEquals($icon_data['data']['iconset_label'] ?? '', $actual->getIconsetLabel());
+    $this->assertEquals($icon_data['data']['icon_pack_id'] . ':' . $icon_data['name'], $actual->getId());
+    $this->assertEquals($icon_data['data']['icon_pack_id'], $actual->getIconPackId());
+    $this->assertEquals($icon_data['data']['icon_pack_label'] ?? '', $actual->getIconPackLabel());
     $this->assertEquals($icon_data['data']['content'], $actual->getContent());
     $this->assertEquals($icon_data['name'], $actual->getName());
     $this->assertEquals($icon_data['source'], $actual->getSource());
@@ -91,7 +91,7 @@ class IconDefinitionTest extends TestCase {
           'name' => 'foo',
           'source' => 'foo/bar',
           'data' => [
-            'iconset_id' => 'baz',
+            'icon_pack_id' => 'baz',
             'content' => NULL,
           ],
           'group' => NULL,
@@ -102,8 +102,8 @@ class IconDefinitionTest extends TestCase {
           'name' => 'foo',
           'source' => 'foo/bar',
           'data' => [
-            'iconset_id' => 'baz',
-            'iconset_label' => 'Qux',
+            'icon_pack_id' => 'baz',
+            'icon_pack_label' => 'Qux',
             'content' => 'corge',
           ],
           'group' => 'quux',
@@ -151,7 +151,7 @@ class IconDefinitionTest extends TestCase {
         [
           'Empty name provided',
           'Empty source provided',
-          'Missing Iconset Id in data',
+          'Missing Icon Pack Id in data',
         ],
       ],
     ];

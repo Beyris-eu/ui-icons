@@ -1,6 +1,6 @@
 ## INTRODUCTION
 
-The UI Icons Feather module provider for UI Icons.
+The Feather icons module provider for UI Icons.
 
 ## INSTALLATION
 

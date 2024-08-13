@@ -1,6 +1,6 @@
 ## INTRODUCTION
 
-The UI Icons Heroicons module provider for UI Icons.
+The Heroicons module provider for UI Icons.
 
 ## INSTALLATION
 

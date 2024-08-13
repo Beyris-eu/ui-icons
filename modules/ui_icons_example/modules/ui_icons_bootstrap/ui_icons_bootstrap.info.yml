@@ -1,6 +1,6 @@
 name: 'Ui Icons Bootstrap'
 type: module
-description: 'Bootstrap icons provider for UI Icons.'
+description: 'Bootstrap pack, see README for installation.'
 package: User interface Icon packs
 core_version_requirement: ^10.3 || ^11
 dependencies:

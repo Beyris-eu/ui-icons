@@ -23,7 +23,7 @@
 
   <div class="ui-icons-grid">
     {% for icon_id, icon in icons %}
-      {% set iconset_id = icon_id | split(':') | first %}
+      {% set icon_pack_id = icon_id | split(':') | first %}
       {% set icon_name = icon_id | split(':') | last %}
       <div class="ui-icons-item ui-icons-item--grid">
         <div class="ui-icons-item__preview">
@@ -33,7 +33,7 @@
         </div>
         <div class="ui-icons-item__name">
           <b>{{ icon_name }}</b>
-          {% if icon['#context']['iconset_label'] %}<br>{{ icon['#context']['iconset_label'] }}{% endif %}
+          {% if icon['#context']['icon_pack_label'] %}<br>{{ icon['#context']['icon_pack_label'] }}{% endif %}
           {% if icon['#group'] %}<br><em>{{ icon['#group']|capitalize }}</em>{% endif %}
         </div>
       </div>

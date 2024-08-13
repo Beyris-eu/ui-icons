@@ -1,6 +1,6 @@
 name: 'UI Icons Ckeditor5'
 type: module
-description: 'Provide Ckeditor 5 integration for icon selection.'
+description: 'Provide Ckeditor 5 integration to embed icons.'
 package: User interface
 core_version_requirement: ^10.3 || ^11
 dependencies:

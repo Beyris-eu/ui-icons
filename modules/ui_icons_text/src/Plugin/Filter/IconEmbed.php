@@ -17,7 +17,7 @@ use Drupal\filter\FilterProcessResult;
 use Drupal\filter\Plugin\FilterBase;
 use Drupal\filter\Plugin\FilterInterface;
 use Drupal\ui_icons\IconDefinitionInterface;
-use Drupal\ui_icons\Plugin\UiIconsetManagerInterface;
+use Drupal\ui_icons\Plugin\IconPackManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -32,7 +32,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   type: FilterInterface::TYPE_TRANSFORM_REVERSIBLE,
   weight: 100,
   settings: [
-    "allowed_iconset" => [],
+    "allowed_icon_pack" => [],
   ],
 )]
 class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
@@ -40,9 +40,9 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
   /**
    * The ui icons service.
    *
-   * @var \Drupal\ui_icons\Plugin\UiIconsetManagerInterface
+   * @var \Drupal\ui_icons\Plugin\IconPackManagerInterface
    */
-  protected $pluginManagerUiIconset;
+  protected $pluginManagerIconPack;
 
   /**
    * The renderer.
@@ -79,16 +79,16 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
    *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
-   * @param \Drupal\ui_icons\Plugin\UiIconsetManagerInterface $ui_iconset
+   * @param \Drupal\ui_icons\Plugin\IconPackManagerInterface $ui_icons_pack
    *   The icon manager service.
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The renderer.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
    *   The logger factory.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, UiIconsetManagerInterface $ui_iconset, RendererInterface $renderer, LoggerChannelFactoryInterface $logger_factory) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, IconPackManagerInterface $ui_icons_pack, RendererInterface $renderer, LoggerChannelFactoryInterface $logger_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->pluginManagerUiIconset = $ui_iconset;
+    $this->pluginManagerIconPack = $ui_icons_pack;
     $this->renderer = $renderer;
     $this->loggerFactory = $logger_factory;
   }
@@ -101,7 +101,7 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('plugin.manager.ui_iconset'),
+      $container->get('plugin.manager.ui_icons_pack'),
       $container->get('renderer'),
       $container->get('logger.factory')
     );
@@ -111,13 +111,13 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state): array {
-    $iconset = $this->pluginManagerUiIconset->listIconsetWithDescriptionOptions();
+    $iconPack = $this->pluginManagerIconPack->listIconPackWithDescriptionOptions();
 
-    $form['allowed_iconset'] = [
-      '#title' => $this->t('Iconset selectable'),
+    $form['allowed_icon_pack'] = [
+      '#title' => $this->t('Icon Pack selectable'),
       '#type' => 'checkboxes',
-      '#options' => $iconset,
-      '#default_value' => $this->settings['allowed_iconset'],
+      '#options' => $iconPack,
+      '#default_value' => $this->settings['allowed_icon_pack'],
       '#description' => $this->t('If none are selected, all will be allowed.'),
       '#element_validate' => [[static::class, 'validateOptions']],
     ];
@@ -167,13 +167,13 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
         $settings = json_decode($data_settings, TRUE);
       }
 
-      $icon = $this->pluginManagerUiIconset->getIcon($icon_id);
+      $icon = $this->pluginManagerIconPack->getIcon($icon_id);
       assert($icon === NULL || $icon instanceof IconDefinitionInterface);
 
       // Use default settings if none set.
       if (empty($settings)) {
-        [$iconset_id] = explode(':', $icon_id);
-        $settings = $this->pluginManagerUiIconset->getExtractorFormDefaults($iconset_id);
+        [$icon_pack_id] = explode(':', $icon_id);
+        $settings = $this->pluginManagerIconPack->getExtractorFormDefaults($icon_pack_id);
       }
 
       if (!$icon) {
@@ -200,8 +200,8 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       return $this->t('
       <p>You can embed icon:</p>
       <ul>
-        <li>Choose which icon item to embed: <code>&lt;drupal-icon data-icon-id="iconset:icon_id" /&gt;</code></li>
-        <li>Optionally also pass settings with data-icon-settings: <code>data-icon-settings="{\'width\':100}"</code>, otherwise the default settings from the Iconset definition are used.</li>
+        <li>Choose which icon item to embed: <code>&lt;drupal-icon data-icon-id="icon_pack_id:icon_id" /&gt;</code></li>
+        <li>Optionally also pass settings with data-icon-settings: <code>data-icon-settings="{\'width\':100}"</code>, otherwise the default settings from the Icon Pack definition are used.</li>
       </ul>');
     }
     else {
@@ -312,7 +312,7 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
    */
   public function calculateDependencies(): array {
     $dependencies = [];
-    // @todo ensure iconset definition is still available?
+    // @todo ensure icon pack definition is still available?
     return $dependencies;
   }
 

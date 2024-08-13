@@ -1,6 +1,6 @@
 ## INTRODUCTION
 
-The UI Icons Octicons module provider for UI Icons.
+The Octicons module provider for UI Icons.
 
 ## INSTALLATION
 

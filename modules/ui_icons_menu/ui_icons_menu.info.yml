@@ -1,7 +1,7 @@
 name: 'UI Icons Menu'
 type: module
-description: 'Provide menu integration for icon selection.'
+description: 'Provide menu integration.'
 package: User interface
 core_version_requirement: ^10.3 || ^11
 dependencies:
-  - ui_icons_field:ui_icons_field_link
+  - ui_icons_field:ui_icons_field

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_icons\Unit;
 
 use Drupal\Tests\UnitTestCase;
-use Drupal\ui_icons\Exception\IconsetConfigErrorException;
+use Drupal\ui_icons\Exception\IconPackConfigErrorException;
 use Drupal\ui_icons\IconDefinitionInterface;
-use Drupal\ui_icons\Plugin\UiIconsExtractor\PathExtractor;
-use Drupal\ui_icons\UiIconsFinder;
+use Drupal\ui_icons\IconFinder;
+use Drupal\ui_icons\Plugin\IconExtractor\PathExtractor;
 
 /**
  * Tests ui_icons path extractor plugin.
@@ -28,9 +28,9 @@ class PathExtractorTest extends UnitTestCase {
         'label' => 'Test',
         'description' => 'Test description',
       ],
-      $this->createMock(UiIconsFinder::class),
+      $this->createMock(IconFinder::class),
     );
-    $this->expectException(IconsetConfigErrorException::class);
+    $this->expectException(IconPackConfigErrorException::class);
     $this->expectExceptionMessage('Missing `config: sources` in your definition, extractor test_extractor require this value.');
     $pathExtractorPlugin->getIcons();
   }
@@ -48,9 +48,9 @@ class PathExtractorTest extends UnitTestCase {
         'label' => 'Test',
         'description' => 'Test description',
       ],
-      $this->createMock(UiIconsFinder::class),
+      $this->createMock(IconFinder::class),
     );
-    $this->expectException(IconsetConfigErrorException::class);
+    $this->expectException(IconPackConfigErrorException::class);
     $this->expectExceptionMessage('Missing `config: sources` in your definition, extractor test_extractor require this value.');
     $pathExtractorPlugin->getIcons();
   }
@@ -69,9 +69,9 @@ class PathExtractorTest extends UnitTestCase {
         'label' => 'Test',
         'description' => 'Test description',
       ],
-      $this->createMock(UiIconsFinder::class),
+      $this->createMock(IconFinder::class),
     );
-    $this->expectException(IconsetConfigErrorException::class);
+    $this->expectException(IconPackConfigErrorException::class);
     $this->expectExceptionMessage('Could not retrieve paths for extractor test_extractor.');
     $pathExtractorPlugin->getIcons();
   }
@@ -90,8 +90,8 @@ class PathExtractorTest extends UnitTestCase {
       ],
     ];
 
-    $uiIconsFinder = $this->createMock(UiIconsFinder::class);
-    $uiIconsFinder->method('getFilesFromSource')->willReturn($icons_list);
+    $iconFinder = $this->createMock(IconFinder::class);
+    $iconFinder->method('getFilesFromSource')->willReturn($icons_list);
 
     $pathExtractorPlugin = new PathExtractor(
       [
@@ -101,14 +101,14 @@ class PathExtractorTest extends UnitTestCase {
           'absolute_path' => '/_ROOT_/web/modules/my_module',
           'relative_path' => 'modules/my_module',
         ],
-        'iconset_id' => 'path',
+        'icon_pack_id' => 'path',
       ],
       'test_extractor',
       [
         'label' => 'Test',
         'description' => 'Test description',
       ],
-      $uiIconsFinder,
+      $iconFinder,
     );
     $icons = $pathExtractorPlugin->getIcons();
 
