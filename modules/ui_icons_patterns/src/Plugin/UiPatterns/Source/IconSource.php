@@ -40,7 +40,7 @@ class IconSource extends SourcePluginBase {
     $value = $this->getSetting('value');
     return [
       'value' => [
-        '#type' => 'ui_icon_autocomplete',
+        '#type' => 'icon_autocomplete',
         '#default_value' => $value['icon_id'] ?? '',
         '#default_settings' => $value['settings'] ?? [],
         '#show_settings' => TRUE,

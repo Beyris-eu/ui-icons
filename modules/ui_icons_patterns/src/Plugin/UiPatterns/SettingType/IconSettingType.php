@@ -21,7 +21,7 @@ class IconSettingType extends PatternSettingTypeBase {
   public function settingsForm(array $form, $value, PatternDefinitionSetting $def, $form_type) {
     $value = $this->getValue($value);
     $form[$def->getName()] = [
-      '#type' => 'ui_icon_autocomplete',
+      '#type' => 'icon_autocomplete',
       '#title' => $def->getLabel(),
       '#default_value' => $value['icon'] ?? '',
       '#default_settings' => $value['settings'] ?? [],
@@ -62,4 +62,4 @@ class IconSettingType extends PatternSettingTypeBase {
     ];
   }
 
-}
+}icon_autocomplete
