@@ -27,8 +27,8 @@ class IconSource extends SourcePluginBase {
     $value = $this->getSetting('value');
     [$iconset_id, $icon_id] = explode(':', $value['icon_id']);
     return [
-      "iconset" => $iconset_id ?? '',
-      "icon" => $icon_id ?? '',
+      "iconset" => $iconset_id ?: '',
+      "icon" => $icon_id ?: '',
       "options" => $value['settings'] ?? [],
     ];
   }
