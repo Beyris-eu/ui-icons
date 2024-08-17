@@ -38,25 +38,25 @@ class IconSettingType extends PatternSettingTypeBase {
   public function preprocess($value, array $context) {
     if (!is_array($value)) {
       return [
-        "iconset" => '',
+        "icon_pack" => '',
         "icon" => '',
         "options" => [],
       ];
     }
     // Value not coming from ::settingsForm(), like component definition's
     // preview, has an already resolved flat structure with primitive only.
-    if (is_string($value['icon']) && isset($value['iconset'])) {
+    if (is_string($value['icon']) && isset($value['icon_pack'])) {
       // @todo Replace by return $value once UiIconsTwigExtension accepts null options
       return [
-        "iconset" => $value['iconset'],
+        "icon_pack" => $value['icon_pack'],
         "icon" => $value['icon'],
         "options" => $value['options'] ?? [],
       ];
     }
     // Data coming from ::settingsForm() have an IconDefinition objects.
-    [$iconset_id, $icon_id] = explode(':', $value['icon']);
+    [$iconpack_id, $icon_id] = explode(':', $value['icon']);
     return [
-      "iconset" => $iconset_id ?? '',
+      "icon_pack" => $iconpack_id ?? '',
       "icon" => $icon_id ?? '',
       "options" => $value['settings'] ?? [],
     ];
