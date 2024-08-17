@@ -12,7 +12,7 @@ props:
       title: "Icon 2"
       type: object
       properties:
-        iconset: {type: "string"}
+        icon_pack: {type: "string"}
         icon: {type: "string"}
 stories:
   preview:
@@ -21,10 +21,10 @@ stories:
       label: Hello world
     props:
       icon1:
-        iconset: "iconset_example_svg"
+        icon_pack: "icon_pack_example_svg"
         icon: "local_svg_Wordmark2_blue_RGB"
         options: {}
       icon2:
-        iconset: "iconset_example_svg"
+        icon_pack: "icon_pack_example_svg"
         icon: "local_svg_Wordmark2_blue_RGB"
         options: {}

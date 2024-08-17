@@ -26,10 +26,10 @@ class IconRenderableSource extends IconSource {
     if (!$value) {
       return [];
     }
-    [$iconset_id, $icon_id] = explode(':', $value['icon_id']);
+    [$iconpack_id, $icon_id] = explode(':', $value['icon_id']);
     return [
       "#type" => "icon",
-      "#iconset" => $iconset_id ?: '',
+      "#icon_pack" => $iconpack_id ?: '',
       "#icon" => $icon_id ?: '',
       "#options" => $value['settings'] ?? [],
     ];

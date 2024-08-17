@@ -18,13 +18,13 @@ use Drupal\ui_patterns\PropTypePluginBase;
   schema: [
     'type' => 'object',
     'properties' => [
-      'icon' => ['$ref' => 'ui-patterns://machine_name'],
-      'iconset' => ['type' => 'string'],
+      'icon' => ['type' => 'string'],
+      'icon_pack' => ['$ref' => 'ui-patterns://machine_name'],
       'options' => ['type' => 'object'],
     ],
     'required' => [
       'icon',
-      'iconset',
+      'icon_pack',
     ],
   ],
   priority: 10
