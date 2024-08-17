@@ -25,9 +25,9 @@ class IconSource extends SourcePluginBase {
    */
   public function getPropValue(): mixed {
     $value = $this->getSetting('value');
-    [$iconset_id, $icon_id] = explode(':', $value['icon_id']);
+    [$iconpack_id, $icon_id] = explode(':', $value['icon_id']);
     return [
-      "iconset" => $iconset_id ?: '',
+      "icon_pack" => $iconpack_id ?: '',
       "icon" => $icon_id ?: '',
       "options" => $value['settings'] ?? [],
     ];
