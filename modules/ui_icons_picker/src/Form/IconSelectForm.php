@@ -1,0 +1,430 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Drupal\ui_icons_picker\Form;
+
+use Drupal\Component\Utility\NestedArray;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\AppendCommand;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Ajax\HtmlCommand;
+use Drupal\Core\Ajax\ReplaceCommand;
+use Drupal\Core\Form\FormBase;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\ui_icons\Plugin\IconPackManagerInterface;
+use Drupal\ui_icons_picker\Ajax\UpdateIconSelectionCommand;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
+/**
+ * Provides a UI Icons picker selector form list.
+ */
+final class IconSelectForm extends FormBase {
+
+  const AJAX_WRAPPER_ID = 'icon-results-wrapper';
+  const MESSAGE_WRAPPER_ID = 'icon-message-wrapper';
+  const NUM_PER_PAGE = 300;
+
+  public function __construct(
+    private readonly IconPackManagerInterface $pluginManagerIconPack,
+  ) {}
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container): self {
+    return new static(
+      $container->get('plugin.manager.ui_icons_pack'),
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFormId(): string {
+    return 'ui_icons_picker_search';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildForm(array $form, FormStateInterface $form_state, ?array $options = NULL): array {
+
+    $request = $this->getRequest();
+    if (!$request->query->has('dialogOptions')) {
+      return [];
+    }
+
+    $options = $request->query->all('dialogOptions');
+    $wrapper_id = $options['query']['wrapper_id'] ?? NULL;
+
+    if (NULL === $wrapper_id) {
+      return [];
+    }
+
+    // Store field information in $form_state.
+    if (!$modal_state = static::getModalState($form_state)) {
+      $modal_state = [
+        'page' => 0,
+        'icon_list' => $this->pluginManagerIconPack->getIcons(),
+      ];
+      static::setModalState($form_state, $modal_state);
+    }
+
+    $icons_list = $modal_state['icon_list'];
+
+    $input = $form_state->getUserInput();
+    $search = $input['filter'] ?? '';
+    $icon_pack = $group = '';
+
+    if (!empty($search) && strlen($search) > 2) {
+      $icons_list = array_filter($icons_list, fn($id) => str_contains($id, $search), ARRAY_FILTER_USE_KEY);
+    }
+
+    $form['#prefix'] = '<div id="' . self::AJAX_WRAPPER_ID . '"><div id="' . self::MESSAGE_WRAPPER_ID . '"></div>';
+    $form['#suffix'] = '</div>';
+
+    $form['wrapper_id'] = [
+      '#type' => 'hidden',
+      '#value' => $wrapper_id,
+    ];
+
+    $ajax_settings = [
+      'callback' => [$this, 'searchAjax'],
+      'wrapper' => self::AJAX_WRAPPER_ID,
+    ];
+
+    $form['filters'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => ['container-inline'],
+      ],
+    ];
+
+    $form['filters']['filter'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Filter'),
+      '#placeholder' => $this->t('Filter by name'),
+      '#title_display' => 'invisible',
+      '#default_value' => !empty($search) ? $search : '',
+      '#attributes' => [
+        'class' => [
+          'icon-filter-input',
+        ],
+      ],
+    ];
+
+    $form['filters']['search'] = [
+      '#type' => 'submit',
+      '#submit' => [[$this, 'searchSubmit']],
+      '#ajax' => $ajax_settings,
+      '#value' => $this->t('Search'),
+      '#attributes' => [
+        'class' => [
+          'icon-ajax-search-submit',
+          'hidden',
+        ],
+      ],
+    ];
+
+    $form['list'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => ['icon-picker-modal__content'],
+      ],
+      '#attached' => ['library' => ['ui_icons_picker/library']],
+    ];
+
+    $display_settings = [
+      'width' => 32,
+      'height' => 32,
+    ];
+
+    $icons = $this->filterIcons($icons_list, $icon_pack, $group, $display_settings);
+    $pager = $this->createPager($modal_state['page'], count($icons));
+    $icons = array_slice($icons, $pager['offset'], self::NUM_PER_PAGE);
+
+    if (empty($icons)) {
+      $form['search_results'] = [
+        '#type' => 'markup',
+        '#markup' => $this->t('No icon found, please adjust your filters and try again.'),
+      ];
+      return $form;
+    }
+
+    foreach ($icons as $icon_id => $icon) {
+      $form['list'][$icon_id] = [
+        '#type' => 'html_tag',
+        '#tag' => 'div',
+        '#attributes' => [
+          'class' => [
+            'icon-preview',
+          ],
+          'data-icon-id' => $icon_id,
+        ],
+        'icon' => $icon,
+      ];
+      $form['list'][$icon_id]['checkbox'] = [
+        '#type' => 'checkbox',
+        '#value' => $icon_id,
+        '#submit' => [],
+        '#ajax' => [
+          'callback' => [$this, 'selectIconAjax'],
+          'event' => 'click',
+        ],
+        '#attributes' => [
+          'class' => [
+            'icon-preview-select',
+            'hidden',
+          ],
+          'data-icon-select' => $icon_id,
+        ],
+      ];
+    }
+
+    if ($pager['total_page'] <= 1) {
+      return $form;
+    }
+
+    $form['pagination'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'class' => ['pagination'],
+      ],
+    ];
+
+    $form['pagination']['page_previous'] = $pager['page_previous'];
+    $form['pagination']['page_next'] = $pager['page_next'];
+    $form['pagination']['page_info'] = $pager['page_info'];
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitForm(array &$form, FormStateInterface $form_state): void {
+  }
+
+  /**
+   * Submission handler for the "Previous page" button.
+   *
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function previousPageSubmit(array $form, FormStateInterface $form_state) {
+    // Increment the page count.
+    $modal_state = self::getModalState($form_state);
+    $modal_state['page']--;
+    self::setModalState($form_state, $modal_state);
+
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Submission handler for the "Next page" button.
+   *
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function nextPageSubmit(array $form, FormStateInterface $form_state) {
+    // Increment the page count.
+    $modal_state = self::getModalState($form_state);
+    $modal_state['page']++;
+    self::setModalState($form_state, $modal_state);
+
+    $form_state->setRebuild();
+  }
+
+  /**
+   * Submission handler for the "Search" button.
+   *
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public function searchSubmit(array $form, FormStateInterface $form_state) {
+    // Reset the pager.
+    $modal_state = self::getModalState($form_state);
+    $modal_state['page'] = 0;
+    self::setModalState($form_state, $modal_state);
+
+    $form_state->setRebuild();
+  }
+
+  /**
+   * When searching, simply return a ajax response.
+   *
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An ajax response to replace the form.
+   */
+  public function searchAjax(array &$form, FormStateInterface $form_state) {
+    return $this->ajaxRenderFormAndMessages($form);
+  }
+
+  /**
+   * Renders form and status messages and returns an ajax response.
+   *
+   * Used for both submission buttons.
+   *
+   * @param array $form
+   *   The form.
+   *
+   * @return \Drupal\Core\Ajax\AjaxResponse
+   *   An ajax response to replace the form.
+   */
+  protected function ajaxRenderFormAndMessages(array &$form) {
+    $response = new AjaxResponse();
+    // phpcs:ignore DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
+    $renderer = \Drupal::service('renderer');
+
+    $status_messages = [
+      '#type' => 'status_messages',
+      '#weight' => -10,
+    ];
+
+    $output = $renderer->renderRoot($form);
+    $messages = $renderer->renderRoot($status_messages);
+
+    $message_wrapper_id = '#' . self::MESSAGE_WRAPPER_ID;
+
+    $response->setAttachments($form['#attached']);
+    $response->addCommand(new ReplaceCommand('', $output));
+    $response->addCommand(new HtmlCommand($message_wrapper_id, ''));
+    $response->addCommand(new AppendCommand($message_wrapper_id, $messages));
+
+    return $response;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function selectIconAjax(array &$form, FormStateInterface $form_state) {
+    $errors = $form_state->getErrors();
+    if ($errors) {
+      return self::ajaxRenderFormAndMessages($form);
+    }
+    $response = new AjaxResponse();
+
+    $icon_full_id = $form_state->getTriggeringElement()['#value'];
+    $wrapper_id = $form_state->getUserInput()['wrapper_id'] ?? '';
+
+    $response->addCommand(new UpdateIconSelectionCommand($icon_full_id, $wrapper_id));
+    $response->addCommand(new CloseModalDialogCommand());
+
+    return $response;
+  }
+
+  /**
+   * Retrieves the modal state from the form state.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state from which to retrieve the modal state.
+   *
+   * @return mixed
+   *   The modal state value.
+   */
+  public static function getModalState(FormStateInterface $form_state) {
+    $values = $form_state->getStorage();
+    return NestedArray::getValue($values, ['search_results']);
+  }
+
+  /**
+   * Sets the modal state in the form state.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state in which to set the modal state.
+   * @param array $field_state
+   *   The modal state value to set.
+   */
+  public static function setModalState(FormStateInterface $form_state, array $field_state): void {
+    $values = $form_state->getStorage();
+    NestedArray::setValue($values, ['search_results'], $field_state);
+  }
+
+  /**
+   * Filter icons based on criteria.
+   *
+   * @param array $icons_list
+   *   The list of icons to filter.
+   * @param string $icon_pack
+   *   The icon set to filter by.
+   * @param string $group
+   *   The group to filter by.
+   * @param array $display_settings
+   *   The display options for the icons.
+   *
+   * @return array
+   *   The filtered list of icons.
+   */
+  private function filterIcons(array $icons_list, string $icon_pack = '', string $group = '', array $display_settings = []): array {
+    $icons = [];
+    foreach ($icons_list as $id => $icon) {
+      if (!empty($icon_pack) && $icon_pack !== $icon->getIconPackId()) {
+        continue;
+      }
+      if (!empty($group) && $group !== $icon->getGroup()) {
+        continue;
+      }
+      $icons[$id] = $icon->getRenderable($display_settings);
+      $icons[$id]['#group'] = $icon->getGroup();
+    }
+    return $icons;
+  }
+
+  /**
+   * Create the pager list.
+   *
+   * @param int $current_page
+   *   The current page.
+   * @param int $total
+   *   The icons total.
+   *
+   * @return array
+   *   The pager information and form elements.
+   */
+  private function createPager(int $current_page, int $total): array {
+    $ajax_pager = [
+      'callback' => [$this, 'searchAjax'],
+      'wrapper' => self::AJAX_WRAPPER_ID,
+    ];
+
+    $total_page = (int) round($total / self::NUM_PER_PAGE) + 1;
+
+    return [
+      'current_page' => $current_page + 1,
+      'total_page' => $total_page,
+      'offset' => self::NUM_PER_PAGE * $current_page,
+      'total' => $total,
+      // Form elements.
+      'page_previous' => [
+        '#type' => 'submit',
+        '#value' => $this->t('Previous page'),
+        '#submit' => [[$this, 'previousPageSubmit']],
+        '#ajax' => $ajax_pager,
+        '#disabled' => !($current_page > 0),
+      ],
+      'page_next' => [
+        '#type' => 'submit',
+        '#value' => $this->t('Next page'),
+        '#submit' => [[$this, 'nextPageSubmit']],
+        '#ajax' => $ajax_pager,
+        '#disabled' => !($total_page > $current_page + 1),
+      ],
+      'page_info' => [
+        '#markup' => $this->t('Page @current_page/@total_page', ['@current_page' => $current_page + 1, '@total_page' => $total_page]),
+      ],
+    ];
+  }
+
+}
