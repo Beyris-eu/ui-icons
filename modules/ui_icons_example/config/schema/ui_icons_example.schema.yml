@@ -1,0 +1,50 @@
+ui_icons.icon_pack_options.icon_pack_example_drupal_core:
+  type: ui_icons.icon_pack_options_default
+  label: 'Drupal core by UI Icons example settings'
+
+ui_icons.icon_pack_options.icon_pack_example_local:
+  type: ui_icons.icon_pack_options_default
+  label: 'Local files mixed settings'
+
+ui_icons.icon_pack_options.icon_pack_example_svg:
+  type: ui_icons.icon_pack_options_default
+  label: 'SVG settings'
+
+ui_icons.icon_pack_options.icon_pack_example_svg_sprite:
+  type: ui_icons.icon_pack_options_default
+  label: 'SVG sprite settings'
+
+ui_icons.icon_pack_options.icon_pack_example_settings:
+  type: ui_icons.icon_pack_options_default
+  label: 'Example settings'
+  mapping:
+    select:
+      type: integer
+      label: 'Test select'
+    boolean:
+      type: boolean
+      label: 'Test boolean'
+    color:
+      type: color_hex
+      label: 'Test color'
+    decimal:
+      type: float
+      label: 'Test decimal'
+    range:
+      type: integer
+      label: 'Test range'
+
+ui_icons.icon_pack_options.icon_pack_example_no_settings:
+  type: mapping
+  label: 'Example no settings'
+
+ui_icons.icon_pack_options.icon_pack_example_drupal_core_sprite:
+  type: mapping
+  label: 'Drupal core sprite settings'
+  mapping:
+    width:
+      type: integer
+      label: 'Width'
+    height:
+      type: integer
+      label: 'Height'

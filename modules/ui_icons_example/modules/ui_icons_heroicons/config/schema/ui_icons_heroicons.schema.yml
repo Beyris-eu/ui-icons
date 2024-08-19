@@ -1,0 +1,11 @@
+ui_icons.icon_pack_options.ui_icons_heroicons_solid:
+  type: ui_icons.icon_pack_options_default
+  label: 'Hero Icons solid settings'
+  mapping:
+    stroke_width:
+      type: float
+      label: 'Stroke width'
+
+ui_icons.icon_pack_options.ui_icons_heroicons_outline:
+  type: ui_icons.icon_pack_options.ui_icons_heroicons_solid
+  label: 'Hero Icons outline settings'

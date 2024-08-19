@@ -8,10 +8,8 @@ field.value.ui_icon:
     settings:
       type: sequence
       label: 'Default icon settings'
-      # sequence:
-      #   type: sequence
-      #   sequence:
-      #     type: string
+      sequence:
+        type: ui_icons.icon_pack_options.[%key]
 
 field.formatter.settings.icon_formatter:
   type: mapping
@@ -20,9 +18,11 @@ field.formatter.settings.icon_formatter:
     icon_settings:
       type: sequence
       label: 'Icon extractor settings'
+      sequence:
+        type: ui_icons.icon_pack_options.[%key]
 
 field.formatter.settings.icon_link_formatter:
-  type: mapping
+  type: field.formatter.settings.link
   label: 'icon formatter link settings'
   mapping:
     icon_settings:
@@ -31,22 +31,6 @@ field.formatter.settings.icon_link_formatter:
     icon_display:
       type: string
       label: 'Icon display position'
-    # @see web/core/modules/link/config/schema/link.schema.yml
-    trim_length:
-      type: integer
-      label: 'Trim link text length'
-    url_only:
-      type: boolean
-      label: 'URL only'
-    url_plain:
-      type: boolean
-      label: 'Show URL as plain text'
-    rel:
-      type: string
-      label: 'Add rel="nofollow" to links'
-    target:
-      type: string
-      label: 'Open link in new window'
 
 field.widget.settings.icon_widget:
   type: mapping
@@ -63,7 +47,7 @@ field.widget.settings.icon_widget:
       label: 'Show extractor settings'
 
 field.widget.settings.icon_link_widget:
-  type: mapping
+  type: field.widget.settings.link_default
   label: 'icon widget link settings'
   mapping:
     allowed_icon_pack:
@@ -81,10 +65,3 @@ field.widget.settings.icon_link_widget:
     icon_position:
       type: boolean
       label: 'Allow icon pack display selection'
-    # @see web/core/modules/link/config/schema/link.schema.yml
-    placeholder_url:
-      type: string
-      label: 'Placeholder for URL'
-    placeholder_title:
-      type: label
-      label: 'Placeholder for link text'
