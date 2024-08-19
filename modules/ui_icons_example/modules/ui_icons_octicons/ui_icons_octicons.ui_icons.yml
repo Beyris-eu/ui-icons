@@ -26,7 +26,6 @@ ui_icons_octicons_svg:
       title: "Alt text"
       placeholder: "Alternative text for this icon"
       description: "Accessibility alternative text, leave empty for decorative icon."
-
   template: >
     <svg xmlns="http://www.w3.org/2000/svg"
       width="{{ width|default(24) }}"

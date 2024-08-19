@@ -1,0 +1,19 @@
+ui_icons.icon_pack_options.ui_icons_material_svg_filled:
+  type: ui_icons.icon_pack_options_default
+  label: 'Material Symbols filled settings'
+
+ui_icons.icon_pack_options.ui_icons_material_svg_outlined:
+  type: ui_icons.icon_pack_options_default
+  label: 'Material Symbols outlined settings'
+
+ui_icons.icon_pack_options.ui_icons_material_svg_round:
+  type: ui_icons.icon_pack_options_default
+  label: 'Material Symbols round settings'
+
+ui_icons.icon_pack_options.ui_icons_material_svg_sharp:
+  type: ui_icons.icon_pack_options_default
+  label: 'Material Symbols sharp settings'
+
+ui_icons.icon_pack_options.ui_icons_material_svg_two_tone:
+  type: ui_icons.icon_pack_options_default
+  label: 'Material Symbols two-tone settings'
