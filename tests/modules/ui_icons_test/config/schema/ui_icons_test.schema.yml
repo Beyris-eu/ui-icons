@@ -1,0 +1,58 @@
+ui_icons.icon_pack_options.test_local_files:
+  type: mapping
+  label: 'Local files settings'
+  mapping:
+    width:
+      type: integer
+      label: 'Width'
+    height:
+      type: integer
+      label: 'Height'
+    title:
+      type: label
+      label: 'Title'
+
+ui_icons.icon_pack_options.test_local_svg:
+  type: mapping
+  label: 'Local svg files settings'
+  mapping:
+    width:
+      type: integer
+      label: 'Width'
+    height:
+      type: integer
+      label: 'Height'
+    title:
+      type: label
+      label: 'Title'
+
+ui_icons.icon_pack_options.test_local_svg_sprite:
+  type: mapping
+  label: 'Local svg sprite file settings'
+  mapping:
+    width:
+      type: integer
+      label: 'Width'
+    height:
+      type: integer
+      label: 'Height'
+
+ui_icons.icon_pack_options.test_disabled_icon_pack:
+  type: mapping
+  label: 'Disabled settings'
+  mapping:
+    title:
+      type: label
+      label: 'Title'
+
+ui_icons.icon_pack_options.test_no_icons:
+  type: mapping
+  label: 'No Icons settings'
+  mapping:
+    title:
+      type: label
+      label: 'Title'
+
+ui_icons.icon_pack_options.test_no_settings:
+  type: mapping
+  label: 'No Settings settings'
