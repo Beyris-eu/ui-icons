@@ -4,7 +4,6 @@
  */
 // eslint-disable-next-line func-names
 (function ($, Drupal, once) {
-  'use strict';
   /**
    * UI Icons autocomplete tweaks.
    *
@@ -23,6 +22,12 @@
       }
 
       iconSelectors.forEach((iconSelector) => {
+        const selector = jQuery(iconSelector);
+
+        if (typeof selector.autocomplete() !== 'function') {
+          return;
+        }
+
         // Current Drupal core autocomplete is based on jQuery UI.
         // Change autocomplete trigger to 3 characters and set delay a bit
         // longer from 300 to 500.
@@ -33,7 +38,7 @@
           delay: 500,
           minLength: 2,
         };
-        jQuery(iconSelector).autocomplete('option', options);
+        selector.autocomplete('option', options);
       });
     },
   };

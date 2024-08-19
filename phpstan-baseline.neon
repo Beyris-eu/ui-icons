@@ -11,6 +11,31 @@ parameters:
 			path: modules/ui_icons_field/src/Plugin/Field/FieldWidget/IconWidget.php
 
 		-
+			message: "#^Parameter \\#1 \\$array of static method Drupal\\\\Component\\\\Utility\\\\NestedArray\\:\\:getValue\\(\\) is passed by reference, so it expects variables only\\.$#"
+			count: 1
+			path: modules/ui_icons_picker/src/Form/IconSelectForm.php
+
+		-
+			message: "#^Parameter \\#1 \\$array of static method Drupal\\\\Component\\\\Utility\\\\NestedArray\\:\\:setValue\\(\\) is passed by reference, so it expects variables only\\.$#"
+			count: 1
+			path: modules/ui_icons_picker/src/Form/IconSelectForm.php
+
+		-
+			message: "#^Parameter \\#2 \\$content of class Drupal\\\\Core\\\\Ajax\\\\AppendCommand constructor expects array\\|string, Drupal\\\\Component\\\\Render\\\\MarkupInterface given\\.$#"
+			count: 1
+			path: modules/ui_icons_picker/src/Form/IconSelectForm.php
+
+		-
+			message: "#^Parameter \\#2 \\$content of class Drupal\\\\Core\\\\Ajax\\\\ReplaceCommand constructor expects array\\|string, Drupal\\\\Component\\\\Render\\\\MarkupInterface given\\.$#"
+			count: 1
+			path: modules/ui_icons_picker/src/Form/IconSelectForm.php
+
+		-
+			message: "#^\\\\Drupal calls should be avoided in classes, use dependency injection instead$#"
+			count: 1
+			path: modules/ui_icons_picker/src/Form/IconSelectForm.php
+
+		-
 			message: "#^Method Drupal\\\\ui_icons_text\\\\Plugin\\\\Filter\\\\IconEmbed\\:\\:tips\\(\\) should return string\\|null but returns Drupal\\\\Core\\\\StringTranslation\\\\TranslatableMarkup\\.$#"
 			count: 2
 			path: modules/ui_icons_text/src/Plugin/Filter/IconEmbed.php

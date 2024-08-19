@@ -1,0 +1,8 @@
+name: 'UI Icons picker'
+type: module
+description: 'Provide an advanced Icon picker for UI Icons selector.'
+package: User interface
+core_version_requirement: ^10.3 || ^11
+dependencies:
+  - ui_icons:ui_icons
+  - ui_icons:ui_icons_field

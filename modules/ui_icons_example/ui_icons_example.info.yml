@@ -5,3 +5,4 @@ package: User interface Example
 core_version_requirement: ^10.3 || ^11
 dependencies:
   - ui_icons:ui_icons
+  # - ui_icons:ui_icons_picker

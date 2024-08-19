@@ -180,6 +180,10 @@ class IconAutocomplete extends FormElementBase {
   public static function processIcon(array &$element, FormStateInterface $form_state, array &$complete_form): array {
     $element['#tree'] = TRUE;
 
+    if ($element['#value'] instanceof \Stringable) {
+      $element['#value'] = [];
+    }
+
     $element['icon_id'] = [
       '#type' => 'textfield',
       '#title' => new TranslatableMarkup('Icon'),
@@ -229,6 +233,8 @@ class IconAutocomplete extends FormElementBase {
 
     $parents_prefix = implode('_', $element['#parents']);
 
+    $element['icon_id']['#attributes']['data-wrapper-id'] = $ajax_wrapper_id;
+
     $element['icon_id']['#ajax'] = [
       'callback' => [static::class, 'buildSettingsAjaxCallback'],
       'options' => [
@@ -244,7 +250,7 @@ class IconAutocomplete extends FormElementBase {
       'wrapper' => $ajax_wrapper_id,
       'effect' => 'none',
       // As we used autocomplete we want matching events.
-      'event' => 'autocompleteclose change',
+      'event' => 'autocompleteclose change paste',
     ];
 
     // ProcessIcon will handle #value or #default_value.
