@@ -1,0 +1,3 @@
+ckeditor5.plugin.ui_icons_ckeditor5_icon:
+  type: mapping
+  label: 'UI Icons'
