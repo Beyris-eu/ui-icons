@@ -1,10 +1,14 @@
 ui_icons.icon_pack_options.*:
   type: ui_icons.icon_pack_options_default
   label: 'Default settings'
+  constraints:
+    FullyValidatable: ~
 
 ui_icons.icon_pack_options_default:
   type: mapping
   label: 'Default settings'
+  constraints:
+    FullyValidatable: ~
   mapping:
     width:
       type: integer
