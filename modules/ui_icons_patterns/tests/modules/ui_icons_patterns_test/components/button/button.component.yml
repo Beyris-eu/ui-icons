@@ -6,10 +6,10 @@ props:
   type: object
   properties:
     icon1:
-      title: "Icon 1"
+      title: "Icon 1, with explicit typing"
       $ref: ui-patterns://icon
     icon2:
-      title: "Icon 2"
+      title: "Icon 2, with implicit typing"
       type: object
       properties:
         icon_pack: {type: "string"}

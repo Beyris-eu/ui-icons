@@ -31,11 +31,4 @@ use Drupal\ui_patterns\PropTypePluginBase;
 )]
 class IconPropType extends PropTypePluginBase {
 
-  /**
-   * {@inheritdoc}
-   */
-  public static function normalize(mixed $value): mixed {
-    return $value;
-  }
-
 }
