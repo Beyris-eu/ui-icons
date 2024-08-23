@@ -29,7 +29,7 @@ class IconSource extends SourcePluginBase {
     return [
       "icon_pack" => $iconpack_id ?: '',
       "icon" => $icon_id ?: '',
-      "options" => $value['settings'] ?? [],
+      "settings" => $value['settings'] ?? [],
     ];
   }
 

@@ -1,9 +1,9 @@
 <span{{ attributes.addClass("button") }}>
   {% if icon1 %}
-  <span class="button__icon">{{ icon(icon1.icon_pack, icon1.icon, icon1.options) }}</span>
+  <span class="button__icon">{{ icon(icon1.icon_pack, icon1.icon, icon1.settings) }}</span>
   {% endif %}
   <span class="button__label">{{ label }}</span>
   {% if icon2 %}
-  <span class="button__icon">{{ icon(icon2.icon_pack, icon2.icon, icon2.options) }}</span>
+  <span class="button__icon">{{ icon(icon2.icon_pack, icon2.icon, icon2.settings) }}</span>
   {% endif %}
 </span>

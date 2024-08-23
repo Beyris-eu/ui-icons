@@ -31,7 +31,7 @@ class IconRenderableSource extends IconSource {
       "#type" => "icon",
       "#icon_pack" => $iconpack_id ?: '',
       "#icon" => $icon_id ?: '',
-      "#options" => $value['settings'] ?? [],
+      "#settings" => $value['settings'] ?? [],
     ];
   }
 

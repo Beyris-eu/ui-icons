@@ -23,8 +23,8 @@ stories:
       icon1:
         icon_pack: "icon_pack_example_svg"
         icon: "local_svg_Wordmark2_blue_RGB"
-        options: {}
+        settings: {}
       icon2:
         icon_pack: "icon_pack_example_svg"
         icon: "local_svg_Wordmark2_blue_RGB"
-        options: {}
+        settings: {}

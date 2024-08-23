@@ -20,7 +20,7 @@ use Drupal\ui_patterns\PropTypePluginBase;
     'properties' => [
       'icon' => ['type' => 'string'],
       'icon_pack' => ['$ref' => 'ui-patterns://machine_name'],
-      'options' => ['type' => 'object'],
+      'settings' => ['type' => 'object'],
     ],
     'required' => [
       'icon',
@@ -29,10 +29,6 @@ use Drupal\ui_patterns\PropTypePluginBase;
   ],
   priority: 10
 )]
-
-/**
- *
- */
 class IconPropType extends PropTypePluginBase {
 
   /**
