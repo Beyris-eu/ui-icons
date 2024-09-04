@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "required": ["label", "extractor"],
+  "properties": {
+    "label": {
+      "title": "Label",
+      "description": "Translatable label",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "description": "Translatable description",
+      "type": "string"
+    },
+    "extractor": {
+      "title": "Extractor ID",
+      "description": "The plugin ID of the extractor",
+      "type": "string",
+      "pattern": "^[A-Za-z]+\\w*$"
+    },
+    "config": {
+      "title": "Extractor configuration",
+      "description": "The structure is specific to the extractor plugin",
+      "type": "object"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Used to build the settings form. Each setting is a JSON schema",
+      "type": "object",
+      "patternProperties": {
+        "^\\w+$": { "$ref": "https://json-schema.org/draft/2020-12/schema" }
+      },
+      "additionalProperties": false
+    },
+    "template": {
+      "title": "Twig template",
+      "type": "string"
+    },
+    "library": {
+      "title": "Asset library",
+      "description": "The ID of an asset library",
+      "type": "string",
+      "pattern": "^\\w+/[A-Za-z]+\\w*$"
+    }
+  }
+}
