@@ -12,6 +12,39 @@
       "description": "Translatable description",
       "type": "string"
     },
+    "version": {
+      "title": "Version",
+      "type": "string"
+    },
+    "links": {
+      "title": "External links",
+      "description": "Both compact and full syntaxes are available",
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string",
+            "format": "iri-reference"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "title": { "type": "string" },
+              "url": { "type": "string", "format": "iri-reference" }
+            }
+          }
+        ]
+      }
+    },
+    "license": {
+      "title": "License",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "url": { "type": "string", "format": "iri-reference" },
+        "gpl-compatible": { "type": "boolean" }
+      }
+    },
     "extractor": {
       "title": "Extractor ID",
       "description": "The plugin ID of the extractor",
