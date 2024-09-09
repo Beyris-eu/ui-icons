@@ -1,6 +1,8 @@
 services:
   plugin.manager.ui_icons_pack:
     class: Drupal\ui_icons\Plugin\IconPackManager
+    calls:
+      - [setValidator, []]
     arguments:
       [
         '@module_handler',

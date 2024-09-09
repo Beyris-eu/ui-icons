@@ -94,18 +94,4 @@ interface IconPackManagerInterface extends PluginManagerInterface {
    */
   public function getExtractorFormDefaults(string $icon_pack_id): array;
 
-  /**
-   * Performs extra processing on plugin definitions.
-   *
-   * By default we add defaults for the type to the definition. If a type has
-   * additional processing logic they can do that by replacing or extending the
-   * method.
-   *
-   * @param array $definition
-   *   The definition to alter.
-   * @param string $plugin_id
-   *   The plugin id.
-   */
-  public function processDefinition(array &$definition, string $plugin_id): void;
-
 }

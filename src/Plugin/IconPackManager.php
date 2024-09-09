@@ -16,6 +16,8 @@ use Drupal\Core\Plugin\Discovery\YamlDiscovery;
 use Drupal\Core\Plugin\Factory\ContainerFactory;
 use Drupal\ui_icons\Exception\IconPackConfigErrorException;
 use Drupal\ui_icons\IconDefinitionInterface;
+use JsonSchema\Constraints\Constraint;
+use JsonSchema\Validator;
 
 /**
  * Defines an Icon Pack plugin manager to deal with icons.
@@ -63,6 +65,17 @@ use Drupal\ui_icons\IconDefinitionInterface;
  */
 class IconPackManager extends DefaultPluginManager implements IconPackManagerInterface {
 
+  private const SCHEMA_VALIDATE = 'icon_pack.schema.json';
+
+  /**
+   * The schema validator.
+   *
+   * This property will only be set if the validator library is available.
+   *
+   * @var \JsonSchema\Validator|null
+   */
+  private ?Validator $validator = NULL;
+
   /**
    * Constructs the IconPackPluginManager object.
    *
@@ -88,6 +101,21 @@ class IconPackManager extends DefaultPluginManager implements IconPackManagerInt
     $this->factory = new ContainerFactory($this);
     $this->alterInfo('ui_icons');
     $this->setCacheBackend($cacheBackend, 'ui_icons_pack', ['ui_icons_pack_plugin']);
+  }
+
+  /**
+   * Sets the validator service if available.
+   *
+   * @param \JsonSchema\Validator|null $validator
+   *   The JSON Validator class.
+   */
+  public function setValidator(?Validator $validator = NULL): void {
+    if ($validator) {
+      $this->validator = $validator;
+    }
+    elseif (class_exists(Validator::class)) {
+      $this->validator = new Validator();
+    }
   }
 
   /**
@@ -294,19 +322,12 @@ class IconPackManager extends DefaultPluginManager implements IconPackManagerInt
   /**
    * {@inheritdoc}
    */
-  public function processDefinition(&$definition, $plugin_id): void {
+  public function processDefinition(&$definition, $plugin_id) {
     if (preg_match('@[^a-z0-9_]@', $plugin_id)) {
       throw new IconPackConfigErrorException(sprintf('Invalid Icon Pack id in: %s, name: %s must contain only lowercase letters, numbers, and underscores.', $definition['provider'], $plugin_id));
     }
 
-    // @todo replace with json validation.
-    if (!isset($definition['extractor'])) {
-      throw new IconPackConfigErrorException('Missing `extractor:` key in your definition!');
-    }
-    // @todo is it needed as an extractor plugin can exist without config key?
-    if (!isset($definition['config'])) {
-      throw new IconPackConfigErrorException('Missing `config:` key in your definition extractor!');
-    }
+    $this->validateDefinition($definition);
 
     $relative_path = $this->moduleHandler->moduleExists($definition['provider'])
     ? $this->moduleHandler->getModule($definition['provider'])->getPath()
@@ -329,6 +350,78 @@ class IconPackManager extends DefaultPluginManager implements IconPackManagerInt
    */
   protected function providerExists(mixed $provider): bool {
     return $this->moduleHandler->moduleExists($provider) || $this->themeHandler->themeExists($provider);
+  }
+
+  /**
+   * Validates a definition against the JSON schema specification.
+   *
+   * @param array $definition
+   *   The definition to alter.
+   *
+   * @return bool
+   *   FALSE if the response failed validation, otherwise TRUE.
+   *
+   * @throws \Drupal\ui_icons\Exception\IconPackConfigErrorException
+   *   Thrown when the definition is not valid.
+   */
+  private function validateDefinition(array $definition): bool {
+    // If the validator isn't set, then the validation library is not installed.
+    if (!$this->validator) {
+      return TRUE;
+    }
+
+    $schema_ref = sprintf(
+      'file://%s/%s',
+      implode('/', [
+        $this->appRoot,
+        $this->moduleHandler->getModule('ui_icons')->getPath(),
+      ]),
+      self::SCHEMA_VALIDATE
+    );
+    $generic_schema = (object) ['$ref' => $schema_ref];
+
+    return $this->validateSchema($generic_schema, $definition);
+  }
+
+  /**
+   * Validates a string against a JSON Schema. It logs any possible errors.
+   *
+   * @param object $schema
+   *   The JSON Schema object.
+   * @param array $definition
+   *   The definition to validate.
+   *
+   * @return bool
+   *   TRUE if the definition is a valid instance of the schema. FALSE
+   *   otherwise.
+   *
+   * @throws \Drupal\ui_icons\Exception\IconPackConfigErrorException
+   *   Thrown when the definition is not valid.
+   */
+  private function validateSchema(object $schema, array $definition): bool {
+    $definition_object = Validator::arrayToObjectRecursive($definition);
+
+    $this->validator->validate($definition_object, $schema, Constraint::CHECK_MODE_COERCE_TYPES);
+
+    if ($this->validator->isValid()) {
+      return TRUE;
+    }
+
+    $message_parts = array_map(
+      static function (array $error): string {
+        return sprintf("[%s] %s", $error['property'], $error['message']);
+      },
+      $this->validator->getErrors()
+    );
+    $message = implode("\n", $message_parts);
+
+    throw new IconPackConfigErrorException(
+      sprintf(
+        'Error in definition `%s`:%s',
+        $definition_object->id,
+        $message
+      )
+    );
   }
 
   /**
