@@ -12,8 +12,6 @@ use Drupal\ui_icons\Exception\IconDefinitionInvalidDataException;
  */
 class IconDefinition implements IconDefinitionInterface {
 
-  private const DEFAULT_TEMPLATE = '<img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">';
-
   /**
    * Constructor for IconDefinition.
    *
@@ -110,7 +108,7 @@ class IconDefinition implements IconDefinitionInterface {
       'icon_pack_label' => $this->getIconPackLabel(),
     ];
 
-    $template = $this->data['template'] ?? self::DEFAULT_TEMPLATE;
+    $template = $this->data['template'] ?? '';
 
     $renderable = [
       '#type' => 'inline_template',

@@ -20,6 +20,8 @@ test_local_files:
       title: 'Title'
       type: string
       default: 'default title'
+  template: >
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
 
 test_local_svg:
   label: SVG manual
@@ -75,6 +77,8 @@ test_disabled_icon_pack:
       title: 'Title'
       type: 'string'
       default: 'default title'
+  template: >
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
 
 test_no_icons:
   label: No Icons
@@ -87,6 +91,8 @@ test_no_icons:
       title: 'Title'
       type: 'string'
       default: 'default title'
+  template: >
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
 
 test_no_settings:
   label: No Settings
@@ -94,3 +100,5 @@ test_no_settings:
   config:
     sources:
       - icons/local_png/{icon_id}.png
+  template: >
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
