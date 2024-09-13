@@ -24,6 +24,8 @@ ui_icons_material_svg_filled:
       title: "Alt text"
       type: "string"
       description: "Accessibility alternative text, leave empty for decorative icon."
+  template: >
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
 
 ui_icons_material_svg_outlined:
   label: Material Symbols outlined
@@ -51,6 +53,8 @@ ui_icons_material_svg_outlined:
       title: "Alt text"
       type: "string"
       description: "Accessibility alternative text, leave empty for decorative icon."
+  template: >
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
 
 ui_icons_material_svg_round:
   label: Material Symbols round
@@ -78,6 +82,8 @@ ui_icons_material_svg_round:
       title: "Alt text"
       type: "string"
       description: "Accessibility alternative text, leave empty for decorative icon."
+  template: >
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
 
 ui_icons_material_svg_sharp:
   label: Material Symbols sharp
@@ -105,6 +111,8 @@ ui_icons_material_svg_sharp:
       title: "Alt text"
       type: "string"
       description: "Accessibility alternative text, leave empty for decorative icon."
+  template: >
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
 
 ui_icons_material_svg_two_tone:
   label: Material Symbols two-tone
@@ -132,3 +140,5 @@ ui_icons_material_svg_two_tone:
       title: "Alt text"
       type: "string"
       description: "Accessibility alternative text, leave empty for decorative icon."
+  template: >
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">

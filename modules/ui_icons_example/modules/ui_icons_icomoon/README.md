@@ -16,6 +16,5 @@ So your folder structure is:
 
 libraries
   └── icomoon
-      └── _PACKAGE_NAME_
-        └── SVG
-            └── ...svg files
+    └── SVG
+        └── ...svg files
