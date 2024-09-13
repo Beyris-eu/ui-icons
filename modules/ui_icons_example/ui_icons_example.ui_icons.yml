@@ -39,6 +39,8 @@ icon_pack_example_drupal_core:
       title: "Alt text"
       type: "string"
       description: "Accessibility alternative text, leave empty for decorative icon."
+  template: >
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
 
 icon_pack_example_local:
   label: Example png
@@ -67,6 +69,8 @@ icon_pack_example_local:
       title: "Alt text"
       type: "string"
       description: "Accessibility alternative text, leave empty for decorative icon."
+  template: >
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
 
 icon_pack_example_svg:
   label: Example SVG
@@ -181,6 +185,8 @@ icon_pack_example_settings:
       minimum: 10
       maximum: 100
     #   multipleOf: 10
+  template: >
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
 
 icon_pack_example_no_settings:
   label: Example no settings
@@ -189,6 +195,8 @@ icon_pack_example_no_settings:
   config:
     sources:
       - assets/icons/no_settings/{icon_id}.svg
+  template: >
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
 
 # icon_pack_example_drupal_core_sprite:
 #   label: Example Drupal core sprite
@@ -199,3 +207,5 @@ icon_pack_example_no_settings:
 #       - /core/modules/views_ui/images/{icon_id}.png
 #       - /core/profiles/demo_umami/themes/umami/images/classy/icons/forum-icons.png
 #       - /core/themes/claro/images/core/stable/views_ui/{icon_id}.png
+# template: >
+#    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
