@@ -24,3 +24,5 @@ ui_icons_dsfr_svg:
       title: "Alt text"
       description: "Accessibility alternative text, leave empty for decorative icon."
       type: string
+  template: >
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
