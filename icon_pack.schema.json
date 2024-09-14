@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "required": ["label", "extractor"],
+  "required": ["label", "extractor", "template"],
   "properties": {
     "label": {
       "title": "Label",
