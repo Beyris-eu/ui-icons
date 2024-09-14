@@ -15,6 +15,7 @@ use Drupal\Core\Render\Element;
 use Drupal\Core\Render\Element\FormElementBase;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_icons\IconDefinitionInterface;
+use Drupal\ui_icons\Plugin\IconPackManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -371,7 +372,7 @@ class IconAutocomplete extends FormElementBase {
    * @return \Drupal\ui_icons\Plugin\IconPackManagerInterface
    *   The icon pack manager service.
    */
-  protected static function iconPack() {
+  protected static function iconPack(): IconPackManagerInterface {
     return \Drupal::service('plugin.manager.ui_icons_pack');
   }
 

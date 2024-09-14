@@ -25,7 +25,7 @@ class UpdateIconSelectionCommand implements CommandInterface {
   /**
    * {@inheritdoc}
    */
-  public function render() {
+  public function render(): array {
     return [
       'command' => 'updateIconLibrarySelection',
       'icon_full_id' => $this->icon_full_id,

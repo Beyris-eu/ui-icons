@@ -101,6 +101,7 @@ class IconFormatterTest extends UnitTestCase {
   public function testSettingsSummary(): void {
     $this->formatter->setSetting('icon_settings', ['foo' => 'bar']);
     $summary = $this->formatter->settingsSummary();
+    /** @var \Drupal\Core\StringTranslation\TranslatableMarkup $summary */
     $this->assertEquals('Specific icon settings saved', $summary[0]->getUntranslatedString());
   }
 

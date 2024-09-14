@@ -52,12 +52,7 @@ export default class IconEditing extends Plugin {
     const { schema } = this.editor.model;
 
     schema.register('drupalIcon', {
-      // Behaves like a self-contained object (e.g. an image).
-      isObject: true,
-      // Allows placement of the object to be inline with text.
-      isInline: true,
-      // Allows an icon to be inserted wherever text is allowed (including another container such as a button).
-      allowWhere: '$text',
+      inheritAllFrom: '$inlineObject',
       allowAttributes: Object.keys(this.attrs),
     });
 

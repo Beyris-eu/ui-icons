@@ -19,6 +19,7 @@ class IconPackExtractorForm extends PluginFormBase implements PluginFormInterfac
    * {@inheritdoc}
    */
   public function buildConfigurationForm(array $form, FormStateInterface $form_state): array {
+    /** @var \Drupal\Core\Plugin\PluginFormInterface $this->plugin */
     return $this->plugin->buildConfigurationForm($form, $form_state);
   }
 
@@ -26,6 +27,7 @@ class IconPackExtractorForm extends PluginFormBase implements PluginFormInterfac
    * {@inheritdoc}
    */
   public function validateConfigurationForm(array &$form, FormStateInterface $form_state): void {
+    /** @var \Drupal\Core\Plugin\PluginFormInterface $this->plugin */
     $this->plugin->validateConfigurationForm($form, $form_state);
   }
 
@@ -33,6 +35,7 @@ class IconPackExtractorForm extends PluginFormBase implements PluginFormInterfac
    * {@inheritdoc}
    */
   public function submitConfigurationForm(array &$form, FormStateInterface $form_state): void {
+    /** @var \Drupal\Core\Plugin\PluginFormInterface $this->plugin */
     $this->plugin->submitConfigurationForm($form, $form_state);
   }
 

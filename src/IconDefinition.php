@@ -110,24 +110,19 @@ class IconDefinition implements IconDefinitionInterface {
       'icon_pack_label' => $this->getIconPackLabel(),
     ];
 
-    if (!isset($this->data['template']) || empty($this->data['template'])) {
-      $template = self::DEFAULT_TEMPLATE;
-    }
-    else {
-      $template = $this->data['template'];
-    }
+    $template = $this->data['template'] ?? self::DEFAULT_TEMPLATE;
 
-    $template = [
+    $renderable = [
       '#type' => 'inline_template',
       '#template' => $template,
-      '#context' => array_merge($context, $options),
+      '#context' => $context + $options,
     ];
 
-    if (isset($this->data['library']) && !empty($this->data['library'])) {
-      $template['#attached'] = ['library' => [$this->data['library']]];
+    if (!empty($this->data['library'])) {
+      $renderable['#attached'] = ['library' => [$this->data['library']]];
     }
 
-    return $template;
+    return $renderable;
   }
 
   /**

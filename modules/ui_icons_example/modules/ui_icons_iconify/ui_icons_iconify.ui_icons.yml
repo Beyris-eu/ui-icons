@@ -16,7 +16,6 @@ ui_icons_iconify_flags:
       title: "Height"
       description: "Set a height for this icon."
       type: "integer"
-      default: 24
     flip:
       title: "Flip"
       type: "text"
@@ -34,7 +33,13 @@ ui_icons_iconify_flags:
         - 180deg
         - 270deg
   template: >
-    <img src="{{ source }}?width={{ width|default(24) }}&height={{ height|default(24) }}&rotate={{ rotate }}&flip={{ flip }}" />
+    {% set params = {
+      width: width,
+      height: height,
+      rotate: rotate,
+      flip: flip
+    }|filter(v => v is not null) %}
+    <img src="{{ source }}?{{ params|url_encode }}" />
 
 ui_icons_iconify_circle_flags:
   label: Circle flags
@@ -53,7 +58,6 @@ ui_icons_iconify_circle_flags:
       title: "Height"
       description: "Set a height for this icon."
       type: "integer"
-      default: 24
     flip:
       title: "Flip"
       type: "text"
@@ -71,7 +75,13 @@ ui_icons_iconify_circle_flags:
         - 180deg
         - 270deg
   template: >
-    <img src="{{ source }}?width={{ width|default(24) }}&height={{ height|default(24) }}&rotate={{ rotate }}&flip={{ flip }}" />
+    {% set params = {
+      width: width,
+      height: height,
+      rotate: rotate,
+      flip: flip
+    }|filter(v => v is not null) %}
+    <img src="{{ source }}?{{ params|url_encode }}" />
 
 ui_icons_iconify_geo:
   label: Geo
@@ -91,7 +101,6 @@ ui_icons_iconify_geo:
       title: "Height"
       description: "Set a height for this icon."
       type: "integer"
-      default: 24
     flip:
       title: "Flip"
       type: "text"
@@ -108,8 +117,19 @@ ui_icons_iconify_geo:
         - 90deg
         - 180deg
         - 270deg
+    color:
+      title: "Color"
+      type: "string"
+      format: "color"
   template: >
-    <img src="{{ source }}?width={{ width|default(24) }}&height={{ height|default(24) }}&rotate={{ rotate }}&flip={{ flip }}" />
+    {% set params = {
+      width: width,
+      height: height,
+      rotate: rotate,
+      flip: flip,
+      color: color
+    }|filter(v => v is not null) %}
+    <img src="{{ source }}?{{ params|url_encode }}" />
 
 ui_icons_iconify_animated:
   label: Animated
@@ -130,7 +150,6 @@ ui_icons_iconify_animated:
       title: "Height"
       description: "Set a height for this icon."
       type: "integer"
-      default: 24
     flip:
       title: "Flip"
       type: "text"
@@ -147,8 +166,19 @@ ui_icons_iconify_animated:
         - 90deg
         - 180deg
         - 270deg
+    color:
+      title: "Color"
+      type: "string"
+      format: "color"
   template: >
-    <img src="{{ source }}?width={{ width|default(24) }}&height={{ height|default(24) }}&rotate={{ rotate }}&flip={{ flip }}" />
+    {% set params = {
+      width: width,
+      height: height,
+      rotate: rotate,
+      flip: flip,
+      color: color
+    }|filter(v => v is not null) %}
+    <img src="{{ source }}?{{ params|url_encode }}" />
 
 ui_icons_iconify_emoji:
   label: Emoji
@@ -169,7 +199,6 @@ ui_icons_iconify_emoji:
       title: "Height"
       description: "Set a height for this icon."
       type: "integer"
-      default: 32
     flip:
       title: "Flip"
       type: "text"
@@ -186,8 +215,19 @@ ui_icons_iconify_emoji:
         - 90deg
         - 180deg
         - 270deg
+    color:
+      title: "Color"
+      type: "string"
+      format: "color"
   template: >
-    <img src="{{ source }}?width={{ width|default(32) }}&height={{ height|default(32) }}&rotate={{ rotate }}&flip={{ flip }}" />
+    {% set params = {
+      width: width,
+      height: height,
+      rotate: rotate,
+      flip: flip,
+      color: color
+    }|filter(v => v is not null) %}
+    <img src="{{ source }}?{{ params|url_encode }}" />
 
 ui_icons_iconify_programming:
   label: Programming
@@ -208,7 +248,6 @@ ui_icons_iconify_programming:
       title: "Height"
       description: "Set a height for this icon."
       type: "integer"
-      default: 32
     flip:
       title: "Flip"
       type: "text"
@@ -225,5 +264,16 @@ ui_icons_iconify_programming:
         - 90deg
         - 180deg
         - 270deg
+    color:
+      title: "Color"
+      type: "string"
+      format: "color"
   template: >
-    <img src="{{ source }}?width={{ width|default(32) }}&height={{ height|default(32) }}&rotate={{ rotate }}&flip={{ flip }}" />
+    {% set params = {
+      width: width,
+      height: height,
+      rotate: rotate,
+      flip: flip,
+      color: color
+    }|filter(v => v is not null) %}
+    <img src="{{ source }}?{{ params|url_encode }}" />

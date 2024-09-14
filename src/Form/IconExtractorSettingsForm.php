@@ -163,6 +163,11 @@ class IconExtractorSettingsForm {
   protected static function buildStringForm(string $setting_id, array $setting, array $saved_values): array {
     $form = self::initSettingForm($setting_id, $setting, $saved_values);
 
+    if (isset($setting['format']) && $setting['format'] === 'color') {
+      $form['#type'] = 'color';
+      return $form;
+    }
+
     $form['#type'] = 'textfield';
 
     if (isset($setting['pattern']) && !empty($setting['pattern'])) {

@@ -62,7 +62,6 @@ class IconExtractorSettingsFormTest extends UnitTestCase {
             'title' => 'Test String',
             'type' => 'string',
             'description' => 'Form test string',
-            'type' => 'string',
             'maxLength' => 33,
             'pattern' => '_pattern_',
           ],
@@ -84,7 +83,6 @@ class IconExtractorSettingsFormTest extends UnitTestCase {
             'title' => 'Test String',
             'type' => 'string',
             'description' => 'Form test string',
-            'type' => 'string',
             'minLength' => 10,
             'maxLength' => 33,
           ],
@@ -251,6 +249,42 @@ class IconExtractorSettingsFormTest extends UnitTestCase {
             '#step' => 0.01,
             '#min' => 10.01,
             '#max' => 12.01,
+          ],
+        ],
+      ],
+      'case for color field' => [
+        'settings' => [
+          'test_color' => [
+            'title' => 'Test color',
+            'description' => 'Form test color',
+            'type' => 'string',
+            'format' => 'color',
+          ],
+        ],
+        'expected' => [
+          'test_color' => [
+            '#title' => 'Test color',
+            '#description' => 'Form test color',
+            '#type' => 'color',
+          ],
+        ],
+      ],
+      'case for color field default' => [
+        'settings' => [
+          'test_color' => [
+            'title' => 'Test color',
+            'description' => 'Form test color',
+            'type' => 'string',
+            'format' => 'color',
+            'default' => '#123456',
+          ],
+        ],
+        'expected' => [
+          'test_color' => [
+            '#title' => 'Test color',
+            '#description' => 'Form test color',
+            '#type' => 'color',
+            '#default_value' => '#123456',
           ],
         ],
       ],

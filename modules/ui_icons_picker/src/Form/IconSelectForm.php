@@ -251,7 +251,7 @@ final class IconSelectForm extends FormBase {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    */
-  public function previousPageSubmit(array $form, FormStateInterface $form_state) {
+  public function previousPageSubmit(array $form, FormStateInterface $form_state): void {
     $modal_state = self::getModalState($form_state);
     $modal_state['page']--;
     self::setModalState($form_state, $modal_state);
@@ -267,7 +267,7 @@ final class IconSelectForm extends FormBase {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    */
-  public function nextPageSubmit(array $form, FormStateInterface $form_state) {
+  public function nextPageSubmit(array $form, FormStateInterface $form_state): void {
     $modal_state = self::getModalState($form_state);
     $modal_state['page']++;
     self::setModalState($form_state, $modal_state);
@@ -283,7 +283,7 @@ final class IconSelectForm extends FormBase {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    */
-  public function searchSubmit(array $form, FormStateInterface $form_state) {
+  public function searchSubmit(array $form, FormStateInterface $form_state): void {
     $modal_state = self::getModalState($form_state);
     $modal_state['page'] = 0;
     self::setModalState($form_state, $modal_state);
@@ -302,7 +302,7 @@ final class IconSelectForm extends FormBase {
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   An ajax response to replace the form.
    */
-  public function searchAjax(array &$form, FormStateInterface $form_state) {
+  public function searchAjax(array &$form, FormStateInterface $form_state): AjaxResponse {
     return $this->ajaxRenderFormAndMessages($form);
   }
 
@@ -317,7 +317,7 @@ final class IconSelectForm extends FormBase {
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   An ajax response to replace the form.
    */
-  protected function ajaxRenderFormAndMessages(array &$form) {
+  protected function ajaxRenderFormAndMessages(array &$form): AjaxResponse {
     $response = new AjaxResponse();
     // phpcs:ignore DrupalPractice.Objects.GlobalDrupal.GlobalDrupal
     $renderer = \Drupal::service('renderer');
@@ -351,7 +351,7 @@ final class IconSelectForm extends FormBase {
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   The AJAX response object.
    */
-  public function selectIconAjax(array &$form, FormStateInterface $form_state) {
+  public function selectIconAjax(array &$form, FormStateInterface $form_state): AjaxResponse {
     $errors = $form_state->getErrors();
     if ($errors) {
       return self::ajaxRenderFormAndMessages($form);

@@ -158,28 +158,28 @@ icon_pack_example_settings:
       title: "Alt text"
       type: "string"
       description: "Accessibility alternative text, leave empty for decorative icon."
-    # select:
-    #   title: "Test select"
-    #   description: "Test for a select with enum property."
-    #   type: "integer"
-    #   enum: [100, 200, 300, 400, 500, 600, 700, 800, 900]
-    #   default: 400
+    select:
+      title: "Test select"
+      description: "Test for a select with enum property."
+      type: "integer"
+      # enum: [100, 200, 300, 400, 500, 600, 700, 800, 900]
+      default: 400
     boolean:
       title: "Test boolean"
       description: "Test for a boolean property."
       type: "boolean"
-    # decimal:
-    #   title: "Test decimal"
-    #   type: "number"
+    decimal:
+      title: "Test decimal"
+      type: "number"
     #   default: 66.66
     #   multipleOf: 0.01
-    # number:
-    #   title: "Test number min/max/step"
-    #   description: "Test for number with constraints."
-    #   type: "integer"
-    #   default: 30
-    #   minimum: 10
-    #   maximum: 100
+    number:
+      title: "Test number min/max/step"
+      description: "Test for number with constraints."
+      type: "integer"
+      default: 30
+      minimum: 10
+      maximum: 100
     #   multipleOf: 10
 
 icon_pack_example_no_settings:
