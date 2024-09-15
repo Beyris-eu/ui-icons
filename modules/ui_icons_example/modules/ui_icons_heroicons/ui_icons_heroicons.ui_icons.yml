@@ -1,95 +1,68 @@
-ui_icons_heroicons_solid:
-  label: Hero Icons solid
-  description: Hero Icons from SVG files as Solid style.
+heroicons_solid:
+  label: Hero solid
+  description: Beautiful hand-crafted SVG icons, by the makers of Tailwind CSS.
+  links:
+   - https://heroicons.com/solid
+   - https://github.com/tailwindlabs/heroicons/?tab=readme-ov-file#basic-usage
   extractor: svg
   config:
     sources:
       - /libraries/heroicons/node_modules/heroicons/24/solid/{icon_id}.svg
   settings:
-    title:
-      title: "Title"
-      type: "string"
-      description: "Set a title on hover for this icon."
-    alt:
-      title: "Alt text"
-      type: "string"
-      description: "Accessibility alternative text, leave empty for decorative icon."
-    width:
-      title: "Width"
-      description: "Set a width for this icon."
+    size:
+      title: "Size"
       type: "integer"
       default: 24
-    height:
-      title: "Height"
-      description: "Set a height for this icon."
-      type: "integer"
-      default: 24
-    stroke_width:
-      title: "Stroke width"
-      description: "Set a stroke width for this icon."
-      type: "number"
-      default: 1.5
-      multipleOf: 0.1
+    color:
+      title: Fill color
+      type: "string"
+      format: "color"
   template: >
     <svg
       class="heroicon"
-      aria-label="{{ alt|default(icon_id|capitalize) }}"
-      fill="none"
+      fill="{{ color|default('currentColor') }}"
       viewBox="0 0 24 24"
-      stroke="currentColor"
-      stroke-width="{{ stroke_width|default(1.5) }}"
-      width="{{ width|default(24) }}"
-      height="{{ height|default(24) }}"
+      width="{{ size|default(24) }}"
+      height="{{ size|default(24) }}"
     >
-      <title>{{ title|default(icon_id|capitalize) }}</title>
       {{ content }}
     </svg>
 
-ui_icons_heroicons_outline:
-  label: Hero Icons outline
-  description: Hero Icons from SVG files as outline style.
+heroicons_outline:
+  label: Hero outline
+  description: Beautiful hand-crafted SVG icons, by the makers of Tailwind CSS.
+  links:
+   - https://heroicons.com/outline
+   - https://github.com/tailwindlabs/heroicons/?tab=readme-ov-file#basic-usage
   extractor: svg
   config:
     sources:
       - /libraries/heroicons/node_modules/heroicons/24/outline/{icon_id}.svg
   settings:
-    title:
-      title: "Title"
-      type: "string"
-      description: "Set a title on hover for this icon."
-    alt:
-      title: "Alt text"
-      type: "string"
-      description: "Accessibility alternative text, leave empty for decorative icon."
-    width:
-      title: "Width"
-      description: "Set a width for this icon."
+    size:
+      title: "Size"
       type: "integer"
       default: 24
-    height:
-      title: "Height"
-      description: "Set a height for this icon."
-      type: "integer"
-      default: 24
+    color:
+      title: Stroke color
+      type: "string"
+      format: "color"
     stroke_width:
       title: "Stroke width"
-      description: "Set a stroke width for this icon."
       type: "number"
       default: 1.5
-      minimum: 0.1
-      maximum: 5
+      minimum: 1.0
+      maximum: 2.0
       multipleOf: 0.1
   template: >
     <svg
       class="heroicon"
-      aria-label="{{ alt|default(icon_id|capitalize) }}"
       fill="none"
       viewBox="0 0 24 24"
-      stroke="currentColor"
+      stroke="{{ color|default('currentColor') }}"
       stroke-width="{{ stroke_width|default(1.5) }}"
-      width="{{ width|default(24) }}"
-      height="{{ height|default(24) }}"
+      width="{{ size|default(24) }}"
+      height="{{ size|default(24) }}"
     >
-      <title>{{ title|default(icon_id|capitalize) }}</title>
       {{ content }}
     </svg>

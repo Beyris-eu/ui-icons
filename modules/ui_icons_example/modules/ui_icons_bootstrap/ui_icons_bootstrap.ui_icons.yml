@@ -1,63 +1,37 @@
-ui_icons_bootstrap_svg:
-  label: Bootstrap
+bootstrap_svg:
+  label: "Bootstrap [SVG]"
   description: Bootstrap icons from SVG files.
+  links:
+   - https://icons.getbootstrap.com/#usage
   extractor: svg
   config:
     sources:
       - /libraries/bootstrap-icons/node_modules/bootstrap-icons/icons/{icon_id}.svg
   settings:
-    width:
-      title: "Width"
-      description: "Set a width for this icon."
+    size:
+      title: "Size"
       type: "integer"
       default: 32
-    height:
-      title: "Height"
-      description: "Set a height for this icon."
-      type: "integer"
-      default: 32
-    title:
-      title: "Title"
-      type: string
-      description: "Set a title on hover for this icon."
-    alt:
-      title: "Alt text"
-      type: string
-      description: "Accessibility alternative text, leave empty for decorative icon."
   template: >
-    <svg xmlns="http://www.w3.org/2000/svg" width="{{ width|default(32) }}" height="{{ height|default(32) }}" fill="currentColor" class="bi bi-{{ icon_id }}" viewBox="0 0 16 16">
-        <title>{{ title|default(icon_id|capitalize) }}</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="{{ size|default(32) }}" height="{{ size|default(32) }}" fill="currentColor" class="bi bi-{{ icon_id }}" viewBox="0 0 16 16">
       {{ content }}
     </svg>
 
-ui_icons_bootstrap_svg_sprite:
-  label: Bootstrap Sprite
+bootstrap_sprite:
+  label: "Bootstrap [Sprite]"
   description: Bootstrap icons from SVG Sprite single source.
+  links:
+   - https://icons.getbootstrap.com/#usage
   extractor: svg_sprite
   config:
     sources:
       - /libraries/bootstrap-icons/node_modules/bootstrap-icons/bootstrap-icons.svg
   settings:
-    width:
-      title: "Width"
-      description: "Set a width for this icon."
+    size:
+      title: "Size"
       type: "integer"
       default: 32
-    height:
-      title: "Height"
-      description: "Set a height for this icon."
-      type: "integer"
-      default: 32
-    title:
-      title: "Title"
-      description: "Set a title on hover for this icon."
-      type: string
-    alt:
-      title: "Alt text"
-      description: "Accessibility alternative text, leave empty for decorative icon."
-      type: string
   template: >
-    <svg class="bi" width="{{ width|default(32) }}" height="{{ height|default(32) }}" fill="currentColor" aria-label="{{ alt|default(icon_id|capitalize) }}">
-      <title>{{ title|default(icon_id|capitalize) }}</title>
+    <svg class="bi" width="{{ size|default(32) }}" height="{{ size|default(32) }}" fill="currentColor">
       <use xlink:href="{{ source }}#{{ icon_id }}"/>
     </svg>

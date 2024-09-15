@@ -1,21 +1,17 @@
-ui_icons_material_svg_filled:
-  label: Material Symbols filled
-  description: Material Symbols icons from SVG files.
+material_filled_svg:
+  label: Material Symbols filled [SVG]
+  description: Latest optimized SVGs for material design icons.
+  links:
+   - https://github.com/marella/material-design-icons
   extractor: svg
   config:
     sources:
       - /libraries/material/node_modules/@material-design-icons/svg/filled/{icon_id}.svg
   settings:
-    width:
-      title: "Width"
-      description: "Set a width for this icon."
+    size:
+      title: "Size"
       type: "integer"
-      default: 32
-    height:
-      title: "Height"
-      description: "Set a height for this icon."
-      type: "integer"
-      default: 32
+      default: 24
     title:
       title: "Title"
       type: "string"
@@ -25,26 +21,22 @@ ui_icons_material_svg_filled:
       type: "string"
       description: "Accessibility alternative text, leave empty for decorative icon."
   template: >
-    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ size|default(24) }}" height="{{ size|default(24) }}">
 
-ui_icons_material_svg_outlined:
-  label: Material Symbols outlined
-  description: Material Symbols icons from SVG files.
+material_outlined_svg:
+  label: Material Symbols outlined [SVG]
+  description: Latest optimized SVGs for material design icons.
+  links:
+   - https://github.com/marella/material-design-icons
   extractor: svg
   config:
     sources:
       - /libraries/material/node_modules/@material-design-icons/svg/outlined/{icon_id}.svg
   settings:
-    width:
-      title: "Width"
-      description: "Set a width for this icon."
+    size:
+      title: "Size"
       type: "integer"
-      default: 32
-    height:
-      title: "Height"
-      description: "Set a height for this icon."
-      type: "integer"
-      default: 32
+      default: 24
     title:
       title: "Title"
       type: "string"
@@ -54,26 +46,22 @@ ui_icons_material_svg_outlined:
       type: "string"
       description: "Accessibility alternative text, leave empty for decorative icon."
   template: >
-    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ size|default(24) }}" height="{{ size|default(24) }}">
 
-ui_icons_material_svg_round:
-  label: Material Symbols round
-  description: Material Symbols icons from SVG files.
+material_round_svg:
+  label: Material Symbols round [SVG]
+  description: Latest optimized SVGs for material design icons.
+  links:
+   - https://github.com/marella/material-design-icons
   extractor: svg
   config:
     sources:
       - /libraries/material/node_modules/@material-design-icons/svg/round/{icon_id}.svg
   settings:
-    width:
-      title: "Width"
-      description: "Set a width for this icon."
+    size:
+      title: "Size"
       type: "integer"
-      default: 32
-    height:
-      title: "Height"
-      description: "Set a height for this icon."
-      type: "integer"
-      default: 32
+      default: 24
     title:
       title: "Title"
       type: "string"
@@ -83,26 +71,22 @@ ui_icons_material_svg_round:
       type: "string"
       description: "Accessibility alternative text, leave empty for decorative icon."
   template: >
-    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ size|default(24) }}" height="{{ size|default(24) }}">
 
-ui_icons_material_svg_sharp:
-  label: Material Symbols sharp
-  description: Material Symbols icons from SVG files.
+material_sharp_svg:
+  label: Material Symbols sharp [SVG]
+  description: Latest optimized SVGs for material design icons.
+  links:
+   - https://github.com/marella/material-design-icons
   extractor: svg
   config:
     sources:
       - /libraries/material/node_modules/@material-design-icons/svg/sharp/{icon_id}.svg
   settings:
-    width:
-      title: "Width"
-      description: "Set a width for this icon."
+    size:
+      title: "Size"
       type: "integer"
-      default: 32
-    height:
-      title: "Height"
-      description: "Set a height for this icon."
-      type: "integer"
-      default: 32
+      default: 24
     title:
       title: "Title"
       type: "string"
@@ -112,26 +96,22 @@ ui_icons_material_svg_sharp:
       type: "string"
       description: "Accessibility alternative text, leave empty for decorative icon."
   template: >
-    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ size|default(24) }}" height="{{ size|default(24) }}">
 
-ui_icons_material_svg_two_tone:
-  label: Material Symbols two-tone
-  description: Material Symbols icons from SVG files.
+material_two_tone_svg:
+  label: Material Symbols two-tone [SVG]
+  description: Latest optimized SVGs for material design icons.
+  links:
+   - https://github.com/marella/material-design-icons
   extractor: svg
   config:
     sources:
       - /libraries/material/node_modules/@material-design-icons/svg/two-tone/{icon_id}.svg
   settings:
-    width:
-      title: "Width"
-      description: "Set a width for this icon."
+    size:
+      title: "Size"
       type: "integer"
-      default: 32
-    height:
-      title: "Height"
-      description: "Set a height for this icon."
-      type: "integer"
-      default: 32
+      default: 24
     title:
       title: "Title"
       type: "string"
@@ -141,4 +121,4 @@ ui_icons_material_svg_two_tone:
       type: "string"
       description: "Accessibility alternative text, leave empty for decorative icon."
   template: >
-    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
+    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ size|default(24) }}" height="{{ size|default(24) }}">

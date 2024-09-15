@@ -141,7 +141,7 @@ class IconPackManager extends DefaultPluginManager implements IconPackManagerInt
       }
       $options[$icon_pack_id] = sprintf('%s (%u)', $definition['label'] ?? $definition['id'], $count);
     }
-
+    natsort($options);
     return $options;
   }
 
