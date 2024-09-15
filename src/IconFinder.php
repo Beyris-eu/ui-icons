@@ -98,6 +98,16 @@ class IconFinder implements ContainerInjectionInterface, IconFinderInterface {
    * {@inheritdoc}
    */
   public function getFilesFromSource(string $source, string $drupal_root, string $definition_absolute_path, string $definition_relative_path): array {
+    if (str_starts_with($source, 'http://') || str_starts_with($source, 'https://')) {
+      return $this->getFilesFromHttpUrl($source);
+    }
+    return $this->getFilesFromLocalPath($source, $drupal_root, $definition_absolute_path, $definition_relative_path);
+  }
+
+  /**
+   * Get files from a local path.
+   */
+  protected function getFilesFromLocalPath(string $source, string $drupal_root, string $definition_absolute_path, string $definition_relative_path): array {
     $is_absolute = str_starts_with($source, '/');
     $path_info = pathinfo($source);
 
@@ -124,6 +134,22 @@ class IconFinder implements ContainerInjectionInterface, IconFinderInterface {
     $base_relative_path = $is_absolute ? '' : $definition_relative_path . '/';
 
     return $this->createFileArray($files, $has_group, $group_position_end, $base_relative_path, $path_info);
+  }
+
+  /**
+   * Get files from an HTTP URL.
+   */
+  protected function getFilesFromHttpUrl(string $source): array {
+    $path_info = pathinfo($source);
+    $file = (object) [
+      "uri" => $source,
+      "filename" => $path_info['basename'],
+      "name" => $path_info['filename'],
+    ];
+    $files = [
+      $source => $file,
+    ];
+    return $this->createFileArray($files, FALSE, FALSE, "", $path_info);
   }
 
   /**

@@ -39,7 +39,7 @@ class SvgSpriteExtractor extends IconExtractorWithFinder {
 
     $icons = [];
     foreach ($files as $file) {
-      $icon_ids = $this->extractSvgSymbolId($file['absolute_path']);
+      $icon_ids = $this->extractFromXml($file['absolute_path']);
       foreach ($icon_ids as $icon_id) {
         $icon_full_id = $this->configuration['icon_pack_id'] . ':' . $icon_id;
         $icons[$icon_full_id] = $this->createIcon($icon_id, $file['relative_path'], $this->configuration, $file['group']);
@@ -50,16 +50,16 @@ class SvgSpriteExtractor extends IconExtractorWithFinder {
   }
 
   /**
-   * Extract svg values.
+   * Extract icon ID from XML.
    *
-   * @param string $uri
-   *   Local path to the svg file.
+   * @param string $source
+   *   Path to the SVG file.
    *
    * @return array
-   *   The list of id from all <symbol>.
+   *   A list of icons ID.
    */
-  private function extractSvgSymbolId(string $uri): array {
-    $content = $this->iconFinder->getFileContents($uri);
+  private function extractFromXml(string $source): array {
+    $content = $this->iconFinder->getFileContents($source);
 
     libxml_use_internal_errors(TRUE);
     $svg = simplexml_load_string($content);
@@ -70,14 +70,31 @@ class SvgSpriteExtractor extends IconExtractorWithFinder {
       }
       return $errors;
     }
+    if ($svg->symbol) {
+      return $this->extractFromSymbols($svg->symbol);
+    }
+    if ($svg->defs->symbol) {
+      return $this->extractFromSymbols($svg->defs->symbol);
+    }
+    return [];
+  }
 
+  /**
+   * Extract icon ID from SVG symbols.
+   *
+   * @param \SimpleXMLElement $wrapper
+   *  A SVG element.
+   *
+   * @return array
+   *   A list of icons ID.
+   */
+  private function extractFromSymbols(\SimpleXMLElement $wrapper): array {
     $ids = [];
-    foreach ($svg->symbol as $symbol) {
+    foreach ($wrapper as $symbol) {
       if (isset($symbol['id'])) {
         $ids[] = (string) $symbol['id'];
       }
     }
-
     return $ids;
   }
 
