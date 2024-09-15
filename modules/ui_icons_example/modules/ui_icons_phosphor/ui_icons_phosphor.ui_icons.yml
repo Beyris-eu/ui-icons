@@ -1,31 +1,28 @@
-ui_icons_phosphor_svg:
+phosphor_svg:
   label: Phosphor
-  description: Phosphor Icons from SVG files.
+  description: A flexible icon family for interfaces, diagrams, presentations — whatever, really.
+  links:
+   - https://phosphoricons.com/
+   - https://github.com/phosphor-icons/core 
   extractor: svg
   config:
     sources:
       - /libraries/phosphor-icons/node_modules/@phosphor-icons/core/assets/{group}/{icon_id}.svg
   settings:
-    width:
-      title: "Width"
-      description: "Set a width for this icon."
+    size:
+      title: "Size"
       type: "integer"
       default: 32
-    height:
-      title: "Height"
-      description: "Set a height for this icon."
-      type: "integer"
-      default: 32
-    title:
-      title: "Title"
-      type: "string"
-      description: "Set a title on hover for this icon."
-    alt:
-      title: "Alt text"
-      type: "string"
-      description: "Accessibility alternative text, leave empty for decorative icon."
+      multipleOf: 4
+      minimum: 16
+      maximum: 96
+    color:
+      title: Color
+      type: string
+      format: color
   template: >
-    <svg xmlns="http://www.w3.org/2000/svg" width="{{ width|default(32) }}" height="{{ height|default(32) }}" class="phosphor phosphor-{{ icon_id }}" viewBox="0 0 256 256" fill="currentColor">
-      <title>{{ title|default(icon_id|capitalize) }}</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" 
+      width="{{ size|default(32) }}" height="{{ size|default(32) }}" 
+      fill="{{ color|default('currentColor') }}">
       {{ content }}
     </svg>

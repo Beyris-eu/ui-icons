@@ -57,7 +57,7 @@ final class LibrarySearchForm extends FormBase {
       '#title_display' => 'invisible',
       '#title' => $this->t('Icon Pack'),
       '#default_value' => $icon_pack,
-      '#options' => ['' => $this->t('- Select Pack -')] + $this->pluginManagerIconPack->listIconPackOptions(),
+      '#options' => ['' => $this->t('- Select pack -')] + $this->pluginManagerIconPack->listIconPackOptions(),
       '#weight' => -11,
     ];
 
@@ -107,7 +107,7 @@ final class LibrarySearchForm extends FormBase {
           '#title_display' => 'invisible',
           '#title' => $this->t('Group'),
           '#default_value' => $group,
-          '#options' => ['' => $this->t('- Select Group -')] + $group_options,
+          '#options' => ['' => $this->t('- Select group -')] + $group_options,
           '#weight' => -11,
         ];
       }

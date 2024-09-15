@@ -1,0 +1,6 @@
+dsfr_icons:
+  version: VERSION
+  css:
+    component:
+      /libraries/dsfr/node_modules/@gouvfr/dsfr/dist/core/core.css: {}
+      /libraries/dsfr/node_modules/@gouvfr/dsfr/dist/utility/icons/icons.css: {}

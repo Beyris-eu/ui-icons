@@ -1,38 +1,29 @@
-ui_icons_octicons_svg:
+octicons_svg:
   label: Octicons
-  description: Octicons icons from SVG sources.
+  description: A scalable set of icons handcrafted by GitHub.
+  links:
+   - https://primer.style/foundations/icons 
+   - https://github.com/primer/octicons
   extractor: svg
   config:
     sources:
       - /libraries/octicons/node_modules/@primer/octicons/build/svg/{icon_id}-24.svg
   settings:
-    width:
-      title: "Width"
-      description: "Set a width for this icon."
+    size:
+      title: "Size"
       type: "integer"
+      enum:
+       - 12
+       - 16
+       - 24
+       - 48
+       - 96
       default: 24
-    height:
-      title: "Height"
-      description: "Set a height for this icon."
-      type: "integer"
-      default: 24
-    title:
-      title: "Title"
+    color:
+      title: "Color"
       type: "string"
-      description: "Default fallback to the Icon ID."
-    alt:
-      title: "Alt text"
-      type: "string"
-      description: "Accessibility alternative text, leave empty for decorative icon."
+      format: color
   template: >
-    <svg xmlns="http://www.w3.org/2000/svg"
-      width="{{ width|default(24) }}"
-      height="{{ height|default(24) }}"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      class="octicon octicon-{{ icon_id }}"
-      {% if alt %}aria-label="{{ alt }}"{% endif %}
-    >
-      <title>{{ title|default(icon_id|capitalize) }}</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="{{ size|default(24) }}" height="{{ height|default(24) }}" viewBox="0 0 24 24" fill="{{ color|default('currentColor') }}">
       {{ content }}
     </svg>

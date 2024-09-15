@@ -1,28 +1,71 @@
-ui_icons_remixicon_svg:
-  label: Remix icon
-  description: Remix icons from SVG sources.
+remixicon_svg:
+  label: Remix [SVG]
+  description: Open-source neutral-style system symbols elaborately crafted for designers and developers.
+  links:
+   - https://remixicon.com/ 
+   - https://github.com/Remix-Design/RemixIcon 
   extractor: svg
   config:
     sources:
       - /libraries/remixicon/node_modules/remixicon/icons/{group}/{icon_id}.svg
   settings:
-    width:
-      title: "Width"
-      description: "Set a width for this icon."
+    size:
+      title: "Size"
       type: "integer"
       default: 24
-    height:
-      title: "Height"
-      description: "Set a height for this icon."
-      type: "integer"
-      default: 24
-    title:
-      title: "Title"
-      type: "string"
-      description: "Default fallback to the Icon ID."
-    alt:
-      title: "Alt text"
-      type: "string"
-      description: "Accessibility alternative text, leave empty for decorative icon."
+      enum:
+       - 12
+       - 16
+       - 18
+       - 32
+       - 36
+       - 48
+       - 64
+       - 72
+       - 96
+       - 120
+       - 240
+    color:
+      title: Fill
+      type: string
+      format: color
   template: >
-    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
+    <svg class="remix" width="{{ size|default(24) }}" height="{{ size|default(24) }}"{% if color %} fill="{{ color }}"{% endif %}>
+      {{ content }}
+    </svg>
+
+remixicon_sprite:
+  label: Remix [Sprite]
+  description: Open-source neutral-style system symbols elaborately crafted for designers and developers.
+  links:
+   - https://remixicon.com/ 
+   - https://github.com/Remix-Design/RemixIcon 
+  extractor: svg_sprite
+  config:
+    sources:
+      - /libraries/remixicon/node_modules/remixicon/fonts/remixicon.symbol.svg
+  settings:
+    size:
+      title: "Size"
+      type: "integer"
+      default: 24
+      enum:
+       - 12
+       - 16
+       - 18
+       - 32
+       - 36
+       - 48
+       - 64
+       - 72
+       - 96
+       - 120
+       - 240
+    color:
+      title: Fill
+      type: string
+      format: color
+  template: >
+    <svg class="remix" width="{{ size|default(24) }}" height="{{ size|default(24) }}"{% if color %} fill="{{ color }}"{% endif %}>
+      <use xlink:href="{{ source }}#{{ icon_id }}"></use>
+    </svg>

@@ -1,28 +1,12 @@
-ui_icons_dsfr_svg:
+dsfr_svg:
   label: DSFR
-  description: DSFR icons from SVG files.
+  description: Functional icons are visual symbols that accompany the user in their actions and help them understand the interface.
+  links:
+   - https://www.systeme-de-design.gouv.fr/fondamentaux/icone
   extractor: svg
   config:
     sources:
       - /libraries/dsfr/node_modules/@gouvfr/dsfr/dist/icons/{group}/{icon_id}.svg
-  settings:
-    width:
-      title: "Width"
-      description: "Set a width for this icon."
-      type: "integer"
-      default: 32
-    height:
-      title: "Height"
-      description: "Set a height for this icon."
-      type: "integer"
-      default: 32
-    title:
-      title: "Title"
-      description: "Set a title on hover for this icon."
-      type: string
-    alt:
-      title: "Alt text"
-      description: "Accessibility alternative text, leave empty for decorative icon."
-      type: string
   template: >
-    <img class="icon icon-{{ icon_id|clean_class }}" src="{{ source }}" title="{{ title|default(name) }}" alt="{{ alt|default(name) }}" width="{{ width|default(24) }}" height="{{ height|default(24) }}">
+    <span class="fr-icon-{{ icon_id }}" aria-hidden="true"></span>
+  library: ui_icons_dsfr/dsfr_icons
