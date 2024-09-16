@@ -98,7 +98,7 @@ class IconFinder implements ContainerInjectionInterface, IconFinderInterface {
    * {@inheritdoc}
    */
   public function getFilesFromSource(string $source, string $drupal_root, string $definition_absolute_path, string $definition_relative_path): array {
-    if (str_starts_with($source, 'http://') || str_starts_with($source, 'https://')) {
+    if (filter_var($source, FILTER_VALIDATE_URL)) {
       return $this->getFilesFromHttpUrl($source);
     }
     return $this->getFilesFromLocalPath($source, $drupal_root, $definition_absolute_path, $definition_relative_path);
