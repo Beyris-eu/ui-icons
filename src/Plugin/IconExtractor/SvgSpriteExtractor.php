@@ -42,7 +42,7 @@ class SvgSpriteExtractor extends IconExtractorWithFinder {
       $icon_ids = $this->extractIdsFromXml($file['absolute_path']);
       foreach ($icon_ids as $icon_id) {
         $icon_full_id = $this->configuration['icon_pack_id'] . ':' . $icon_id;
-        $icons[$icon_full_id] = $this->createIcon($icon_id, $file['relative_path'], $this->configuration, $file['group']);
+        $icons[$icon_full_id] = $this->createIcon($icon_id, $this->configuration, $file['relative_path'], $file['group']);
       }
     }
 

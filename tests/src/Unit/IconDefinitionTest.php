@@ -60,14 +60,12 @@ class IconDefinitionTest extends IconUnitTestCase {
 
     $expected = [
       '#theme' => 'icon_preview',
-      '#id' => 'test_icon_pack:test',
+      '#icon_id' => 'test_icon_pack:test',
       '#extractor' => '',
-      '#label' => 'Test icon pack:test - test_icon_pack',
-      '#pack_label' => 'Baz',
+      '#icon_label' => 'Test icon pack:test - Baz',
       '#source' => '/foo/bar',
       '#settings' => ['foo' => 'bar'],
       '#library' => 'test_library',
-      '#attached' => ['library' => ['test_library']],
     ];
 
     $actual = $icon->getPreview(['foo' => 'bar']);
@@ -132,12 +130,12 @@ class IconDefinitionTest extends IconUnitTestCase {
    */
   public function testCreateIconError(): void {
     $this->expectException(IconDefinitionInvalidDataException::class);
-    $this->expectExceptionMessage('Empty icon_id provided. Empty source provided. Missing Icon Pack Id in data.');
+    $this->expectExceptionMessage('Empty icon_id provided. Missing Icon Pack Id in data.');
 
     self::createIcon([
       'icon_id' => '',
-      'source' => '',
       'data' => [],
+      'source' => NULL,
       'group' => NULL,
     ]);
   }

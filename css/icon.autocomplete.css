@@ -35,9 +35,12 @@
 }
 
 .ui-icons-preview-icon img,
-.ui-icons-preview-icon svg {
+.ui-icons-preview-icon svg,
+.ui-icons-preview-icon > i,
+.ui-icons-preview-icon > b,
+.ui-icons-preview-icon > span {
   display: block;
-  width: 2.5rem;
-  max-height: 2.6rem;
+  width: 2.6rem;
+  max-height: 2.8rem;
   margin: auto;
 }

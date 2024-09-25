@@ -118,6 +118,7 @@ final class LibrarySearchForm extends FormBase {
     }
 
     $icons = $this->filterIcons($icons_list, $icon_pack, $group);
+    ksort($icons);
 
     $total = count($icons);
     if ($total > self::NUM_PER_PAGE) {
@@ -196,16 +197,21 @@ final class LibrarySearchForm extends FormBase {
    */
   private function filterIcons(array $icons_list, string $icon_pack, string $group): array {
     $icons = [];
-    foreach ($icons_list as $id => $icon) {
+    foreach ($icons_list as $icon) {
       if (!empty($icon_pack) && $icon_pack !== $icon->getIconPackId()) {
         continue;
       }
       if (!empty($group) && $group !== $icon->getGroup()) {
         continue;
       }
-      $icons[$id] = $icon->getPreview(['size' => 48]);
-      $icons[$id]['#group'] = $icon->getGroup();
+      // Generate a key for sorting.
+      $key = $icon->getLabel() . ' ' . $icon->getIconPackLabel();
+      $icons[$key] = $icon->getPreview(['size' => 48]);
+      $icons[$key]['#group'] = $icon->getGroup();
+      $icons[$key]['#label'] = $icon->getLabel();
+      $icons[$key]['#pack_label'] = $icon->getIconPackLabel();
     }
+
     return $icons;
   }
 

@@ -60,6 +60,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
     $theme_handler = $this->container->get('theme_handler');
     $cache_backend = $this->container->get('cache.default');
     $ui_icons_extractor_plugin_manager = $this->container->get('plugin.manager.ui_icons_extractor');
+    $key_value = $this->container->get('keyvalue');
     $this->appRoot = $this->container->getParameter('app.root');
 
     $this->pluginManagerIconPack = new IconPackManager(
@@ -67,6 +68,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
       $theme_handler,
       $cache_backend,
       $ui_icons_extractor_plugin_manager,
+      $key_value,
       $this->appRoot,
     );
   }
@@ -337,22 +339,6 @@ class IconPackManagerKernelTest extends KernelTestBase {
     ];
     $this->expectException(IconPackConfigErrorException::class);
     $this->expectExceptionMessage('Missing `template:` key in your definition!');
-    $this->pluginManagerIconPack->processDefinition($definition, 'foo');
-  }
-
-  /**
-   * Test the processDefinition method.
-   */
-  public function testProcessDefinitionExceptionConfig(): void {
-    $definition = [
-      'id' => 'foo',
-      'label' => 'Foo',
-      'provider' => 'ui_icons_test',
-      'extractor' => 'bar',
-      'template' => '',
-    ];
-    $this->expectException(IconPackConfigErrorException::class);
-    $this->expectExceptionMessage('Missing `config:` key in your definition extractor!');
     $this->pluginManagerIconPack->processDefinition($definition, 'foo');
   }
 

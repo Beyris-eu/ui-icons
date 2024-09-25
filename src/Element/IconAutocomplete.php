@@ -251,7 +251,8 @@ class IconAutocomplete extends FormElementBase {
       'wrapper' => $ajax_wrapper_id,
       'effect' => 'none',
       // As we used autocomplete we want matching events.
-      'event' => 'autocompleteclose change paste',
+      // @todo check for too early errors related to change.
+      'event' => 'autocompleteclose change',
     ];
 
     // ProcessIcon will handle #value or #default_value.

@@ -40,16 +40,16 @@ interface IconExtractorInterface extends PluginFormInterface {
    *
    * @param string $icon_id
    *   The id of the icon.
-   * @param string $path
-   *   The path of the icon.
    * @param array $data
    *   The additional data of the icon.
+   * @param string|null $source
+   *   The source of the icon (optional).
    * @param string|null $group
    *   The group of the icon (optional).
    *
    * @return \Drupal\ui_icons\IconDefinition
    *   The Icon definition.
    */
-  public static function createIcon(string $icon_id, string $path, array $data, ?string $group = NULL): IconDefinition;
+  public static function createIcon(string $icon_id, array $data, ?string $source = NULL, ?string $group = NULL): IconDefinition;
 
 }

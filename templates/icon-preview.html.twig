@@ -1,10 +1,8 @@
-<span class="icon-preview-wrapper">
-  {% if extractor == 'svg_sprite' %}
-    <svg class="icon icon-preview" width="{{ settings.size|default(32) }}" height="{{ settings.size|default(32) }}" fill="currentColor">
-      <title>{{ label }}</title>
-      <use xlink:href="{{ source }}#{{ id }}"/>
-    </svg>
-  {% else %}
-    <img class="icon icon-preview" src="{{ source }}" title="{{ label }}" alt="Preview for Icon {{ label }}" width="{{ settings.size|default(32) }}" height="{{ settings.size|default(32) }}">
-  {% endif %}
-</span>
+{% if extractor == 'svg_sprite' %}
+  <svg class="icon icon-preview" width="{{ settings.size|default(48) }}" height="{{ settings.size|default(48) }}" fill="currentColor">
+    <title>{{ icon_label }}</title>
+    <use xlink:href="{{ source }}#{{ icon_id }}"/>
+  </svg>
+{% else %}
+  <img class="icon icon-preview" src="{{ source }}" title="{{ icon_label }}" alt="Preview Icon: {{ icon_label }}" width="{{ settings.size|default(48) }}" height="{{ settings.size|default(48) }}">
+{% endif %}

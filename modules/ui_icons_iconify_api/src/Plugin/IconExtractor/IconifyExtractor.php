@@ -69,12 +69,16 @@ class IconifyExtractor extends IconExtractorBase implements ContainerFactoryPlug
    * {@inheritdoc}
    */
   public function discoverIcons(): array {
-    if (!isset($this->configuration['config']['collections'])) {
+    $config = $this->configuration['config'] ?? [];
+
+    if (!isset($config['collections'])) {
       throw new IconPackConfigErrorException(sprintf('Missing `config: collections` in your definition, extractor %s require this value.', $this->getPluginId()));
     }
 
+    unset($this->configuration['config']);
+
     $icons = [];
-    foreach ($this->configuration['config']['collections'] as $collection) {
+    foreach ($config['collections'] as $collection) {
       $icons_collection = $this->iconifyApi->getIconsByCollection($collection);
       if (empty($icons_collection)) {
         continue;
@@ -86,7 +90,7 @@ class IconifyExtractor extends IconExtractorBase implements ContainerFactoryPlug
         }
         $icon_full_id = $this->configuration['icon_pack_id'] . ':' . $icon_id;
         $source = sprintf('%s/%s/%s.svg', IconifyApi::API_ENDPOINT, $collection, $icon_id);
-        $icons[$icon_full_id] = $this->createIcon($icon_id, $source, $this->configuration, NULL);
+        $icons[$icon_full_id] = $this->createIcon($icon_id, $this->configuration, $source);
       }
     }
 

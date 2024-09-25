@@ -77,7 +77,7 @@ final class IconSelectForm extends FormBase {
     $search = $input['filter'] ?? '';
     $icons_list = $modal_state['icon_list'];
 
-    if (!empty($search) && strlen($search) > self::SEARCH_MIN_LENGTH) {
+    if (!empty($search) && strlen($search) >= self::SEARCH_MIN_LENGTH) {
       $icons_list = array_filter($icons_list, fn($id) => str_contains($id, $search), ARRAY_FILTER_USE_KEY);
     }
 
@@ -171,7 +171,7 @@ final class IconSelectForm extends FormBase {
         ],
         'icon' => $icon,
       ];
-      $options[$icon_full_id] = $icon['#label'];
+      $options[$icon_full_id] = $icon['#label'] ?? $icon['#context']['label'] ?? $icon_full_id;
     }
 
     $form['list']['icon_full_id'] = [

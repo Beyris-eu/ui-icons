@@ -63,12 +63,18 @@
   padding: 1px;
 }
 
-.ui-icons-item-inner img,
-.ui-icons-item-inner svg {
+.icon-preview-wrapper {
+  height: 3rem;
+}
+
+.icon-preview-wrapper > svg,
+.icon-preview-wrapper > img {
   display: block;
   max-width: 2.8rem;
   max-height: 2.8rem;
   margin: auto;
+  text-align: center;
+  line-height: 2.8rem;
 }
 
 .ui-icons-item-name {
@@ -79,4 +85,5 @@
   text-transform: capitalize;
   text-overflow: ellipsis;
   font-size: 11px;
+  line-height: 12px;
 }

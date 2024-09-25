@@ -102,18 +102,18 @@ abstract class IconUnitTestCase extends UnitTestCase {
    *   The icon mocked.
    */
   protected function createIcon(array $data): IconDefinitionInterface {
+    $filtered_data = [];
+    $keys = ['icon_pack_id', 'icon_pack_label', 'template', 'config', 'library', 'content', 'extractor', 'preview'];
+    foreach ($keys as $key) {
+      if (isset($data[$key])) {
+        $filtered_data[$key] = $data[$key];
+      }
+    }
+
     return IconDefinition::create(
       $data['icon_id'] ?? '',
+      $filtered_data,
       $data['source'] ?? '',
-      [
-        'icon_pack_id' => $data['icon_pack_id'] ?? '',
-        'icon_pack_label' => $data['icon_pack_label'] ?? '',
-        'template' => $data['template'] ?? NULL,
-        'library' => $data['library'] ?? NULL,
-        'content' => $data['content'] ?? '',
-        'extractor' => $data['extractor'] ?? '',
-        'preview' => $data['preview'] ?? '',
-      ],
       $data['group'] ?? NULL,
     );
   }

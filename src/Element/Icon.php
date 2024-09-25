@@ -72,6 +72,9 @@ class Icon extends RenderElementBase {
       $context['content'] = new FormattableMarkup($content, []);
     }
 
+    // @todo do we need all data?
+    // $context['data'] = $icon->getData();
+
     $element['inline-template'] = [
       '#type' => 'inline_template',
       '#template' => $icon->getTemplate(),

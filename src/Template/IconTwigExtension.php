@@ -68,7 +68,7 @@ class IconTwigExtension extends AbstractExtension {
       return [];
     }
 
-    return $icon->getPreview($settings ?? []);
+    return $icon->getPreview($settings ?? ['size' => 32]);
   }
 
 }

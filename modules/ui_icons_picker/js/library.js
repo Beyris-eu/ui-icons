@@ -48,7 +48,7 @@
       iconPickerPreview.forEach((element) => {
         // See templates/icon-preview.html.twig for css selector.
         const iconPreview = document.querySelector(
-          `.icon-preview[data-icon-id='${element.value}'] .icon-preview-wrapper .icon`,
+          `.icon-preview[data-icon-id='${element.value}']`,
         );
         if (!iconPreview || typeof element.labels[0] === 'undefined') {
           return;

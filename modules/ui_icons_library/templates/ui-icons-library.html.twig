@@ -24,7 +24,6 @@
 
   <div class="ui-icons-grid">
     {% for icon_full_id, icon in icons %}
-
       {% set full_name = icon['#label'] %}
       {% if icon['#group'] %}
         {% set full_name = full_name ~ ' - ' ~ icon['#group']|capitalize %}
@@ -32,9 +31,11 @@
 
       <div class="ui-icons-item">
         <div class="ui-icons-item-inner" title="{{ full_name }}">
-          {{ icon }}
+          <span class="icon-preview-wrapper">
+            {{ icon }}
+          </span>
           <div class="ui-icons-item-name">
-            <b>{{ icon['#id'] }}</b>
+            <b>{{ icon['#label'] }}</b>
             {% if icon['#pack_label'] %}
               <br /><small>{{ icon['#pack_label'] }}</small>
             {% endif %}

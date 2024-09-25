@@ -16,26 +16,26 @@ class IconDefinition implements IconDefinitionInterface {
    *
    * @param string $icon_id
    *   The id of the icon.
-   * @param string $source
-   *   The source of the icon.
    * @param array $data
    *   The additional data of the icon.
+   * @param string|null $source
+   *   The source of the icon (optional).
    * @param string|null $group
    *   The group of the icon (optional).
    */
   private function __construct(
     private string $icon_id,
-    private string $source,
     private array $data,
+    private ?string $source = NULL,
     private ?string $group = NULL,
   ) {}
 
   /**
    * {@inheritdoc}
    */
-  public static function create(string $icon_id, string $source, array $data, ?string $group = NULL): self {
-    self::validateData($icon_id, $source, $data);
-    return new self($icon_id, $source, $data, $group);
+  public static function create(string $icon_id, array $data, ?string $source = NULL, ?string $group = NULL): self {
+    self::validateData($icon_id, $data);
+    return new self($icon_id, $data, $source, $group);
   }
 
   /**
@@ -62,15 +62,22 @@ class IconDefinition implements IconDefinitionInterface {
   /**
    * {@inheritdoc}
    */
-  public function getSource(): string {
+  public function getSource(): ?string {
     return $this->source;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getGroup(): string {
-    return $this->group ?? '';
+  public function getGroup(): ?string {
+    return $this->group;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getData(): array {
+    return $this->data;
   }
 
   /**
@@ -90,7 +97,7 @@ class IconDefinition implements IconDefinitionInterface {
    * {@inheritdoc}
    */
   public function getTemplate(): string {
-    return $this->data['template'];
+    return $this->data['template'] ?? '';
   }
 
   /**
@@ -130,37 +137,32 @@ class IconDefinition implements IconDefinitionInterface {
    * {@inheritdoc}
    */
   public function getPreview(array $settings = []): array {
-    $label = sprintf('%s - %s', $this->getLabel(), $this->getIconPackId());
-
     if ($preview = $this->data['preview'] ?? NULL) {
       return [
         '#type' => 'inline_template',
         '#template' => $preview,
+        '#attached' => $this->getLibrary() ? ['library' => [$this->getLibrary()]] : [],
         '#context' => [
-          'id' => $this->getIconId(),
-          'label' => $label,
-          'pack_label' => $this->getIconPackLabel(),
+          'icon_id' => $this->getIconId(),
+          'label' => sprintf('%s - %s', $this->getLabel(), $this->getIconPackLabel()),
           'source' => $this->getSource(),
           'extractor' => $this->data['extractor'] ?? '',
-          'settings' => $settings,
+          'content' => $this->getContent(),
+          'size' => $settings['size'] ?? 48,
         ],
       ];
     }
 
+    // Fallback to template based preview.
     $renderable = [
       '#theme' => 'icon_preview',
-      '#id' => $this->getIconId(),
+      '#icon_id' => $this->getIconId(),
       '#extractor' => $this->data['extractor'] ?? '',
-      '#label' => $label,
-      '#pack_label' => $this->getIconPackLabel(),
+      '#icon_label' => sprintf('%s - %s', $this->getLabel(), $this->getIconPackLabel()),
       '#source' => $this->getSource(),
       '#settings' => $settings,
       '#library' => $this->getLibrary(),
     ];
-
-    if ($this->getLibrary()) {
-      $renderable['#attached'] = ['library' => [$this->getLibrary()]];
-    }
 
     return $renderable;
   }
@@ -170,21 +172,15 @@ class IconDefinition implements IconDefinitionInterface {
    *
    * @param string $icon_id
    *   The id of the icon.
-   * @param string $source
-   *   The source of the icon.
    * @param array $data
    *   The additional data of the icon.
    */
-  private static function validateData(string $icon_id, string $source, array $data): void {
+  private static function validateData(string $icon_id, array $data): void {
     $errors = NULL;
 
     // Empty can have "0" as false positive.
     if ('' === $icon_id) {
       $errors[] = 'Empty icon_id provided';
-    }
-    // @todo test source is valid? ie path or url?
-    if (empty($source)) {
-      $errors[] = 'Empty source provided';
     }
 
     if (!isset($data['icon_pack_id']) || empty($data['icon_pack_id'])) {

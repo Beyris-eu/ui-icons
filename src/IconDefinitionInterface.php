@@ -14,17 +14,17 @@ interface IconDefinitionInterface {
    *
    * @param string $icon_id
    *   The id of the icon.
-   * @param string $path
-   *   The path of the icon.
    * @param array $data
    *   The additional data of the icon.
+   * @param string|null $source
+   *   The source of the icon (optional).
    * @param string|null $group
    *   The group of the icon (optional).
    *
    * @return self
    *   The icon definition.
    */
-  public static function create(string $icon_id, string $path, array $data, ?string $group = NULL): self;
+  public static function create(string $icon_id, array $data, ?string $source = NULL, ?string $group = NULL): self;
 
   /**
    * Get the Icon name.
@@ -53,18 +53,26 @@ interface IconDefinitionInterface {
   /**
    * Get the Icon source.
    *
-   * @return string
+   * @return string|null
    *   The icon source.
    */
-  public function getSource(): string;
+  public function getSource(): ?string;
 
   /**
    * Get the Icon group.
    *
-   * @return string
+   * @return string|null
    *   The icon group.
    */
-  public function getGroup(): string;
+  public function getGroup(): ?string;
+
+  /**
+   * Get the Icon data.
+   *
+   * @return array
+   *   The icon data, include definition and any extractor added data.
+   */
+  public function getData(): array;
 
   /**
    * Get the Icon content.

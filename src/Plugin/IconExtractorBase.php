@@ -60,31 +60,8 @@ abstract class IconExtractorBase extends PluginBase implements IconExtractorInte
   /**
    * {@inheritdoc}
    */
-  public static function createIcon(string $icon_id, string $path, array $data, ?string $group = NULL): IconDefinition {
-    // @todo should not filter and allow the extractor any data.
-    $data = self::filterDataFromDefinition($data);
-    return IconDefinition::create($icon_id, $path, $data, $group);
-  }
-
-  /**
-   * Clean the icon data object values.
-   *
-   * @param array $definition
-   *   The definition used as data.
-   *
-   * @return array
-   *   The clean data definition.
-   */
-  private static function filterDataFromDefinition(array $definition): array {
-    return [
-      'icon_pack_id' => $definition['icon_pack_id'],
-      'icon_pack_label' => $definition['icon_pack_label'] ?? '',
-      'template' => $definition['template'] ?? NULL,
-      'library' => $definition['library'] ?? NULL,
-      'content' => $definition['content'] ?? '',
-      'extractor' => $definition['extractor'] ?? '',
-      'preview' => $definition['preview'] ?? '',
-    ];
+  public static function createIcon(string $icon_id, array $data, ?string $source = NULL, ?string $group = NULL): IconDefinition {
+    return IconDefinition::create($icon_id, $data, $source, $group);
   }
 
 }
