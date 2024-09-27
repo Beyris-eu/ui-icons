@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons\Unit\Element;
 
-use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\RendererInterface;
@@ -201,9 +200,9 @@ class IconAutocompleteTest extends IconUnitTestCase {
     $ui_icons_pack_plugin_manager->expects($this->once())
       ->method('getExtractorPluginForms')
       ->with($this->anything())
-      ->will($this->returnCallback(function (&$form): void {
+      ->willReturnCallback(function (&$form): void {
         $form['sub_form'] = TRUE;
-      }));
+      });
     $this->container->set('plugin.manager.ui_icons_pack', $ui_icons_pack_plugin_manager);
 
     $element = $base_element;
@@ -239,7 +238,7 @@ class IconAutocompleteTest extends IconUnitTestCase {
     $complete_form = [];
     $settings = $values['icon']['icon_settings'];
 
-    $icon = self::createIcon([
+    $icon = self::createTestIcon([
       'icon_id' => explode(':', $values['icon']['icon_id'])[1],
       'source' => 'foo/bar',
       'icon_pack_id' => $icon_pack_id,
@@ -376,7 +375,7 @@ class IconAutocompleteTest extends IconUnitTestCase {
       '#allowed_icon_pack' => ['qux', 'corge'],
     ];
 
-    $icon = self::createIcon([
+    $icon = self::createTestIcon([
       'icon_pack_id' => $icon_pack_id,
       'icon_id' => $icon_id,
       'source' => 'foo/path',
@@ -432,7 +431,7 @@ class IconAutocompleteTest extends IconUnitTestCase {
       'icon_settings' => ['foo' => 'bar'],
     ];
 
-    $icon = self::createIcon([
+    $icon = self::createTestIcon([
       'icon_pack_id' => $icon_pack_id,
       'icon_id' => $icon_id,
       'source' => 'foo/path',
@@ -488,8 +487,6 @@ class IconAutocompleteTest extends IconUnitTestCase {
     $this->container->set('renderer', $renderer);
 
     $actual = IconAutocomplete::buildSettingsAjaxCallback($form, $form_state, $request);
-
-    $this->assertInstanceOf(AjaxResponse::class, $actual);
 
     $expected = [
       'command' => 'insert',

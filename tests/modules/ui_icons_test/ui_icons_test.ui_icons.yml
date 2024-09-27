@@ -4,12 +4,14 @@ test:
   links:
     - https://www.drupal.org/project/ui_icons
   version: 1.0.0
-  license: GPL-2.0-or-later
+  license: GPL-3.0-or-later
+  license_url: https://www.gnu.org/licenses/gpl-3.0.html
   extractor: path
   config:
     sources:
-      - icons/local_png/{icon_id}.png
-      - icons/local_png_group/{group}/{icon_id}.png
+      - icons/flat/*.png
+      - icons/group/{group}/*.png
+      - icons/group/*/{group}/*.png
   # For tests keep same name attribute as HTMl fore easier IconPluginTest.
   settings:
     width:
@@ -42,9 +44,10 @@ test_svg:
   extractor: svg
   config:
     sources:
-      - icons/local_svg/prefix_{icon_id}_suffix.svg
-      - icons/local_svg_group/{group}/{icon_id}.svg
-      - icons/local_svg_group/{group}/sub_group/{icon_id}.svg
+      - icons/flat/*.svg
+      - icons/group/{group}/*.svg
+      - icons/group/*/{group}/*.svg
+      - icons/prefix_suffix/prefix_{icon_id}_suffix.svg
   settings:
     size:
       title: "Size"
@@ -54,7 +57,7 @@ test_svg:
       type: "string"
   template: >
     <svg
-      xmlns="http://www.w3.org/2000/svg"
+      xmlns="https://www.w3.org/2000/svg"
       fill="currentColor"
       viewBox="0 0 163.83 124.92"
       width="{{ size|default(32) }}"
@@ -74,7 +77,7 @@ test_svg_sprite:
   extractor: svg_sprite
   config:
     sources:
-      - icons/sprite/{icon_id}.svg
+      - icons/sprite/foo_sprite.svg
   settings:
     width:
       title: "Width"
@@ -109,7 +112,7 @@ test_settings:
   extractor: path
   config:
     sources:
-      - icons/settings/{icon_id}.svg
+      - icons/settings/*.svg
   settings:
     width:
       title: "Width"
@@ -174,13 +177,60 @@ test_settings:
       data-number="{{ number }}"
     >
 
+test_url_path:
+  label: Test url path
+  extractor: path
+  config:
+    sources:
+      - http://test.com/foo.svg
+      - https://test.com/foo.svg
+      - https://test.com/bar.png
+      - https://test.com/baz.gif
+      - ftp://test.com/ignored.png
+      - ssh://test.com/ignored.png
+      - htp://test.com/invalid.jpg
+      - https://test.com/ignored.jpg
+      - https://test.com/ignored.jpeg
+      - https://test.com/ignored.webp
+  template: >
+    <img src={{ source }}>
+
+test_url_svg:
+  enabled: false
+  label: Test url svg
+  extractor: svg
+  config:
+    sources:
+      - https://test.com/foo.svg
+      - https://test.com/bar.svg
+      - https://test.com/baz.svg
+      - https://test.com/ignored.png
+  template: >
+    <svg xmlns="https://www.w3.org/2000/svg">
+      {{ content }}
+    </svg>
+
+test_url_svg_sprite:
+  enabled: false
+  label: Test url svg sprite
+  extractor: svg_sprite
+  config:
+    sources:
+      - https://test.com/foo.svg
+      - https://test.com/bar.svg
+      - https://test.com/ignored.png
+  template: >
+    <svg xmlns="https://www.w3.org/2000/svg">
+      <use xlink:href="{{ source }}#{{ icon_id }}"/>
+    </svg>
+
 test_disabled:
   label: Disabled
   extractor: path
   enabled: false
   config:
     sources:
-      - icons/local_png/{icon_id}.png
+      - icons/png/*.png
   settings:
     title:
       title: "Title"
@@ -199,7 +249,7 @@ test_no_icons:
   extractor: path
   config:
     sources:
-      - invalid_path/{icon_id}.png
+      - invalid_path/*.png
   settings:
     title:
       title: "Title"
@@ -218,7 +268,7 @@ test_no_settings:
   extractor: path
   config:
     sources:
-      - icons/no_settings/{icon_id}.svg
+      - icons/no_settings/*.svg
   template: >
     <img
       class="icon icon-{{ icon_id|clean_class }}"

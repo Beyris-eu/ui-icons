@@ -59,7 +59,7 @@ class IconTest extends IconUnitTestCase {
    * @dataProvider providerPreRenderIcon
    */
   public function testPreRenderIcon(array $data, array $expected): void {
-    $icon = self::createIcon($data);
+    $icon = self::createTestIcon($data);
 
     $prophecy = $this->prophesize('\Drupal\ui_icons\Plugin\IconPackManagerInterface');
     $prophecy->getIcon($data['icon_pack_id'] . ':' . $data['icon_id'])

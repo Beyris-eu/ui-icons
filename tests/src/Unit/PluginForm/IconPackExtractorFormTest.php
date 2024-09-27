@@ -53,10 +53,11 @@ class IconPackExtractorFormTest extends UnitTestCase {
   /**
    * Test the buildConfigurationForm method.
    */
-  public function testBuildConfigurationForm() {
+  public function testBuildConfigurationForm(): void {
     $form = [
       'test_form' => 'test_form',
     ];
+    /** @var \Drupal\Core\Form\FormStateInterface $formState */
     $formState = $this->formState->reveal();
 
     $result = $this->iconPackForm->buildConfigurationForm($form, $formState);
@@ -68,8 +69,9 @@ class IconPackExtractorFormTest extends UnitTestCase {
   /**
    * Test the validateConfigurationForm method.
    */
-  public function testValidateConfigurationForm() {
+  public function testValidateConfigurationForm(): void {
     $form = [];
+    /** @var \Drupal\Core\Form\FormStateInterface $formState */
     $formState = $this->formState->reveal();
 
     $this->iconPackForm->validateConfigurationForm($form, $formState);
@@ -79,8 +81,9 @@ class IconPackExtractorFormTest extends UnitTestCase {
   /**
    * Test the submitConfigurationForm method.
    */
-  public function testSubmitConfigurationForm() {
+  public function testSubmitConfigurationForm(): void {
     $form = [];
+    /** @var \Drupal\Core\Form\FormStateInterface $formState */
     $formState = $this->formState->reveal();
 
     $this->iconPackForm->submitConfigurationForm($form, $formState);

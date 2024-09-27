@@ -36,7 +36,7 @@ class FontExtractor extends IconExtractorBase {
 
     $icons = [];
     foreach ($this->configuration['config']['sources'] as $filename) {
-      $filepath = sprintf('%s/%s', $this->configuration['_path_info']['absolute_path'], $filename);
+      $filepath = sprintf('%s/%s', $this->configuration['definition_absolute_path'], $filename);
       $fileinfo = pathinfo($filepath);
 
       if (!isset($fileinfo['extension'])) {

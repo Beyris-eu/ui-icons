@@ -31,7 +31,7 @@ class PathExtractor extends IconExtractorWithFinder {
       throw new IconPackConfigErrorException(sprintf('Missing `config: sources` in your definition, extractor %s require this value.', $this->getPluginId()));
     }
 
-    $files = $this->getFilesFromSources($this->configuration['config']['sources'] ?? [], $this->configuration['_path_info'] ?? []);
+    $files = $this->getFilesFromSources($this->configuration['config']['sources'] ?? [], $this->configuration['definition_relative_path'] ?? '');
 
     if (empty($files)) {
       return [];
@@ -40,7 +40,7 @@ class PathExtractor extends IconExtractorWithFinder {
     $icons = [];
     foreach ($files as $file) {
       $icon_full_id = $this->configuration['icon_pack_id'] . ':' . $file['icon_id'];
-      $icons[$icon_full_id] = $this->createIcon($file['icon_id'], $this->configuration, $file['relative_path'], $file['group']);
+      $icons[$icon_full_id] = $this->createIcon($file['icon_id'], $this->configuration, $file['source'], $file['group'] ?? NULL);
     }
 
     return $icons;

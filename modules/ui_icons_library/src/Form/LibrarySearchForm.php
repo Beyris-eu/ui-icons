@@ -118,7 +118,8 @@ final class LibrarySearchForm extends FormBase {
     }
 
     $icons = $this->filterIcons($icons_list, $icon_pack, $group);
-    ksort($icons);
+    $icons_keys = array_keys($icons);
+    array_multisort($icons_keys, SORT_NATURAL, $icons);
 
     $total = count($icons);
     if ($total > self::NUM_PER_PAGE) {

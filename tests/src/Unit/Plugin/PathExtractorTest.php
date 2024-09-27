@@ -58,11 +58,11 @@ class PathExtractorTest extends UnitTestCase {
   /**
    * Test the getIcons method.
    */
-  public function testDiscoverIconsExceptionPaths(): void {
+  public function testDiscoverIconsExceptionRelativePath(): void {
     $pathExtractorPlugin = new PathExtractor(
       [
         'config' => ['sources' => ['foo/bar']],
-        '_path_info' => [],
+        'definition_relative_path' => '',
       ],
       'test_extractor',
       [
@@ -72,7 +72,7 @@ class PathExtractorTest extends UnitTestCase {
       $this->createMock(IconFinder::class),
     );
     $this->expectException(IconPackConfigErrorException::class);
-    $this->expectExceptionMessage('Could not retrieve paths for extractor test_extractor.');
+    $this->expectExceptionMessage('Empty relative path for extractor test_extractor.');
     $pathExtractorPlugin->discoverIcons();
   }
 
@@ -84,23 +84,20 @@ class PathExtractorTest extends UnitTestCase {
       'baz' => [
         'name' => 'baz',
         'icon_id' => 'baz',
-        'relative_path' => 'web/modules/my_module/foo/bar/baz.svg',
+        'source' => 'web/modules/my_module/foo/bar/baz.svg',
         'absolute_path' => '/_ROOT_/web/modules/my_module/foo/bar/baz.svg',
         'group' => NULL,
       ],
     ];
 
     $iconFinder = $this->createMock(IconFinder::class);
-    $iconFinder->method('getFilesFromSource')->willReturn($icons_list);
+    $iconFinder->method('getFilesFromSources')->willReturn($icons_list);
 
     $pathExtractorPlugin = new PathExtractor(
       [
         'config' => ['sources' => ['foo/bar/baz.svg']],
-        '_path_info' => [
-          'drupal_root' => '/_ROOT_/web',
-          'absolute_path' => '/_ROOT_/web/modules/my_module',
-          'relative_path' => 'modules/my_module',
-        ],
+        'definition_relative_path' => 'modules/my_module',
+        'definition_absolute_path' => '/_ROOT_/web/modules/my_module',
         'icon_pack_id' => 'path',
       ],
       'test_extractor',

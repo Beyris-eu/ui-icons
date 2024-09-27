@@ -56,22 +56,16 @@ abstract class IconExtractorWithFinder extends IconExtractorBase implements Icon
   /**
    * {@inheritdoc}
    */
-  public function getFilesFromSources(array $sources, array $paths): array {
+  public function getFilesFromSources(array $sources, string $relative_path): array {
     if (empty($sources)) {
       throw new IconPackConfigErrorException(sprintf('Missing `config: sources` in your definition, extractor %s require this value.', $this->getPluginId()));
     }
 
-    if (!isset($paths['drupal_root']) || !isset($paths['absolute_path']) || !isset($paths['relative_path'])) {
-      throw new IconPackConfigErrorException(sprintf('Could not retrieve paths for extractor %s.', $this->getPluginId()));
+    if (empty($relative_path)) {
+      throw new IconPackConfigErrorException(sprintf('Empty relative path for extractor %s.', $this->getPluginId()));
     }
 
-    $files = [];
-    foreach ($sources as $source) {
-      $files_found = $this->iconFinder->getFilesFromSource($source, $paths['drupal_root'], $paths['absolute_path'], $paths['relative_path']);
-      $files = array_merge($files, $files_found);
-    }
-
-    return $files;
+    return $this->iconFinder->getFilesFromSources($sources, $relative_path);
   }
 
 }

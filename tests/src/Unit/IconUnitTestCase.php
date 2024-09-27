@@ -101,7 +101,7 @@ abstract class IconUnitTestCase extends UnitTestCase {
    * @return \Drupal\ui_icons\IconDefinitionInterface
    *   The icon mocked.
    */
-  protected function createIcon(array $data): IconDefinitionInterface {
+  protected function createTestIcon(array $data): IconDefinitionInterface {
     $filtered_data = [];
     $keys = ['icon_pack_id', 'icon_pack_label', 'template', 'config', 'library', 'content', 'extractor', 'preview'];
     foreach ($keys as $key) {

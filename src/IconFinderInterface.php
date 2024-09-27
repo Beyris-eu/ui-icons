@@ -10,21 +10,17 @@ namespace Drupal\ui_icons;
 interface IconFinderInterface {
 
   /**
-   * Create files from source path.
+   * Create files from source paths.
    *
-   * @param string $source
-   *   The path or url.
-   * @param string $drupal_root
-   *   The Drupal root.
-   * @param string $definition_absolute_path
-   *   The current definition absolute path.
+   * @param array $sources
+   *   The list of paths or urls.
    * @param string $definition_relative_path
    *   The current definition relative path.
    *
    * @return array
    *   List of files with metadata.
    */
-  public function getFilesFromSource(string $source, string $drupal_root, string $definition_absolute_path, string $definition_relative_path): array;
+  public function getFilesFromSources(array $sources, string $definition_relative_path): array;
 
   /**
    * Wrapper tho the file url generator.

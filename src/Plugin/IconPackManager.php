@@ -333,13 +333,10 @@ class IconPackManager extends DefaultPluginManager implements IconPackManagerInt
       ? $this->moduleHandler->getModule($definition['provider'])->getPath()
       : $this->themeHandler->getTheme($definition['provider'])->getPath();
 
-    // Provide path information for extractor.
+    // Provide path information for extractors and Icon pack data.
     $definition += [
-      '_path_info' => [
-        'drupal_root' => $this->appRoot,
-        'absolute_path' => sprintf('%s/%s', $this->appRoot, $relative_path),
-        'relative_path' => $relative_path,
-      ],
+      'definition_relative_path' => $relative_path,
+      'definition_absolute_path' => sprintf('%s/%s', $this->appRoot, $relative_path),
       'icon_pack_id' => $definition['id'],
       'icon_pack_label' => $definition['label'],
     ];

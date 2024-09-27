@@ -25,7 +25,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
   /**
    * Icon from ui_icons_test module.
    */
-  private const TEST_ICON_FULL_ID = 'test:test_drupal_logo_blue';
+  private const TEST_ICON_FULL_ID = 'test:foo';
 
   /**
    * {@inheritdoc}
@@ -83,7 +83,6 @@ class IconPackManagerKernelTest extends KernelTestBase {
    */
   public function testGetIcons(): void {
     $icons = $this->pluginManagerIconPack->getIcons();
-    $this->assertIsArray($icons);
     $this->assertArrayHasKey(self::TEST_ICON_FULL_ID, $icons);
   }
 
@@ -104,13 +103,14 @@ class IconPackManagerKernelTest extends KernelTestBase {
   public function testListIconPackOptions(): void {
     $actual = $this->pluginManagerIconPack->listIconPackOptions();
     $expected = [
+      'test' => 'Test icons (9)',
+      'test_svg' => 'Test SVG (10)',
+      'test_svg_sprite' => 'Small sprite (3)',
       'test_no_settings' => 'No Settings (1)',
-      'test_svg_sprite' => 'Small sprite (5)',
-      'test_svg' => 'Test SVG (8)',
-      'test' => 'Test icons (8)',
       'test_settings' => 'Test settings (1)',
+      'test_url_path' => 'Test url path (4)',
     ];
-    $this->assertSame($expected, $actual);
+    $this->assertEquals($expected, $actual);
   }
 
   /**
@@ -119,13 +119,14 @@ class IconPackManagerKernelTest extends KernelTestBase {
   public function testListIconPackWithDescriptionOptions(): void {
     $actual = $this->pluginManagerIconPack->listIconPackWithDescriptionOptions();
     $expected = [
-      'test' => 'Test icons (8) - Local files relative available for test.',
-      'test_svg' => 'Test SVG (8)',
-      'test_svg_sprite' => 'Small sprite (5)',
-      'test_settings' => 'Test settings (1)',
+      'test' => 'Test icons (9) - Local files relative available for test.',
+      'test_svg' => 'Test SVG (10)',
+      'test_svg_sprite' => 'Small sprite (3)',
       'test_no_settings' => 'No Settings (1)',
+      'test_settings' => 'Test settings (1)',
+      'test_url_path' => 'Test url path (4)',
     ];
-    $this->assertSame($expected, $actual);
+    $this->assertEquals($expected, $actual);
   }
 
   /**
@@ -133,10 +134,10 @@ class IconPackManagerKernelTest extends KernelTestBase {
    */
   public function testListIconOptions(): void {
     $actual = $this->pluginManagerIconPack->listIconOptions();
-    $this->assertCount(23, $actual);
+    $this->assertCount(28, $actual);
 
     $actual = $this->pluginManagerIconPack->listIconOptions(['test']);
-    $this->assertCount(8, $actual);
+    $this->assertCount(9, $actual);
 
     $actual = $this->pluginManagerIconPack->listIconOptions(['test_no_icons']);
     $this->assertCount(0, $actual);
@@ -247,7 +248,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
     $this->assertSame('Default title', $form['test_settings']['title']['#default_value']);
     $this->assertSame('Default alt', $form['test_settings']['alt']['#default_value']);
     $this->assertSame(400, $form['test_settings']['select']['#default_value']);
-    $this->assertSame(TRUE, $form['test_settings']['boolean']['#default_value']);
+    $this->assertTrue($form['test_settings']['boolean']['#default_value']);
     $this->assertSame(66.66, $form['test_settings']['decimal']['#default_value']);
     $this->assertSame(30, $form['test_settings']['number']['#default_value']);
 
@@ -291,13 +292,12 @@ class IconPackManagerKernelTest extends KernelTestBase {
 
     $this->assertSame('foo', $definition['id']);
     $this->assertSame('Foo', $definition['label']);
-    $this->assertArrayHasKey('_path_info', $definition);
-    $this->assertArrayHasKey('drupal_root', $definition['_path_info']);
-    $this->assertSame($this->appRoot, $definition['_path_info']['drupal_root']);
 
-    // Can not check these paths values as CI relate to modules/custom.
-    $this->assertArrayHasKey('absolute_path', $definition['_path_info']);
-    $this->assertArrayHasKey('relative_path', $definition['_path_info']);
+    $relative_path = 'modules/custom/ui_icons/tests/modules/ui_icons_test';
+    $this->assertEquals($relative_path, $definition['definition_relative_path']);
+
+    $absolute_path = sprintf('%s/%s', $this->appRoot, $relative_path);
+    $this->assertEquals($absolute_path, $definition['definition_absolute_path']);
   }
 
   /**

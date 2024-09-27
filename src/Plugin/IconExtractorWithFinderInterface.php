@@ -14,15 +14,12 @@ interface IconExtractorWithFinderInterface extends IconExtractorInterface {
    *
    * @param array $sources
    *   The extractor config sources, path or url.
-   * @param array $paths
-   *   The definition paths. Include:
-   *   - drupal_root
-   *   - absolute_path
-   *   - relative_path.
+   * @param string $relative_path
+   *   The definition relative path.
    *
    * @return array
    *   List of files with metadata.
    */
-  public function getFilesFromSources(array $sources, array $paths): array;
+  public function getFilesFromSources(array $sources, string $relative_path): array;
 
 }

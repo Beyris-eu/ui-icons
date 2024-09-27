@@ -26,4 +26,8 @@ services:
   ui_icons.finder:
     class: Drupal\ui_icons\IconFinder
     autowire: true
-    arguments: ['@file_system', '@file_url_generator']
+    arguments:
+      [
+        '@file_url_generator',
+        '%app.root%',
+      ]

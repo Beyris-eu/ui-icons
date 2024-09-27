@@ -75,25 +75,25 @@ class IconifyExtractorTest extends IconUnitTestCase {
     $icons = $this->iconifyExtractor->discoverIcons();
 
     $expected_icons = [
-      'test_icon_pack:icon-1' => $this->createIcon([
+      'test_icon_pack:icon-1' => $this->createTestIcon([
         'icon_id' => 'icon-1',
         'source' => IconifyApi::API_ENDPOINT . '/test-collection-1/icon-1.svg',
         'icon_pack_id' => 'test_icon_pack',
         'icon_pack_label' => 'Test Icon Pack',
       ]),
-      'test_icon_pack:icon-2' => $this->createIcon([
+      'test_icon_pack:icon-2' => $this->createTestIcon([
         'icon_id' => 'icon-2',
         'source' => IconifyApi::API_ENDPOINT . '/test-collection-1/icon-2.svg',
         'icon_pack_id' => 'test_icon_pack',
         'icon_pack_label' => 'Test Icon Pack',
       ]),
-      'test_icon_pack:icon-3' => $this->createIcon([
+      'test_icon_pack:icon-3' => $this->createTestIcon([
         'icon_id' => 'icon-3',
         'source' => IconifyApi::API_ENDPOINT . '/test-collection-2/icon-3.svg',
         'icon_pack_id' => 'test_icon_pack',
         'icon_pack_label' => 'Test Icon Pack',
       ]),
-      'test_icon_pack:icon-4' => $this->createIcon([
+      'test_icon_pack:icon-4' => $this->createTestIcon([
         'icon_id' => 'icon-4',
         'source' => IconifyApi::API_ENDPOINT . '/test-collection-2/icon-4.svg',
         'icon_pack_id' => 'test_icon_pack',

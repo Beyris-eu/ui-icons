@@ -20,7 +20,7 @@ class IconTwigExtensionTest extends TestCase {
   /**
    * The plugin manager.
    *
-   * @var \Drupal\ui_icons\Plugin\IconPackManagerInterface
+   * @var \Drupal\ui_icons\Plugin\IconPackManagerInterface|\PHPUnit\Framework\MockObject\MockObject
    */
   private IconPackManagerInterface $pluginManagerIconPack;
 
@@ -44,7 +44,6 @@ class IconTwigExtensionTest extends TestCase {
    */
   public function testGetFunctions(): void {
     $functions = $this->iconTwigExtension->getFunctions();
-    $this->assertIsArray($functions);
     $this->assertCount(2, $functions);
     $this->assertInstanceOf(TwigFunction::class, $functions[0]);
     $this->assertEquals('icon', $functions[0]->getName());
@@ -61,7 +60,6 @@ class IconTwigExtensionTest extends TestCase {
       ->willReturn(NULL);
 
     $result = $this->iconTwigExtension->getIconRenderable('icon_pack_id', 'icon_id');
-    $this->assertIsArray($result);
     $this->assertEmpty($result);
   }
 
@@ -80,7 +78,6 @@ class IconTwigExtensionTest extends TestCase {
       ->willReturn($iconMock);
 
     $result = $this->iconTwigExtension->getIconRenderable('icon_pack_id', 'icon_id', $settings);
-    $this->assertIsArray($result);
     $this->assertEquals(['rendered_icon'] + $settings, $result);
   }
 
@@ -99,7 +96,6 @@ class IconTwigExtensionTest extends TestCase {
       ->willReturn($iconMock);
 
     $result = $this->iconTwigExtension->getIconPreview('icon_pack_id', 'icon_id', $settings);
-    $this->assertIsArray($result);
     $this->assertEquals(['preview_icon'] + $settings, $result);
   }
 

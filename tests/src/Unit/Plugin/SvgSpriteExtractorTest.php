@@ -58,11 +58,12 @@ class SvgSpriteExtractorTest extends UnitTestCase {
   /**
    * Test the getIcons method.
    */
-  public function testDiscoverIconsExceptionPaths(): void {
+  public function testDiscoverIconsExceptionRelativePath(): void {
     $svgSpriteExtractorPlugin = new SvgSpriteExtractor(
       [
         'config' => ['sources' => ['foo/bar']],
-        '_path_info' => [],
+        'definition_relative_path' => '',
+        'definition_absolute_path' => '',
       ],
       'test_extractor',
       [
@@ -72,7 +73,7 @@ class SvgSpriteExtractorTest extends UnitTestCase {
       $this->createMock(IconFinder::class),
     );
     $this->expectException(IconPackConfigErrorException::class);
-    $this->expectExceptionMessage('Could not retrieve paths for extractor test_extractor.');
+    $this->expectExceptionMessage('Empty relative path for extractor test_extractor.');
     $svgSpriteExtractorPlugin->discoverIcons();
   }
 
@@ -86,23 +87,20 @@ class SvgSpriteExtractorTest extends UnitTestCase {
       'baz' => [
         'name' => 'baz',
         'icon_id' => 'baz',
-        'relative_path' => 'web/modules/my_module/foo/bar/baz.svg',
+        'source' => 'web/modules/my_module/foo/bar/baz.svg',
         'absolute_path' => '/_ROOT_/web/modules/my_module/foo/bar/baz.svg',
         'group' => NULL,
       ],
     ];
-    $iconFinder->method('getFilesFromSource')->willReturn($icons_list);
+    $iconFinder->method('getFilesFromSources')->willReturn($icons_list);
     $svg_data = 'Not valid svg';
     $iconFinder->method('getFileContents')->willReturn($svg_data);
 
     $svgSpriteExtractorPlugin = new SvgSpriteExtractor(
       [
         'config' => ['sources' => ['foo/bar/baz.svg']],
-        '_path_info' => [
-          'drupal_root' => '/_ROOT_/web',
-          'absolute_path' => '/_ROOT_/web/modules/my_module',
-          'relative_path' => 'modules/my_module',
-        ],
+        'definition_relative_path' => 'modules/my_module',
+        'definition_absolute_path' => '/_ROOT_/web/modules/my_module',
         'icon_pack_id' => 'svg_sprite',
       ],
       'test_extractor',
@@ -114,7 +112,6 @@ class SvgSpriteExtractorTest extends UnitTestCase {
     );
 
     $icons = $svgSpriteExtractorPlugin->discoverIcons();
-    $this->assertIsArray($icons);
     $this->assertArrayHasKey("svg_sprite:Start tag expected, '<' not found", $icons);
   }
 
@@ -123,16 +120,13 @@ class SvgSpriteExtractorTest extends UnitTestCase {
    */
   public function testDiscoverIconsEmpty(): void {
     $iconFinder = $this->createMock(IconFinder::class);
-    $iconFinder->method('getFilesFromSource')->willReturn([]);
+    $iconFinder->method('getFilesFromSources')->willReturn([]);
 
     $svgSpriteExtractorPlugin = new SvgSpriteExtractor(
       [
         'config' => ['sources' => ['foo/bar/baz.svg']],
-        '_path_info' => [
-          'drupal_root' => '/_ROOT_/web',
-          'absolute_path' => '/_ROOT_/web/modules/my_module',
-          'relative_path' => 'modules/my_module',
-        ],
+        'definition_relative_path' => 'modules/my_module',
+        'definition_absolute_path' => '/_ROOT_/web/modules/my_module',
         'icon_pack_id' => 'svg_sprite',
       ],
       'test_extractor',
@@ -157,12 +151,12 @@ class SvgSpriteExtractorTest extends UnitTestCase {
       'baz' => [
         'name' => 'baz',
         'icon_id' => 'baz',
-        'relative_path' => 'web/modules/my_module/foo/bar/baz.svg',
+        'source' => 'web/modules/my_module/foo/bar/baz.svg',
         'absolute_path' => '/_ROOT_/web/modules/my_module/foo/bar/baz.svg',
         'group' => NULL,
       ],
     ];
-    $iconFinder->method('getFilesFromSource')->willReturn($icons_list);
+    $iconFinder->method('getFilesFromSources')->willReturn($icons_list);
 
     $svg_expected = '<title>test</title><symbol id="foo"></symbol><symbol id="bar"></symbol>';
     $svg_data = '<svg xmlns="http://www.w3.org/2000/svg">' . $svg_expected . '</svg>';
@@ -171,11 +165,8 @@ class SvgSpriteExtractorTest extends UnitTestCase {
     $svgSpriteExtractorPlugin = new SvgSpriteExtractor(
       [
         'config' => ['sources' => ['foo/bar/baz.svg']],
-        '_path_info' => [
-          'drupal_root' => '/_ROOT_/web',
-          'absolute_path' => '/_ROOT_/web/modules/my_module',
-          'relative_path' => 'modules/my_module',
-        ],
+        'definition_relative_path' => 'modules/my_module',
+        'definition_absolute_path' => '/_ROOT_/web/modules/my_module',
         'icon_pack_id' => 'svg_sprite',
       ],
       'test_extractor',
@@ -187,7 +178,6 @@ class SvgSpriteExtractorTest extends UnitTestCase {
     );
     $icons = $svgSpriteExtractorPlugin->discoverIcons();
 
-    $this->assertIsArray($icons);
     $this->assertCount(2, $icons);
     $this->assertArrayHasKey('svg_sprite:foo', $icons);
     $this->assertArrayHasKey('svg_sprite:bar', $icons);

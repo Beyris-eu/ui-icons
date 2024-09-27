@@ -51,6 +51,7 @@ class UiIconsMenuTest extends KernelTestBase {
     $this->assertInstanceOf(BaseFieldDefinition::class, $link_field);
 
     $form_display_options = $link_field->getDisplayOptions('form');
+    $this->assertIsArray($form_display_options);
     $this->assertArrayHasKey('type', $form_display_options);
     $this->assertContains($form_display_options['type'], ['icon_link_widget', 'icon_link_attributes_widget']);
 
