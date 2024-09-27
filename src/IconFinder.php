@@ -6,20 +6,24 @@ namespace Drupal\ui_icons;
 
 use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
-use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\File\FileUrlGeneratorInterface;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\Glob;
 
 /**
  * UI Icons finder for icon files under specific paths or urls.
  *
  * Handle our `sources` format to describe paths or urls, for paths:
- * Will search files with specific extension and extract `icon_id` and optional
- * `group` if set.
- * The `group` can be anywhere in the path and the `icon_id` can be a part of
- * the file name.
+ * Will search files with specific extension and extract optional `{icon_id}`
+ * and `{group}` if set.
+ * The `{group}` can be anywhere in the path and the `{icon_id}` can be a part
+ * of the file name.
+ *
  * The result will include relative and absolute paths to the icon.
+ *
  * If the source start with a slash, `/`, path will be relative to the Drupal
  * installation, if not it will be relative to the definition folder.
+ *
  * The result Icon definition will be passed to the Extractor to prepare the
  * Icon to be returned as renderable.
  *
@@ -32,8 +36,17 @@ class IconFinder implements ContainerInjectionInterface, IconFinderInterface {
   private const GROUP_PATTERN = '{group}';
   private const ICON_ID_PATTERN = '{icon_id}';
 
+  /**
+   * For security, do not allow search other than images.
+   */
+  private const LIMIT_SEARCH_EXT = ['gif', 'svg', 'png', 'gif'];
+
+  /**
+   * Track the list of icons for each call of this class.
+   */
+  private array $countIcons = [];
+
   public function __construct(
-    private readonly FileSystemInterface $fileSystem,
     private readonly FileUrlGeneratorInterface $fileUrlGenerator,
   ) {}
 
@@ -60,10 +73,10 @@ class IconFinder implements ContainerInjectionInterface, IconFinderInterface {
    */
   public function getFilesFromSource(string $source, string $drupal_root, string $definition_absolute_path, string $definition_relative_path): array {
     if (FALSE !== filter_var($source, FILTER_VALIDATE_URL)) {
-      return $this->getFilesFromHttpUrl($source);
+      return self::getFileFromHttpUrl($source);
     }
 
-    return $this->getFilesFromLocalPath($source, $drupal_root, $definition_absolute_path, $definition_relative_path);
+    return $this->getFilesFromPath($source, $drupal_root, $definition_absolute_path, $definition_relative_path);
   }
 
   /**
@@ -81,41 +94,82 @@ class IconFinder implements ContainerInjectionInterface, IconFinderInterface {
    * @return array
    *   List of files with metadata.
    */
-  private function getFilesFromLocalPath(string $source, string $drupal_root, string $definition_absolute_path, string $definition_relative_path): array {
-    $is_absolute = str_starts_with($source, '/');
-    $path_info = pathinfo($source);
+  private function getFilesFromPath(string $source, string $drupal_root, string $definition_absolute_path, string $definition_relative_path): array {
+
+    $source_group = str_replace(self::GROUP_PATTERN, '*', $source);
+    $path_info = pathinfo($source_group);
 
     if (!isset($path_info['dirname'])) {
       return [];
     }
 
-    $group_position_end = TRUE;
-    $group_position = strpos($path_info['dirname'], self::GROUP_PATTERN);
-    $has_group = $group_position !== FALSE;
+    $path_info_group = pathinfo($source);
+    $is_absolute = str_starts_with($source_group, '/');
 
+    $dirname = rtrim($path_info['dirname'], '/');
+    $path_search = $is_absolute ? $drupal_root . $dirname : $definition_absolute_path . '/' . $dirname;
+
+    $path_info_filename = $path_info['filename'];
+    $has_icon_pattern = FALSE;
+    if (FALSE !== strrpos($path_info['filename'], self::ICON_ID_PATTERN)) {
+      $has_icon_pattern = TRUE;
+      $path_info['filename'] = str_replace(self::ICON_ID_PATTERN, '*', $path_info['filename']);
+    }
+
+    $names = self::determineFinderNames($path_info, $has_icon_pattern);
+    $finder = new Finder();
+    try {
+      $finder
+        ->depth(0)
+        ->in($path_search)
+        ->files()
+        ->name($names)
+        ->sortByExtension();
+    }
+    catch (\Throwable $th) {
+      // @todo log invalid folders?
+      return [];
+    }
+    if (!$finder->hasResults()) {
+      return [];
+    }
+
+    $has_group = (FALSE !== strpos($source, self::GROUP_PATTERN));
+
+    $group_position = 0;
     if ($has_group) {
-      $group_position_end = strlen($path_info['dirname']) === $group_position + strlen(self::GROUP_PATTERN);
-      $path_search = rtrim(substr($path_info['dirname'], 0, $group_position), '/');
-    }
-    else {
-      $path_search = rtrim($path_info['dirname'], '/');
+      $group_position = self::determineGroupPosition($path_info_group, $is_absolute, $definition_relative_path);
     }
 
-    $path_search = $is_absolute ? $drupal_root . $path_search : $definition_absolute_path . '/' . $path_search;
+    $result = [];
+    foreach ($finder as $file) {
+      $group = '';
+      if ($has_group) {
+        $parts = explode('/', trim(str_replace($drupal_root, '', $file->getPath()), '/'));
+        $group = $parts[$group_position] ?? '';
+      }
 
-    if (!isset($path_info['extension'])) {
-      return [];
+      $filename = $file->getFilenameWithoutExtension();
+      $icon_id = self::getCleanIconId($filename) ?? $filename;
+      if ($has_icon_pattern) {
+        $icon_id = self::determineIconId($path_info_filename, $icon_id);
+      }
+
+      $countIcons[$icon_id] = $countIcons[$icon_id] ?? 0;
+      if (isset($result[$icon_id])) {
+        $countIcons[$icon_id]++;
+        $icon_id .= '__' . $countIcons[$icon_id];
+      }
+
+      $result[$icon_id] = [
+        'icon_id' => $icon_id,
+        'relative_path' => $this->fileUrlGenerateString(str_replace($drupal_root, '', $file->getPathName())),
+        'absolute_path' => $file->getPathName(),
+        'group' => $group,
+      ];
     }
 
-    $files = $this->findFiles($path_search, '#\\.' . $path_info['extension'] . '#', $group_position_end);
-
-    if (empty($files)) {
-      return [];
-    }
-
-    $base_relative_path = $is_absolute ? '' : $definition_relative_path . '/';
-
-    return $this->createFileArray($files, $has_group, $group_position_end, $base_relative_path, $path_info);
+    return $result;
   }
 
   /**
@@ -127,169 +181,114 @@ class IconFinder implements ContainerInjectionInterface, IconFinderInterface {
    * @return array
    *   List of files with metadata.
    */
-  private function getFilesFromHttpUrl(string $source): array {
+  private static function getFileFromHttpUrl(string $source): array {
     $path_info = pathinfo($source);
-    $file = (object) [
-      'uri' => $source,
-      'filename' => $path_info['basename'],
-      'name' => $path_info['filename'],
-    ];
-    $files = [
-      $source => $file,
-    ];
-    return $this->createFileArray($files, FALSE, FALSE, '', $path_info);
-  }
-
-  /**
-   * Scan a directory to find files.
-   *
-   * @param string $dir
-   *   The path to search, without group if set.
-   * @param string $mask
-   *   The file mask, mostly *.extension.
-   * @param bool $group_position_end
-   *   Flag if the group value is at the end of the path.
-   *
-   * @return array
-   *   List of files with metadata.
-   */
-  private function findFiles(string $dir, string $mask, bool $group_position_end): array {
-    $options = [
-      'recurse' => TRUE,
-      'min_depth' => $group_position_end ? 0 : 1,
-    ];
-
-    try {
-      return $this->fileSystem->scanDirectory($dir, $mask, $options);
-    }
-    catch (\Throwable $th) {
-      // @todo error missing directory?
-      return [];
-    }
-  }
-
-  /**
-   * Create files data from files list.
-   *
-   * @param array $files
-   *   The list of files found.
-   * @param bool $has_group
-   *   Flag if there is a group value in path.
-   * @param bool $group_position_end
-   *   Flag if the group value is at the end of the path.
-   * @param string $base_relative_path
-   *   The relative path of the file without group if set.
-   * @param array $path_info
-   *   The path info from pathinfo().
-   *
-   * @return array
-   *   List of files with custom metadata.
-   */
-  private function createFileArray(array $files, bool $has_group, bool $group_position_end, string $base_relative_path, array $path_info): array {
-    $result = [];
-
-    foreach ($files as $file) {
-      $group = $this->determineGroup($file->uri, $has_group, $group_position_end, $path_info['dirname']);
-      $uri = $this->buildDrupalUri($has_group, $group, $path_info['dirname'], $base_relative_path, $file->filename);
-
-      $filename = $icon_id = $file->name;
-      $icon_id = $this->extractIconId($path_info['filename'], $filename);
-
-      if (!$icon_id) {
-        continue;
-      }
-
-      $result[$filename] = [
+    $icon_id = self::getCleanIconId($path_info['filename']) ?? $path_info['filename'];
+    return [
+      $icon_id => [
         'icon_id' => $icon_id,
-        'relative_path' => $uri,
-        'absolute_path' => $file->uri,
-        'group' => $group,
-      ];
-    }
-
-    return $result;
+        'relative_path' => $source,
+        'absolute_path' => $source,
+        'group' => '',
+      ],
+    ];
   }
 
   /**
    * Check if icon_id is a part of the name and need to be extracted.
    *
-   * @param string $path_filename
-   *   The path and filename to extract icon ID from.
+   * @param array $path_info
+   *   The file path info.
+   * @param bool $has_icon_pattern
+   *   The file name contains the {icon_id} placeholder.
+   *
+   * @return string
+   *   The names string to use in the Finder.
+   */
+  private static function determineFinderNames(array $path_info, bool $has_icon_pattern): string {
+    // In case of full filename, return directly.
+    if (FALSE === strpos($path_info['filename'], '*')) {
+      return $path_info['basename'];
+    }
+
+    // If an extension is set wwe replace wildcard by our limited list of images
+    // to avoid listing of files.
+    if (isset($path_info['extension'])) {
+      // We can have multiple extensions with glob brace: {png,svg}. So check if
+      // we allow them.
+      if (FALSE !== strpos($path_info['extension'], '{')) {
+        $source_names = explode(',', str_replace(['{', '}', ' '], '', $path_info['extension']));
+        $names = array_intersect($source_names, self::LIMIT_SEARCH_EXT);
+        return Glob::toRegex($path_info['filename'] . '.{' . implode(',', $names) . '}');
+      }
+
+      if (in_array($path_info['extension'], self::LIMIT_SEARCH_EXT)) {
+        return $path_info['filename'] . '.' . $path_info['extension'];
+      }
+    }
+
+    // Default match for images.
+    return Glob::toRegex($path_info['filename'] . '.{' . implode(',', self::LIMIT_SEARCH_EXT) . '}');
+  }
+
+  /**
+   * Check if {icon_id} is a part of the name and need to be extracted.
+   *
+   * @param string $mask
+   *   The path with {icon_id}.
    * @param string $filename
-   *   The filename to match against.
+   *   The filename found to match against.
    *
    * @return string
    *   The extracted icon ID or the original filename.
    */
-  private function extractIconId(string $path_filename, string $filename): ?string {
-    if ($path_filename !== self::ICON_ID_PATTERN) {
-      $pattern = str_replace(self::ICON_ID_PATTERN, '(?<icon_id>.+?)', $path_filename);
-      if (preg_match('@' . $pattern . '@', $filename, $matches)) {
-        // @todo should return null? add test to know.
-        if (isset($matches['icon_id'])) {
-          return $matches['icon_id'];
-        }
-      }
-      else {
-        return NULL;
-      }
+  private static function determineIconId(string $mask, string $filename): ?string {
+    $pattern = str_replace(self::ICON_ID_PATTERN, '(?<icon_id>.+)?', $mask);
+    if (preg_match('@' . $pattern . '@', $filename, $matches)) {
+      return $matches['icon_id'] ?? NULL;
     }
 
-    return $filename;
-  }
-
-  /**
-   * Builds a Drupal URI based on the provided parameters.
-   *
-   * @param bool $has_group
-   *   Indicates if a group is present.
-   * @param string $group
-   *   The group value.
-   * @param string $dirname
-   *   The directory name.
-   * @param string $base_relative_path
-   *   The base relative path.
-   * @param string $filename
-   *   The filename to append.
-   *
-   * @return string
-   *   The generated Drupal URI.
-   */
-  private function buildDrupalUri(bool $has_group, string $group, string $dirname, string $base_relative_path, string $filename): string {
-    $current_relative_path = $has_group ? str_replace(self::GROUP_PATTERN, $group, $dirname) : $dirname;
-    $current_relative_path = $base_relative_path . $current_relative_path;
-    $current_relative_path = sprintf('%s/%s', $current_relative_path, $filename);
-
-    return $this->fileUrlGenerateString($current_relative_path);
+    return NULL;
   }
 
   /**
    * Determines the group based on the URI and other parameters.
    *
-   * @param string $uri
-   *   The URI to extract group from.
-   * @param bool $has_group
-   *   Indicates if a group is present.
-   * @param bool $group_position_end
-   *   Indicates if the group position is at the end.
-   * @param string $dirname
-   *   The directory name pattern.
+   * @param array $path_info
+   *   The file path info.
+   * @param bool $is_absolute
+   *   The file source is absolute, ie: relative to Drupal core.
+   * @param string $definition_relative_path
+   *   The definition file relative path.
    *
-   * @return string
-   *   The determined group or empty.
+   * @return int|null
+   *   The determined group position.
    */
-  private function determineGroup(string $uri, bool $has_group, bool $group_position_end, string $dirname): string {
-    if (!$has_group) {
-      return '';
+  private static function determineGroupPosition(array $path_info, bool $is_absolute, string $definition_relative_path): ?int {
+    $absolute_path = $path_info['dirname'];
+    if (!$is_absolute) {
+      $absolute_path = sprintf('%s/%s', $definition_relative_path, $path_info['dirname']);
     }
+    $parts = explode('/', trim($absolute_path, '/'));
 
-    if ($group_position_end) {
-      return basename(dirname($uri));
+    $result = array_search(self::GROUP_PATTERN, $parts, TRUE);
+    if (FALSE === $result) {
+      return NULL;
     }
+    return (int) $result;
+  }
 
-    $pattern = str_replace(self::GROUP_PATTERN, '(?P<group>.+)?', $dirname);
-    preg_match('@' . $pattern . '@', $uri, $matches);
-    return $matches['group'] ?? '';
+  /**
+   * Generate a clean Icon Id.
+   *
+   * @param string $name
+   *   The name to clean.
+   *
+   * @return string|null
+   *   The cleaned string used as id.
+   */
+  private static function getCleanIconId(string $name): ?string {
+    return preg_replace('@[^a-z0-9_-]+@', '_', mb_strtolower($name));
   }
 
 }

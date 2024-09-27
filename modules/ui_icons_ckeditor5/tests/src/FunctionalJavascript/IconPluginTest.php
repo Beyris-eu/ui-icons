@@ -29,32 +29,32 @@ class IconPluginTest extends WebDriverTestBase {
   /**
    * Icon from ui_icons_test module.
    */
-  private const TEST_ICON_ID_1 = 'test_drupal_logo_blue';
+  private const TEST_ICON_ID_1 = 'foo';
 
   /**
    * Icon filename from ui_icons_test module.
    */
-  private const TEST_ICON_FILENAME_1 = 'test_drupal_logo_blue.png';
+  private const TEST_ICON_FILENAME_1 = 'foo.png';
 
   /**
    * Icon class from ui_icons_test module.
    */
-  private const TEST_ICON_CLASS_1 = 'icon icon-test-drupal-logo-blue';
+  private const TEST_ICON_CLASS_1 = 'icon icon-foo';
 
   /**
    * Icon from ui_icons_test module.
    */
-  private const TEST_ICON_ID_2 = 'test_drupal_logo_white';
+  private const TEST_ICON_ID_2 = 'bar';
 
   /**
    * Icon filename from ui_icons_test module.
    */
-  private const TEST_ICON_FILENAME_2 = 'test_drupal_logo_white.png';
+  private const TEST_ICON_FILENAME_2 = 'bar.png';
 
   /**
    * Icon class from ui_icons_test module.
    */
-  private const TEST_ICON_CLASS_2 = 'icon icon-test-drupal-logo-white';
+  private const TEST_ICON_CLASS_2 = 'icon icon-bar';
 
   /**
    * {@inheritdoc}

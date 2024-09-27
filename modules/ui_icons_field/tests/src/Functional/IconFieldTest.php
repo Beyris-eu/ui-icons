@@ -22,17 +22,17 @@ class IconFieldTest extends BrowserTestBase {
   /**
    * Icon from ui_icons_test module.
    */
-  private const TEST_ICON_ID = 'test_drupal_logo_blue';
+  private const TEST_ICON_ID = 'foo';
 
   /**
    * Icon filename from ui_icons_test module.
    */
-  private const TEST_ICON_FILENAME = 'test_drupal_logo_blue.png';
+  private const TEST_ICON_FILENAME = 'foo.png';
 
   /**
    * Icon class from ui_icons_test module.
    */
-  private const TEST_ICON_CLASS = '.icon-test-drupal-logo-blue';
+  private const TEST_ICON_CLASS = '.icon-foo';
 
   /**
    * {@inheritdoc}

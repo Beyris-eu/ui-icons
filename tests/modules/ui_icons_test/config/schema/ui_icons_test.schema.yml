@@ -1,4 +1,4 @@
-ui_icons.icon_pack_options.test_local_files:
+ui_icons.icon_pack_options.test:
   type: mapping
   label: 'Local files settings'
   constraints:
@@ -16,33 +16,27 @@ ui_icons.icon_pack_options.test_local_files:
       constraints:
         Range:
           min: 0
-    title:
+    alt:
       type: label
-      label: 'Title'
+      label: 'Alt'
 
-ui_icons.icon_pack_options.test_local_svg:
+ui_icons.icon_pack_options.test_svg:
   type: mapping
   label: 'Local svg files settings'
   constraints:
     FullyValidatable: ~
   mapping:
-    width:
+    size:
       type: integer
-      label: 'Width'
+      label: 'Size'
       constraints:
         Range:
           min: 0
-    height:
-      type: integer
-      label: 'Height'
-      constraints:
-        Range:
-          min: 0
-    title:
+    alt:
       type: label
-      label: 'Title'
+      label: 'Alt'
 
-ui_icons.icon_pack_options.test_local_svg_sprite:
+ui_icons.icon_pack_options.test_svg_sprite:
   type: mapping
   label: 'Local svg sprite file settings'
   constraints:
@@ -60,8 +54,48 @@ ui_icons.icon_pack_options.test_local_svg_sprite:
       constraints:
         Range:
           min: 0
+    alt:
+      type: label
+      label: 'Alt'
 
-ui_icons.icon_pack_options.test_disabled_icon_pack:
+ui_icons.icon_pack_options.test_settings:
+  type: mapping
+  label: 'A lot of settings'
+  constraints:
+    FullyValidatable: ~
+  mapping:
+    width:
+      type: integer
+      label: 'Width'
+      constraints:
+        Range:
+          min: 0
+    height:
+      type: integer
+      label: 'Height'
+      constraints:
+        Range:
+          min: 0
+    title:
+      type: label
+      label: 'Title'
+    alt:
+      type: label
+      label: 'Alt'
+    select:
+      title: "Test select"
+      type: "integer"
+    boolean:
+      title: "Test boolean"
+      type: "boolean"
+    decimal:
+      title: "Test decimal"
+      type: "number"
+    number:
+      title: "Test number min/max/step"
+      type: "integer"
+
+ui_icons.icon_pack_options.test_disabled:
   type: mapping
   label: 'Disabled settings'
   constraints:
