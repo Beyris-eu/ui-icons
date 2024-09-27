@@ -25,7 +25,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
   /**
    * Icon from ui_icons_test module.
    */
-  private const TEST_ICON_FULL_ID = 'test:test_drupal_logo_blue';
+  private const TEST_ICON_FULL_ID = 'test:foo';
 
   /**
    * {@inheritdoc}
@@ -84,6 +84,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
   public function testGetIcons(): void {
     $icons = $this->pluginManagerIconPack->getIcons();
     $this->assertIsArray($icons);
+
     $this->assertArrayHasKey(self::TEST_ICON_FULL_ID, $icons);
   }
 
@@ -104,13 +105,13 @@ class IconPackManagerKernelTest extends KernelTestBase {
   public function testListIconPackOptions(): void {
     $actual = $this->pluginManagerIconPack->listIconPackOptions();
     $expected = [
+      'test' => 'Test icons (9)',
+      'test_svg' => 'Test SVG (10)',
+      'test_svg_sprite' => 'Small sprite (3)',
       'test_no_settings' => 'No Settings (1)',
-      'test_svg_sprite' => 'Small sprite (5)',
-      'test_svg' => 'Test SVG (8)',
-      'test' => 'Test icons (8)',
       'test_settings' => 'Test settings (1)',
     ];
-    $this->assertSame($expected, $actual);
+    $this->assertEquals($expected, $actual);
   }
 
   /**
@@ -119,13 +120,13 @@ class IconPackManagerKernelTest extends KernelTestBase {
   public function testListIconPackWithDescriptionOptions(): void {
     $actual = $this->pluginManagerIconPack->listIconPackWithDescriptionOptions();
     $expected = [
-      'test' => 'Test icons (8) - Local files relative available for test.',
-      'test_svg' => 'Test SVG (8)',
-      'test_svg_sprite' => 'Small sprite (5)',
-      'test_settings' => 'Test settings (1)',
+      'test' => 'Test icons (9) - Local files relative available for test.',
+      'test_svg' => 'Test SVG (10)',
+      'test_svg_sprite' => 'Small sprite (3)',
       'test_no_settings' => 'No Settings (1)',
+      'test_settings' => 'Test settings (1)',
     ];
-    $this->assertSame($expected, $actual);
+    $this->assertEquals($expected, $actual);
   }
 
   /**
@@ -133,10 +134,10 @@ class IconPackManagerKernelTest extends KernelTestBase {
    */
   public function testListIconOptions(): void {
     $actual = $this->pluginManagerIconPack->listIconOptions();
-    $this->assertCount(23, $actual);
+    $this->assertCount(24, $actual);
 
     $actual = $this->pluginManagerIconPack->listIconOptions(['test']);
-    $this->assertCount(8, $actual);
+    $this->assertCount(9, $actual);
 
     $actual = $this->pluginManagerIconPack->listIconOptions(['test_no_icons']);
     $this->assertCount(0, $actual);
