@@ -6,17 +6,20 @@ namespace Drupal\ui_icons\Plugin\IconExtractor;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_icons\Attribute\IconExtractor;
-use Drupal\ui_icons\Exception\IconPackConfigErrorException;
 use Drupal\ui_icons\Plugin\IconExtractorWithFinder;
 use Drupal\ui_icons\PluginForm\IconPackExtractorForm;
 
 /**
  * Plugin implementation of the ui_icons_extractor.
+ *
+ * This extractor need the file content, remote url will raise too much risks
+ * and slow down if the file is not available anymore. Then `path` extractor
+ * must be used.
  */
 #[IconExtractor(
   id: 'svg',
   label: new TranslatableMarkup('SVG'),
-  description: new TranslatableMarkup('All files from one or many paths. Works for any file type.'),
+  description: new TranslatableMarkup('Handle SVG files from one or many paths.'),
   forms: [
     'settings' => IconPackExtractorForm::class,
   ]
@@ -27,11 +30,7 @@ class SvgExtractor extends IconExtractorWithFinder {
    * {@inheritdoc}
    */
   public function discoverIcons(): array {
-    if (!isset($this->configuration['config']['sources'])) {
-      throw new IconPackConfigErrorException(sprintf('Missing `config: sources` in your definition, extractor %s require this value.', $this->getPluginId()));
-    }
-
-    $files = $this->getFilesFromSources($this->configuration['config']['sources'] ?? [], $this->configuration['definition_relative_path'] ?? '');
+    $files = $this->getFilesFromSources();
 
     if (empty($files)) {
       return [];
@@ -39,9 +38,17 @@ class SvgExtractor extends IconExtractorWithFinder {
 
     $icons = [];
     foreach ($files as $file) {
-      $this->configuration['content'] = $this->extractSvg($file['absolute_path']);
-      $icon_full_id = $this->configuration['icon_pack_id'] . ':' . $file['icon_id'];
-      $icons[$icon_full_id] = $this->createIcon($file['icon_id'], $this->configuration, $file['source'], $file['group'] ?? NULL);
+      if (!$content = $this->extractSvg($file['absolute_path'] ?? '')) {
+        continue;
+      }
+      $icons[] = $this->createIcon(
+        $file['icon_id'],
+        $file['source'],
+        $file['group'] ?? NULL,
+        [
+          'content' => $content,
+        ],
+      );
     }
 
     return $icons;
@@ -50,31 +57,31 @@ class SvgExtractor extends IconExtractorWithFinder {
   /**
    * Extract svg values, simply exclude parent <svg>.
    *
-   * @param string $uri
-   *   Local path to the svg file.
+   * @param string $source
+   *   Local path or url to the svg file.
    *
-   * @return string
+   * @return string|null
    *   The inner SVG content as string.
    *
    * @todo allow some pattern for xpath to select children?
    */
-  private function extractSvg(string $uri): string {
-    $content = $this->iconFinder->getFileContents($uri);
+  private function extractSvg(string $source): ?string {
+    if (!$content = $this->iconFinder->getFileContents($source)) {
+      return NULL;
+    }
 
     libxml_use_internal_errors(TRUE);
-    $svg = simplexml_load_string($content);
-    if ($svg === FALSE) {
-      $errors = [];
-      foreach (libxml_get_errors() as $error) {
-        $errors[] = $error->message;
-      }
-      return implode(', ', $errors);
+
+    if (!$svg = simplexml_load_string((string) $content)) {
+      // @todo log a warning with the xml error.
+      return NULL;
     }
 
     $content = '';
     foreach ($svg as $child) {
       $content .= $child->asXML();
     }
+
     return $content;
   }
 

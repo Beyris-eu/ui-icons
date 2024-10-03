@@ -6,6 +6,7 @@ namespace Drupal\ui_icons_patterns\Plugin\UiPatterns\Source;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\ui_icons\IconDefinition;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\SourcePluginBase;
 
@@ -25,11 +26,11 @@ class IconSource extends SourcePluginBase {
    */
   public function getPropValue(): mixed {
     $value = $this->getSetting('value');
-    [$icon_pack_id, $icon_id] = explode(':', $value['icon_id']);
+    [$pack_id, $icon_id] = explode(IconDefinition::ICON_SEPARATOR, $value['icon_id']);
     return [
-      'icon_pack' => $icon_pack_id ?: '',
+      'icon_pack' => $pack_id ?: '',
       'icon' => $icon_id ?: '',
-      'settings' => $value['icon_settings'][$icon_pack_id] ?? [],
+      'settings' => $value['icon_settings'][$pack_id] ?? [],
     ];
   }
 

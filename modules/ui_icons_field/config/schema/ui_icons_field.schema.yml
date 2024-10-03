@@ -6,7 +6,7 @@ field.value.ui_icon:
   mapping:
     target_id:
       type: string
-      label: 'Default icon ID'
+      label: 'Default icon full ID'
     settings:
       type: sequence
       label: 'Default icon settings'

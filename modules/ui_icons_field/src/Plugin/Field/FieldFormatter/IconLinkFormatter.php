@@ -294,12 +294,12 @@ class IconLinkFormatter extends LinkFormatter {
         continue;
       }
 
-      $icon_pack_id = $icon->getIconPackId();
+      $pack_id = $icon->getPackId();
 
       $settings = [];
       $formatter_settings = $this->getSetting('icon_settings') ?? [];
-      if (isset($formatter_settings[$icon_pack_id])) {
-        $settings = $formatter_settings[$icon_pack_id];
+      if (isset($formatter_settings[$pack_id])) {
+        $settings = $formatter_settings[$pack_id];
       }
 
       $icon_display = $item->options['icon_display'] ?? $formatter_icon_display ?? NULL;

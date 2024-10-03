@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ui_icons\Plugin;
 
 use Drupal\Core\Plugin\PluginFormInterface;
-use Drupal\ui_icons\IconDefinition;
+use Drupal\ui_icons\IconDefinitionInterface;
 
 /**
  * Interface for ui_icons_extractor plugins.
@@ -18,7 +18,7 @@ interface IconExtractorInterface extends PluginFormInterface {
    * The icons provided as an associative array with the keys and values equal
    * to the icon ID and icon definition respectively.
    *
-   * @return \Drupal\ui_icons\IconDefinition[]
+   * @return \Drupal\ui_icons\IconDefinitionInterface[]
    *   Gets a built list of icons that are found by this extractor. Array is
    *   keyed by the icon ID and the array values are the icon definition for
    *   each of the icons listed.
@@ -36,20 +36,20 @@ interface IconExtractorInterface extends PluginFormInterface {
   public function description(): string;
 
   /**
-   * Create the icon definition.
+   * Create the icon definition from an extractor plugin.
    *
    * @param string $icon_id
    *   The id of the icon.
-   * @param array $data
-   *   The additional data of the icon.
    * @param string|null $source
-   *   The source of the icon (optional).
+   *   The source, url or path of the icon.
    * @param string|null $group
-   *   The group of the icon (optional).
+   *   The group of the icon.
+   * @param array|null $data
+   *   The icon data.
    *
-   * @return \Drupal\ui_icons\IconDefinition
+   * @return \Drupal\ui_icons\IconDefinitionInterface
    *   The Icon definition.
    */
-  public static function createIcon(string $icon_id, array $data, ?string $source = NULL, ?string $group = NULL): IconDefinition;
+  public function createIcon(string $icon_id, ?string $source = NULL, ?string $group = NULL, ?array $data = NULL): IconDefinitionInterface;
 
 }

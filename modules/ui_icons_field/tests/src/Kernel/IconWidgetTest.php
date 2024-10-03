@@ -89,13 +89,13 @@ class IconWidgetTest extends KernelTestBase {
       'name' => 'sample entity 2',
     ]);
     $entity->icon = [
-      'target_id' => 'test_local_files:local__9.0_blue',
+      'target_id' => 'test_minimal:foo',
     ];
     $entity->save();
 
     // Reload the entity and check that the field value is correct.
     $entity = EntityTest::load($entity->id());
-    $this->assertEquals('test_local_files:local__9.0_blue', $entity->icon->target_id);
+    $this->assertEquals('test_minimal:foo', $entity->icon->target_id);
   }
 
   /**

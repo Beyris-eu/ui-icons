@@ -7,6 +7,7 @@ namespace Drupal\Tests\ui_icons_field\Functional;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\ui_icons\IconDefinition;
 
 /**
  * Test the UI icons field features.
@@ -17,7 +18,7 @@ class IconFieldTest extends BrowserTestBase {
   /**
    * Icon pack from ui_icons_test module.
    */
-  private const TEST_ICON_PACK_ID = 'test';
+  private const TEST_ICON_PACK_ID = 'test_path';
 
   /**
    * Icon from ui_icons_test module.
@@ -87,7 +88,7 @@ class IconFieldTest extends BrowserTestBase {
    */
   public function testIconFieldSave(): void {
     $label = 'Icon test';
-    $icon_full_id = self:: TEST_ICON_PACK_ID . ':' . self::TEST_ICON_ID;
+    $icon_full_id = IconDefinition::createIconId(self::TEST_ICON_PACK_ID, self::TEST_ICON_ID);
 
     // Create a field and storage for checking.
     FieldStorageConfig::create([

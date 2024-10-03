@@ -14,6 +14,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base class for ui_icons_extractor plugins.
+ *
+ * This is a wrapper for the IconFinder class to load icon files based on path
+ * or urls.
  */
 abstract class IconExtractorWithFinder extends IconExtractorBase implements IconExtractorWithFinderInterface, PluginWithFormsInterface, ContainerFactoryPluginInterface {
 
@@ -56,16 +59,34 @@ abstract class IconExtractorWithFinder extends IconExtractorBase implements Icon
   /**
    * {@inheritdoc}
    */
-  public function getFilesFromSources(array $sources, string $relative_path): array {
-    if (empty($sources)) {
-      throw new IconPackConfigErrorException(sprintf('Missing `config: sources` in your definition, extractor %s require this value.', $this->getPluginId()));
-    }
+  public function getFilesFromSources(): array {
+    $this->checkRequireConfigSources();
 
-    if (empty($relative_path)) {
+    if (!isset($this->configuration['relative_path'])) {
       throw new IconPackConfigErrorException(sprintf('Empty relative path for extractor %s.', $this->getPluginId()));
     }
 
-    return $this->iconFinder->getFilesFromSources($sources, $relative_path);
+    return $this->iconFinder->getFilesFromSources(
+      $this->configuration['config']['sources'],
+      $this->configuration['relative_path']
+    );
+  }
+
+  /**
+   * Check the required `config > sources` value from definition.
+   *
+   * @throws \Drupal\ui_icons\Exception\IconPackConfigErrorException
+   *   If the config:sources value in definition is not set or not valid.
+   */
+  private function checkRequireConfigSources(): void {
+    // @todo json schema validation can avoid type check.
+    if (
+      !isset($this->configuration['config']['sources']) ||
+      empty($this->configuration['config']['sources']) ||
+      !is_array($this->configuration['config']['sources'])
+    ) {
+      throw new IconPackConfigErrorException(sprintf('Missing `config: sources` in your definition, extractor %s require this value.', $this->getPluginId()));
+    }
   }
 
 }

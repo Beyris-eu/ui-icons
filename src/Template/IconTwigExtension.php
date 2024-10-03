@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ui_icons\Template;
 
+use Drupal\ui_icons\IconDefinition;
 use Drupal\ui_icons\Plugin\IconPackManagerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -30,7 +31,7 @@ class IconTwigExtension extends AbstractExtension {
   /**
    * Get an icon renderable.
    *
-   * @param string $icon_pack_id
+   * @param string $pack_id
    *   The icon set ID.
    * @param string $icon_id
    *   The icon ID.
@@ -40,8 +41,9 @@ class IconTwigExtension extends AbstractExtension {
    * @return array
    *   The icon renderable.
    */
-  public function getIconRenderable(string $icon_pack_id, string $icon_id, ?array $settings = []): array {
-    $icon = $this->pluginManagerIconPack->getIcon($icon_pack_id . ':' . $icon_id);
+  public function getIconRenderable(string $pack_id, string $icon_id, ?array $settings = []): array {
+    $icon_full_id = IconDefinition::createIconId($pack_id, $icon_id);
+    $icon = $this->pluginManagerIconPack->getIcon($icon_full_id);
     if (!$icon) {
       return [];
     }
@@ -52,7 +54,7 @@ class IconTwigExtension extends AbstractExtension {
   /**
    * Get an icon preview.
    *
-   * @param string $icon_pack_id
+   * @param string $pack_id
    *   The icon set ID.
    * @param string $icon_id
    *   The icon ID.
@@ -62,8 +64,9 @@ class IconTwigExtension extends AbstractExtension {
    * @return array
    *   The icon renderable.
    */
-  public function getIconPreview(string $icon_pack_id, string $icon_id, ?array $settings = []): array {
-    $icon = $this->pluginManagerIconPack->getIcon($icon_pack_id . ':' . $icon_id);
+  public function getIconPreview(string $pack_id, string $icon_id, ?array $settings = []): array {
+    $icon_full_id = IconDefinition::createIconId($pack_id, $icon_id);
+    $icon = $this->pluginManagerIconPack->getIcon($icon_full_id);
     if (!$icon) {
       return [];
     }

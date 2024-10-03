@@ -6,12 +6,15 @@ namespace Drupal\ui_icons\Plugin\IconExtractor;
 
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\ui_icons\Attribute\IconExtractor;
-use Drupal\ui_icons\Exception\IconPackConfigErrorException;
 use Drupal\ui_icons\Plugin\IconExtractorWithFinder;
 use Drupal\ui_icons\PluginForm\IconPackExtractorForm;
 
 /**
  * Plugin implementation of the ui_icons_extractor.
+ *
+ * This extractor need the file content, remote url will raise too much risks
+ * and slow down if the file is not available anymore. Then `path` extractor
+ * must be used.
  */
 #[IconExtractor(
   id: 'svg_sprite',
@@ -27,11 +30,7 @@ class SvgSpriteExtractor extends IconExtractorWithFinder {
    * {@inheritdoc}
    */
   public function discoverIcons(): array {
-    if (!isset($this->configuration['config']['sources'])) {
-      throw new IconPackConfigErrorException(sprintf('Missing `config: sources` in your definition, extractor %s require this value.', $this->getPluginId()));
-    }
-
-    $files = $this->getFilesFromSources($this->configuration['config']['sources'] ?? [], $this->configuration['definition_relative_path'] ?? '');
+    $files = $this->getFilesFromSources();
 
     if (empty($files)) {
       return [];
@@ -39,10 +38,9 @@ class SvgSpriteExtractor extends IconExtractorWithFinder {
 
     $icons = [];
     foreach ($files as $file) {
-      $icon_ids = $this->extractIdsFromXml($file['absolute_path']);
+      $icon_ids = $this->extractIdsFromXml($file['absolute_path'] ?? '');
       foreach ($icon_ids as $icon_id) {
-        $icon_full_id = $this->configuration['icon_pack_id'] . ':' . $icon_id;
-        $icons[$icon_full_id] = $this->createIcon($icon_id, $this->configuration, $file['source'], $file['group'] ?? NULL);
+        $icons[] = $this->createIcon($icon_id, $file['source'], $file['group'] ?? NULL);
       }
     }
 
@@ -53,22 +51,21 @@ class SvgSpriteExtractor extends IconExtractorWithFinder {
    * Extract icon ID from XML.
    *
    * @param string $source
-   *   Path to the SVG file.
+   *   Local path or url to the svg file.
    *
    * @return array
    *   A list of icons ID.
    */
   private function extractIdsFromXml(string $source): array {
-    $content = $this->iconFinder->getFileContents($source);
+    if (!$content = $this->iconFinder->getFileContents($source)) {
+      return [];
+    }
 
     libxml_use_internal_errors(TRUE);
-    $svg = simplexml_load_string($content);
-    if ($svg === FALSE) {
-      $errors = [];
-      foreach (libxml_get_errors() as $error) {
-        $errors[] = trim($error->message);
-      }
-      return $errors;
+
+    if (!$svg = simplexml_load_string((string) $content)) {
+      // @todo log a warning with the xml error.
+      return [];
     }
     if ($svg->symbol) {
       return $this->extractIdsFromSymbols($svg->symbol);
@@ -76,6 +73,7 @@ class SvgSpriteExtractor extends IconExtractorWithFinder {
     if ($svg->defs->symbol) {
       return $this->extractIdsFromSymbols($svg->defs->symbol);
     }
+
     return [];
   }
 
@@ -95,6 +93,7 @@ class SvgSpriteExtractor extends IconExtractorWithFinder {
         $ids[] = (string) $symbol['id'];
       }
     }
+
     return $ids;
   }
 
