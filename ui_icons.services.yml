@@ -29,5 +29,6 @@ services:
     arguments:
       [
         '@file_url_generator',
+        '@logger.channel.default',
         '%app.root%',
       ]

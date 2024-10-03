@@ -2,6 +2,7 @@
 
 namespace Drupal\ui_icons_patterns\Plugin\UIPatterns\SettingType;
 
+use Drupal\ui_icons\IconDefinition;
 use Drupal\ui_patterns_settings\Definition\PatternDefinitionSetting;
 use Drupal\ui_patterns_settings\Plugin\PatternSettingTypeBase;
 
@@ -48,11 +49,11 @@ class IconSettingType extends PatternSettingTypeBase {
       return $value;
     }
     // Data coming from ::settingsForm() have an IconDefinition objects.
-    [$icon_pack_id, $icon_id] = explode(':', $value['target_id']);
+    [$pack_id, $icon_id] = explode(IconDefinition::ICON_SEPARATOR, $value['target_id']);
     return [
-      'icon_pack' => $icon_pack_id ?: '',
+      'icon_pack' => $pack_id ?: '',
       'icon' => $icon_id ?: '',
-      'settings' => $value['settings'][$icon_pack_id] ?? [],
+      'settings' => $value['settings'][$pack_id] ?? [],
     ];
   }
 

@@ -12,38 +12,27 @@ interface IconFinderInterface {
   /**
    * Create files from source paths.
    *
-   * @param array $sources
+   * @param string[] $sources
    *   The list of paths or urls.
-   * @param string $definition_relative_path
+   * @param string $relative_path
    *   The current definition relative path.
    *
-   * @return array
+   * @return array<string, array<string, string|null>>
    *   List of files with metadata.
    */
-  public function getFilesFromSources(array $sources, string $definition_relative_path): array;
+  public function getFilesFromSources(array $sources, string $relative_path): array;
 
   /**
-   * Wrapper tho the file url generator.
+   * Wrapper to the file_get_contents function.
    *
-   * To avoid injection in IconExtractorBase.
+   * This allow usage in extractor and easier unit test.
    *
    * @param string $uri
    *   The uri to process.
    *
-   * @return string
-   *   The Drupal url access of the uri.
-   */
-  public function fileUrlGenerateString(string $uri): string;
-
-  /**
-   * Wrapper tho the file_get_contents function..
-   *
-   * @param string $uri
-   *   The uri to process.
-   *
-   * @return string
+   * @return string|bool
    *   The file content.
    */
-  public function getFileContents(string $uri): string;
+  public function getFileContents(string $uri): string|bool;
 
 }

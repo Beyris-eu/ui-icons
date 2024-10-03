@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\ui_icons\Element;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Render\Attribute\RenderElement;
 use Drupal\Core\Render\Element\RenderElementBase;
+use Drupal\ui_icons\IconDefinition;
 
 /**
  * Provides a render element to display an ui icon.
@@ -58,18 +58,22 @@ class Icon extends RenderElementBase {
     /** @var \Drupal\ui_icons\Plugin\IconPackManagerInterface $pluginManagerIconPack */
     $pluginManagerIconPack = \Drupal::service('plugin.manager.ui_icons_pack');
 
-    $icon = $pluginManagerIconPack->getIcon($element['#icon_pack'] . ':' . $element['#icon']);
+    $icon_full_id = IconDefinition::createIconId($element['#icon_pack'], $element['#icon']);
+    $icon = $pluginManagerIconPack->getIcon($icon_full_id);
     if (!$icon) {
       return $element;
     }
 
     $context = [
       'icon_id' => $icon->getIconId(),
-      'source' => $icon->getSource(),
     ];
 
-    if ($content = $icon->getContent()) {
-      $context['content'] = new FormattableMarkup($content, []);
+    if ($source = $icon->getSource()) {
+      $context['source'] = $source;
+    }
+
+    if ($content = $icon->getData('content')) {
+      $context['content'] = $content;
     }
 
     // @todo do we need all data?
@@ -80,8 +84,8 @@ class Icon extends RenderElementBase {
       '#context' => $context + $element['#settings'],
     ];
 
-    if ($icon->getLibrary()) {
-      $element['inline-template']['#attached'] = ['library' => [$icon->getLibrary()]];
+    if ($library = $icon->getData('library')) {
+      $element['inline-template']['#attached'] = ['library' => [$library]];
     }
 
     return $element;

@@ -4,234 +4,167 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons\Unit;
 
-use Drupal\Tests\UnitTestCase;
-use Drupal\ui_icons\Exception\IconPackConfigErrorException;
-use Drupal\ui_icons\IconDefinitionInterface;
 use Drupal\ui_icons\IconFinder;
 use Drupal\ui_icons\Plugin\IconExtractor\SvgSpriteExtractor;
 
 /**
- * Tests ui_icons svg_sprite extractor plugin.
+ * @coversDefaultClass \Drupal\ui_icons\Plugin\IconExtractor\SvgSpriteExtractor
  *
  * @group ui_icons
  */
-class SvgSpriteExtractorTest extends UnitTestCase {
+class SvgSpriteExtractorTest extends IconUnitTestCase {
 
   /**
-   * Test the getIcons method.
+   * This test plugin id (icon pack id).
    */
-  public function testDiscoverIconsExceptionSource(): void {
-    $svgSpriteExtractorPlugin = new SvgSpriteExtractor(
-      [],
-      'test_extractor',
-      [
-        'label' => 'Test',
-        'description' => 'Test description',
-      ],
-      $this->createMock(IconFinder::class),
-    );
-    $this->expectException(IconPackConfigErrorException::class);
-    $this->expectExceptionMessage('Missing `config: sources` in your definition, extractor test_extractor require this value.');
-    $svgSpriteExtractorPlugin->discoverIcons();
-  }
+  private string $pluginId = 'test_svg_sprite';
 
   /**
-   * Test the getIcons method.
-   */
-  public function testDiscoverIconsExceptionSourceEmpty(): void {
-    $svgSpriteExtractorPlugin = new SvgSpriteExtractor(
-      [
-        'config' => ['sources' => []],
-      ],
-      'test_extractor',
-      [
-        'label' => 'Test',
-        'description' => 'Test description',
-      ],
-      $this->createMock(IconFinder::class),
-    );
-    $this->expectException(IconPackConfigErrorException::class);
-    $this->expectExceptionMessage('Missing `config: sources` in your definition, extractor test_extractor require this value.');
-    $svgSpriteExtractorPlugin->discoverIcons();
-  }
-
-  /**
-   * Test the getIcons method.
-   */
-  public function testDiscoverIconsExceptionRelativePath(): void {
-    $svgSpriteExtractorPlugin = new SvgSpriteExtractor(
-      [
-        'config' => ['sources' => ['foo/bar']],
-        'definition_relative_path' => '',
-        'definition_absolute_path' => '',
-      ],
-      'test_extractor',
-      [
-        'label' => 'Test',
-        'description' => 'Test description',
-      ],
-      $this->createMock(IconFinder::class),
-    );
-    $this->expectException(IconPackConfigErrorException::class);
-    $this->expectExceptionMessage('Empty relative path for extractor test_extractor.');
-    $svgSpriteExtractorPlugin->discoverIcons();
-  }
-
-  /**
-   * Test the getIcons method.
-   */
-  public function testDiscoverIconsInvalid(): void {
-    $iconFinder = $this->createMock(IconFinder::class);
-
-    $icons_list = [
-      'baz' => [
-        'name' => 'baz',
-        'icon_id' => 'baz',
-        'source' => 'web/modules/my_module/foo/bar/baz.svg',
-        'absolute_path' => '/_ROOT_/web/modules/my_module/foo/bar/baz.svg',
-        'group' => NULL,
-      ],
-    ];
-    $iconFinder->method('getFilesFromSources')->willReturn($icons_list);
-    $svg_data = 'Not valid svg';
-    $iconFinder->method('getFileContents')->willReturn($svg_data);
-
-    $svgSpriteExtractorPlugin = new SvgSpriteExtractor(
-      [
-        'config' => ['sources' => ['foo/bar/baz.svg']],
-        'definition_relative_path' => 'modules/my_module',
-        'definition_absolute_path' => '/_ROOT_/web/modules/my_module',
-        'icon_pack_id' => 'svg_sprite',
-      ],
-      'test_extractor',
-      [
-        'label' => 'Test',
-        'description' => 'Test description',
-      ],
-      $iconFinder,
-    );
-
-    $icons = $svgSpriteExtractorPlugin->discoverIcons();
-    $this->assertArrayHasKey("svg_sprite:Start tag expected, '<' not found", $icons);
-  }
-
-  /**
-   * Test the getIcons method.
-   */
-  public function testDiscoverIconsEmpty(): void {
-    $iconFinder = $this->createMock(IconFinder::class);
-    $iconFinder->method('getFilesFromSources')->willReturn([]);
-
-    $svgSpriteExtractorPlugin = new SvgSpriteExtractor(
-      [
-        'config' => ['sources' => ['foo/bar/baz.svg']],
-        'definition_relative_path' => 'modules/my_module',
-        'definition_absolute_path' => '/_ROOT_/web/modules/my_module',
-        'icon_pack_id' => 'svg_sprite',
-      ],
-      'test_extractor',
-      [
-        'label' => 'Test',
-        'description' => 'Test description',
-      ],
-      $iconFinder,
-    );
-    $icons = $svgSpriteExtractorPlugin->discoverIcons();
-
-    $this->assertEmpty($icons);
-  }
-
-  /**
-   * Test the getIcons method.
+   * Data provider for ::testDiscoverIconsSvgSprite().
    *
-   * @param string $svg
-   *   The svg to test.
-   * @param int $expected_count
-   *   The number of icon expected.
-   * @param array $expected_icon
+   * @return \Generator
+   *   The test cases.
+   */
+  public static function providerDiscoverIconsSvgSprite(): iterable {
+    yield 'empty files' => [
+      [],
+      [],
+      [],
+    ];
+
+    yield 'svg not sprite is ignored' => [
+      [
+        [
+          'source' => 'source/baz',
+          'absolute_path' => '/path/baz.svg',
+        ],
+      ],
+      [
+        ['/path/baz.svg', '<svg><path d="M8 15a.5.5 0 0 0"/></svg>'],
+      ],
+      [],
+    ];
+
+    yield 'svg sprite with one symbol' => [
+      [
+        [
+          'source' => 'source/baz',
+          'absolute_path' => '/path/baz.svg',
+        ],
+      ],
+      [
+        ['/path/baz.svg', '<svg><symbol id="foo"></symbol></svg>'],
+      ],
+      ['foo'],
+    ];
+
+    yield 'single file with multiple symbol' => [
+      [
+        [
+          'absolute_path' => '/path/baz.svg',
+          'source' => 'source/baz',
+        ],
+      ],
+      [
+        ['/path/baz.svg', '<svg><symbol id="foo"></symbol><symbol id="bar"></symbol></svg>'],
+      ],
+      ['foo', 'bar'],
+    ];
+
+    yield 'single file with multiple symbol in defs' => [
+      [
+        [
+          'absolute_path' => '/path/baz.svg',
+          'source' => 'source/baz',
+        ],
+      ],
+      [
+        ['/path/baz.svg', '<svg><defs><symbol id="foo"></symbol><symbol id="bar"></symbol></defs></svg>'],
+      ],
+      ['foo', 'bar'],
+    ];
+  }
+
+  /**
+   * Test the SvgSpriteExtractor::discoverIcons() method.
+   *
+   * @param array<array<string, string>> $icons
+   *   The icons to test.
+   * @param array<int, array<int, mixed>> $contents_map
+   *   The content returned by fileGetContents() based on absolute_path.
+   * @param array<string> $expected
    *   The icon ids expected.
    *
-   * @dataProvider providerDiscoverIcons
+   * @dataProvider providerDiscoverIconsSvgSprite
    */
-  public function testDiscoverIcons(string $svg, int $expected_count, array $expected_icon): void {
-    $extractor_id = 'svg_sprite';
+  public function testDiscoverIconsSvgSprite(array $icons, array $contents_map, array $expected): void {
+    $return_list = [];
+    foreach ($icons as $icon) {
+      $return_list[] = $this->createIconData($icon);
+    }
     $iconFinder = $this->createMock(IconFinder::class);
+    $iconFinder->method('getFilesFromSources')->willReturn($return_list);
 
-    $icons_list = [
-      'baz' => [
-        'name' => 'baz',
-        'icon_id' => 'baz',
-        'source' => 'web/modules/my_module/foo/bar/baz.svg',
-        'absolute_path' => '/_ROOT_/web/modules/my_module/foo/bar/baz.svg',
-        'group' => NULL,
-      ],
-    ];
-    $iconFinder->method('getFilesFromSources')->willReturn($icons_list);
+    $iconFinder->method('getFileContents')
+      ->willReturnMap($contents_map);
 
-    $svg_data = '<svg xmlns="http://www.w3.org/2000/svg">' . $svg . '</svg>';
-    $iconFinder->method('getFileContents')->willReturn($svg_data);
-
-    $svgSpriteExtractorPlugin = new SvgSpriteExtractor(
+    $svgExtractorPlugin = new SvgSpriteExtractor(
       [
-        'config' => ['sources' => ['foo/bar/baz.svg']],
-        'definition_relative_path' => 'modules/my_module',
-        'definition_absolute_path' => '/_ROOT_/web/modules/my_module',
-        'icon_pack_id' => $extractor_id,
+        'id' => $this->pluginId,
+        'config' => ['sources' => ['foo/bar/{icon_id}.svg']],
+        'template' => '_foo_',
+        'relative_path' => 'modules/my_module',
       ],
-      'test_extractor',
-      [
-        'label' => 'Test',
-        'description' => 'Test description',
-      ],
+      $this->pluginId,
+      [],
       $iconFinder,
     );
-    $icons = $svgSpriteExtractorPlugin->discoverIcons();
+    $result = $svgExtractorPlugin->discoverIcons();
 
-    $this->assertCount($expected_count, $icons);
+    if (empty($expected)) {
+      $this->assertEmpty($result);
+      return;
+    }
 
-    if (!empty($expected_icon)) {
-      foreach ($expected_icon as $icon) {
-        $key = $extractor_id . ':' . $icon;
-        $this->assertArrayHasKey($key, $icons);
-        $this->assertInstanceOf(IconDefinitionInterface::class, $icons[$key]);
+    foreach ($icons as $index => $expected_icon) {
+      // Main test is to ensure the icon id is extracted.
+      $this->assertSame($expected[$index], $result[$index]->getIconId());
+    }
 
-        $this->assertSame($icon, $icons[$key]->getIconId());
-        $this->assertSame('web/modules/my_module/foo/bar/baz.svg', $icons[$key]->getSource());
-      }
+    // Basic data are not altered and can be compared directly.
+    foreach ($result as $icon) {
+      $this->assertSame($icons[$index]['source'], $icon->getSource());
+      $this->assertSame($icons[$index]['group'] ?? NULL, $icon->getGroup());
     }
   }
 
   /**
-   * Data provider for testDiscoverIcons().
+   * Test the SvgSpriteExtractor::discoverIcons() method with invalid svg.
    */
-  public static function providerDiscoverIcons() {
-    return [
+  public function testDiscoverIconsSvgSpriteInvalid(): void {
+    $iconFinder = $this->createMock(IconFinder::class);
+    $iconFinder->method('getFilesFromSources')->willReturn([
+      $this->createIconData(),
+    ]);
+    $iconFinder->method('getFileContents')->willReturn('Not valid svg');
+
+    $svgSpriteExtractorPlugin = new SvgSpriteExtractor(
       [
-        '',
-        0,
-        [],
+        'id' => $this->pluginId,
+        'config' => ['sources' => ['foo/bar/{icon_id}.svg']],
+        'template' => '_foo_',
+        'relative_path' => 'modules/my_module',
       ],
-      [
-        '<symbol id="foo"></symbol>',
-        1,
-        ['foo'],
-      ],
-      [
-        '<symbol id="foo"></symbol><symbol id="bar"></symbol>',
-        2,
-        ['foo', 'bar'],
-      ],
-      [
-        '<defs><symbol id="foo"></symbol></defs>',
-        1,
-        ['foo'],
-      ],
-      [
-        '<defs><symbol id="foo"></symbol><symbol id="bar"></symbol></defs>',
-        2,
-        ['foo', 'bar'],
-      ],
-    ];
+      $this->pluginId,
+      [],
+      $iconFinder,
+    );
+
+    $icons = $svgSpriteExtractorPlugin->discoverIcons();
+    $this->assertEmpty($icons);
+    foreach (libxml_get_errors() as $error) {
+      $this->assertSame("Start tag expected, '<' not found", trim($error->message));
+    }
   }
 
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_icons_text\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\ui_icons\IconDefinition;
 use Drupal\ui_icons_text\Plugin\Filter\IconEmbed;
 
 /**
@@ -17,7 +18,7 @@ class IconEmbedFilterTest extends KernelTestBase {
   /**
    * Icon pack from ui_icons_test module.
    */
-  private const TEST_ICON_PACK_ID = 'test';
+  private const TEST_ICON_PACK_ID = 'test_path';
 
   /**
    * Icon from ui_icons_test module.
@@ -89,7 +90,7 @@ class IconEmbedFilterTest extends KernelTestBase {
    * Test the process method.
    */
   public function testProcess(): void {
-    $icon_full_id = self::TEST_ICON_PACK_ID . ':' . self::TEST_ICON_ID;
+    $icon_full_id = IconDefinition::createIconId(self::TEST_ICON_PACK_ID, self::TEST_ICON_ID);
 
     // Test case 1: No icon tags.
     $text = '<p>This is a test paragraph without icons.</p>';
