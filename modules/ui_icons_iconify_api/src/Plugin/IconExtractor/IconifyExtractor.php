@@ -88,9 +88,9 @@ class IconifyExtractor extends IconExtractorBase implements ContainerFactoryPlug
         if (!is_string($icon_id)) {
           continue;
         }
-        $icon_full_id = $this->configuration['icon_pack_id'] . ':' . $icon_id;
+
         $source = sprintf('%s/%s/%s.svg', IconifyApi::API_ENDPOINT, $collection, $icon_id);
-        $icons[$icon_full_id] = $this->createIcon($icon_id, $this->configuration, $source);
+        $icons[] = $this->createIcon($icon_id, $source);
       }
     }
 

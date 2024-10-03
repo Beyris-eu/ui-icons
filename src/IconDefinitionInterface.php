@@ -12,25 +12,49 @@ interface IconDefinitionInterface {
   /**
    * Create an icon definition.
    *
+   * @param string $pack_id
+   *   The id of the icon pack.
    * @param string $icon_id
    *   The id of the icon.
+   * @param string $template
+   *   The icon template from definition.
+   * @param string|null $source
+   *   The source, url or path of the icon.
+   * @param string|null $group
+   *   The group of the icon.
    * @param array $data
    *   The additional data of the icon.
-   * @param string|null $source
-   *   The source of the icon (optional).
-   * @param string|null $group
-   *   The group of the icon (optional).
    *
    * @return self
    *   The icon definition.
    */
-  public static function create(string $icon_id, array $data, ?string $source = NULL, ?string $group = NULL): self;
+  public static function create(
+    string $pack_id,
+    string $icon_id,
+    string $template,
+    ?string $source = NULL,
+    ?string $group = NULL,
+    ?array $data = NULL,
+  ): self;
 
   /**
-   * Get the Icon name.
+   * Create an icon full id.
+   *
+   * @param string $pack_id
+   *   The id of the icon pack.
+   * @param string $icon_id
+   *   The id of the icon.
    *
    * @return string
-   *   The icon name.
+   *   The icon full id.
+   */
+  public static function createIconId(string $pack_id, string $icon_id): string;
+
+  /**
+   * Get the Icon label as human friendly.
+   *
+   * @return string
+   *   The icon label.
    */
   public function getLabel(): string;
 
@@ -38,7 +62,7 @@ interface IconDefinitionInterface {
    * Get the full Icon id.
    *
    * @return string
-   *   The icon id as icon_pack_id:icon_id.
+   *   The icon id as pack_id:icon_id.
    */
   public function getId(): string;
 
@@ -51,60 +75,47 @@ interface IconDefinitionInterface {
   public function getIconId(): string;
 
   /**
-   * Get the Icon source.
-   *
-   * @return string|null
-   *   The icon source.
-   */
-  public function getSource(): ?string;
-
-  /**
-   * Get the Icon group.
-   *
-   * @return string|null
-   *   The icon group.
-   */
-  public function getGroup(): ?string;
-
-  /**
-   * Get the Icon content.
-   *
-   * @return string|null
-   *   The icon content if set.
-   */
-  public function getContent(): ?string;
-
-  /**
-   * Get the Icon template.
-   *
-   * @return string
-   *   The icon template.
-   */
-  public function getTemplate(): string;
-
-  /**
-   * Get the Icon library.
-   *
-   * @return string|null
-   *   The icon library.
-   */
-  public function getLibrary(): ?string;
-
-  /**
    * Get the Icon Pack id.
    *
    * @return string
    *   The Icon Pack id.
    */
-  public function getIconPackId(): string;
+  public function getPackId(): string;
 
   /**
-   * Get the Icon Pack label.
+   * Get the Icon source, path or url.
+   *
+   * @return string|null
+   *   The Icon source.
+   */
+  public function getSource(): ?string;
+
+  /**
+   * Get the Icon Group.
+   *
+   * @return string|null
+   *   The Icon Group.
+   */
+  public function getGroup(): ?string;
+
+  /**
+   * Get the Icon Twig template.
    *
    * @return string
-   *   The Icon Pack label.
+   *   The Icon template.
    */
-  public function getIconPackLabel(): string;
+  public function getTemplate(): string;
+
+  /**
+   * Get the Icon data.
+   *
+   * @param string $key
+   *   The ata key to find.
+   *
+   * @return mixed
+   *   The icon data if exist or null.
+   */
+  public function getData(string $key): mixed;
 
   /**
    * Get the Icon renderable array.
@@ -118,13 +129,19 @@ interface IconDefinitionInterface {
   public function getRenderable(array $settings = []): array;
 
   /**
-   * Get the Icon preview array.
+   * Get the Icon preview renderable.
+   *
+   * There is 2 modes for preview, an internal preview based on icon_preview
+   * theme and template, generic and compatible with core extractors.
+   * For specific cases like fonts icons where the display is unknown, the
+   * definition can provide a `preview` key with a specific Twig template used
+   * to render the Icon in a preview context, ie: admin and library.
    *
    * @param array $settings
    *   Settings to pass to the renderable for context.
    *
    * @return array
-   *   The Icon preview.
+   *   The Icon preview render element.
    */
   public function getPreview(array $settings = []): array;
 

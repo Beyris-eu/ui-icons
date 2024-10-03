@@ -13,7 +13,7 @@ use Drupal\ui_icons\Plugin\IconPackManagerInterface;
 /**
  * Tests the ui_icons_menu module.
  *
- * @group ui_icons_menu
+ * @group ui_icons
  */
 class UiIconsMenuTest extends KernelTestBase {
 
@@ -59,7 +59,7 @@ class UiIconsMenuTest extends KernelTestBase {
   }
 
   /**
-   * Data provider for testPreprocessMenu.
+   * Data provider for ::testPreprocessMenu().
    */
   public static function iconDisplayDataProvider(): array {
     return [
@@ -103,7 +103,7 @@ class UiIconsMenuTest extends KernelTestBase {
 
     // Create a mock IconDefinitionInterface.
     $icon = $this->createMock(IconDefinitionInterface::class);
-    $icon->method('getIconPackId')->willReturn('test_pack');
+    $icon->method('getPackId')->willReturn('test_pack');
     $icon->method('getRenderable')->willReturn(['#markup' => '<img class="icon drupal-icon" src=""/>']);
 
     // Mock the icon pack manager service.
@@ -126,7 +126,7 @@ class UiIconsMenuTest extends KernelTestBase {
 
       foreach ($expectedOrder as $index => $key) {
         $this->assertArrayHasKey($key, $variables['items'][0]['title']);
-        $this->assertSame($index, array_search($key, array_keys($variables['items'][0]['title'])));
+        $this->assertSame($index, array_search($key, array_keys($variables['items'][0]['title']), TRUE));
       }
 
       $this->assertEquals(

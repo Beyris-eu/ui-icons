@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace Drupal\ui_icons_field\Kernel\Plugin;
 
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTest;
 
 /**
- * Tests the IconWidget field class.
+ * @coversDefaultClass \Drupal\ui_icons_field\Plugin\Field\FieldWidget\IconWidget
  *
  * @group ui_icons
  */
@@ -30,13 +28,6 @@ class IconWidgetTest extends KernelTestBase {
     'ui_icons_field',
     'ui_icons_test',
   ];
-
-  /**
-   * The field definition.
-   *
-   * @var \Drupal\Core\Field\FieldDefinitionInterface
-   */
-  private FieldDefinitionInterface $fieldDefinition;
 
   /**
    * The base field definition.
@@ -60,10 +51,6 @@ class IconWidgetTest extends KernelTestBase {
 
     $this->installEntitySchema('entity_test');
     $this->installConfig(['system']);
-
-    $this->fieldDefinition = $this->createMock(FieldDefinitionInterface::class);
-    $this->fieldDefinition->method('getFieldStorageDefinition')
-      ->willReturn($this->createMock(FieldStorageDefinitionInterface::class));
   }
 
   /**
@@ -89,13 +76,13 @@ class IconWidgetTest extends KernelTestBase {
       'name' => 'sample entity 2',
     ]);
     $entity->icon = [
-      'target_id' => 'test_local_files:local__9.0_blue',
+      'target_id' => 'test_minimal:foo',
     ];
     $entity->save();
 
     // Reload the entity and check that the field value is correct.
     $entity = EntityTest::load($entity->id());
-    $this->assertEquals('test_local_files:local__9.0_blue', $entity->icon->target_id);
+    $this->assertEquals('test_minimal:foo', $entity->icon->target_id);
   }
 
   /**

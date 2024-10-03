@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons\Kernel\Plugin;
 
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_icons\Exception\IconPackConfigErrorException;
 use Drupal\ui_icons\IconDefinitionInterface;
@@ -12,7 +11,7 @@ use Drupal\ui_icons\Plugin\IconPackManager;
 use Drupal\ui_icons\Plugin\IconPackManagerInterface;
 
 /**
- * Tests the IconPackManager class.
+ * @coversDefaultClass \Drupal\ui_icons\Plugin\IconPackManager
  *
  * Tests values are from test module.
  *
@@ -25,7 +24,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
   /**
    * Icon from ui_icons_test module.
    */
-  private const TEST_ICON_FULL_ID = 'test:foo';
+  private const TEST_ICON_FULL_ID = 'test_minimal:foo';
 
   /**
    * {@inheritdoc}
@@ -83,7 +82,19 @@ class IconPackManagerKernelTest extends KernelTestBase {
    */
   public function testGetIcons(): void {
     $icons = $this->pluginManagerIconPack->getIcons();
-    $this->assertArrayHasKey(self::TEST_ICON_FULL_ID, $icons);
+    $this->assertCount(30, $icons);
+    foreach ($icons as $icon) {
+      $this->assertInstanceOf(IconDefinitionInterface::class, $icon);
+    }
+
+    $icons = $this->pluginManagerIconPack->getIcons(['test_minimal']);
+    $this->assertCount(1, $icons);
+    foreach ($icons as $icon) {
+      $this->assertInstanceOf(IconDefinitionInterface::class, $icon);
+    }
+
+    $icons = $this->pluginManagerIconPack->getIcons(['do_not_exist']);
+    $this->assertEmpty($icons);
   }
 
   /**
@@ -93,7 +104,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
     $icon = $this->pluginManagerIconPack->getIcon(self::TEST_ICON_FULL_ID);
     $this->assertInstanceOf(IconDefinitionInterface::class, $icon);
 
-    $icon = $this->pluginManagerIconPack->getIcon('test_local_files:_do_not_exist_');
+    $icon = $this->pluginManagerIconPack->getIcon('test_minimal:_do_not_exist_');
     $this->assertNull($icon);
   }
 
@@ -103,47 +114,29 @@ class IconPackManagerKernelTest extends KernelTestBase {
   public function testListIconPackOptions(): void {
     $actual = $this->pluginManagerIconPack->listIconPackOptions();
     $expected = [
-      'test' => 'Test icons (9)',
-      'test_svg' => 'Test SVG (10)',
-      'test_svg_sprite' => 'Small sprite (3)',
-      'test_no_settings' => 'No Settings (1)',
+      'test_minimal' => 'test_minimal (1)',
+      'test_path' => 'Test path (10)',
+      'test_svg' => 'Test svg (11)',
+      'test_svg_sprite' => 'Test sprite (3)',
+      'test_no_settings' => 'test_no_settings (1)',
       'test_settings' => 'Test settings (1)',
-      'test_url_path' => 'Test url path (4)',
+      'test_url_path' => 'Test url path (2)',
+      'test_url_svg' => 'Test url svg (1)',
     ];
     $this->assertEquals($expected, $actual);
-  }
 
-  /**
-   * Test the listIconPackWithDescriptionOption method.
-   */
-  public function testListIconPackWithDescriptionOptions(): void {
-    $actual = $this->pluginManagerIconPack->listIconPackWithDescriptionOptions();
+    $actual = $this->pluginManagerIconPack->listIconPackOptions(TRUE);
     $expected = [
-      'test' => 'Test icons (9) - Local files relative available for test.',
-      'test_svg' => 'Test SVG (10)',
-      'test_svg_sprite' => 'Small sprite (3)',
-      'test_no_settings' => 'No Settings (1)',
+      'test_minimal' => 'test_minimal (1)',
+      'test_path' => 'Test path - Local png files available for test. (10)',
+      'test_svg' => 'Test svg (11)',
+      'test_svg_sprite' => 'Test sprite (3)',
+      'test_no_settings' => 'test_no_settings (1)',
       'test_settings' => 'Test settings (1)',
-      'test_url_path' => 'Test url path (4)',
+      'test_url_path' => 'Test url path (2)',
+      'test_url_svg' => 'Test url svg (1)',
     ];
     $this->assertEquals($expected, $actual);
-  }
-
-  /**
-   * Test the listIconOptions method.
-   */
-  public function testListIconOptions(): void {
-    $actual = $this->pluginManagerIconPack->listIconOptions();
-    $this->assertCount(28, $actual);
-
-    $actual = $this->pluginManagerIconPack->listIconOptions(['test']);
-    $this->assertCount(9, $actual);
-
-    $actual = $this->pluginManagerIconPack->listIconOptions(['test_no_icons']);
-    $this->assertCount(0, $actual);
-
-    $actual = $this->pluginManagerIconPack->listIconOptions(['do_not_exist']);
-    $this->assertCount(0, $actual);
   }
 
   /**
@@ -172,38 +165,48 @@ class IconPackManagerKernelTest extends KernelTestBase {
    * Test the getExtractorPluginForms method.
    */
   public function testGetExtractorPluginForms(): void {
-    $form_state = $this->createMock(FormStateInterface::class);
+    $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
+      ->disableOriginalConstructor()
+      ->getMock();
     $form = [];
 
     $this->pluginManagerIconPack->getExtractorPluginForms($form, $form_state);
 
     // @see ui_icons/tests/modules/ui_icons_test/ui_icons_test.ui_icons.yml
-    $this->assertCount(5, array_keys($form));
-    $expected = ['test', 'test_svg', 'test_svg_sprite', 'test_settings', 'test_no_icons'];
+    $this->assertCount(4, array_keys($form));
+    $expected = ['test_path', 'test_svg', 'test_svg_sprite', 'test_settings'];
     $this->assertSame($expected, array_keys($form));
 
-    // Check under settings form key.
-    $this->assertArrayHasKey('width', $form['test']);
-    $this->assertArrayHasKey('height', $form['test']);
-    $this->assertArrayHasKey('alt', $form['test']);
+    $expected = [
+      '#type',
+      '#title',
+      'width',
+      'height',
+      'title',
+    ];
+    $this->assertSame($expected, array_keys($form['test_path']));
 
-    $this->assertArrayHasKey('size', $form['test_svg']);
-    $this->assertArrayHasKey('alt', $form['test_svg']);
+    $expected = [
+      '#type',
+      '#title',
+      'width',
+      'height',
+    ];
+    $this->assertSame($expected, array_keys($form['test_svg_sprite']));
 
-    $this->assertArrayHasKey('width', $form['test_svg_sprite']);
-    $this->assertArrayHasKey('height', $form['test_svg_sprite']);
-    $this->assertArrayHasKey('alt', $form['test_svg_sprite']);
-
-    $this->assertArrayHasKey('width', $form['test_settings']);
-    $this->assertArrayHasKey('height', $form['test_settings']);
-    $this->assertArrayHasKey('title', $form['test_settings']);
-    $this->assertArrayHasKey('alt', $form['test_settings']);
-    $this->assertArrayHasKey('select', $form['test_settings']);
-    $this->assertArrayHasKey('boolean', $form['test_settings']);
-    $this->assertArrayHasKey('decimal', $form['test_settings']);
-    $this->assertArrayHasKey('number', $form['test_settings']);
-
-    $this->assertArrayHasKey('title', $form['test_no_icons']);
+    $expected = [
+      '#type',
+      '#title',
+      'width',
+      'height',
+      'title',
+      'alt',
+      'select',
+      'boolean',
+      'decimal',
+      'number',
+    ];
+    $this->assertSame($expected, array_keys($form['test_settings']));
 
     // No form if no settings.
     $this->assertArrayNotHasKey('test_no_settings', $form);
@@ -213,7 +216,9 @@ class IconPackManagerKernelTest extends KernelTestBase {
    * Test the getExtractorPluginForms method.
    */
   public function testGetExtractorPluginFormsWithAllowed(): void {
-    $form_state = $this->createMock(FormStateInterface::class);
+    $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
+      ->disableOriginalConstructor()
+      ->getMock();
     $form = [];
 
     $allowed_icon_pack['test_svg'] = '';
@@ -222,7 +227,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
 
     $this->assertArrayHasKey('test_svg', $form);
 
-    $this->assertArrayNotHasKey('test', $form);
+    $this->assertArrayNotHasKey('test_minimal', $form);
     $this->assertArrayNotHasKey('test_svg_sprite', $form);
     $this->assertArrayNotHasKey('test_no_icons', $form);
   }
@@ -239,22 +244,29 @@ class IconPackManagerKernelTest extends KernelTestBase {
       ],
     ];
 
-    $form_state = $this->createMock(FormStateInterface::class);
+    $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
+      ->disableOriginalConstructor()
+      ->onlyMethods(['setValue', 'getValue'])
+      ->getMock();
     $this->pluginManagerIconPack->getExtractorPluginForms($form, $form_state);
 
     // Without default, values are from definition.
-    $this->assertSame(32, $form['test_settings']['width']['#default_value']);
-    $this->assertSame(33, $form['test_settings']['height']['#default_value']);
-    $this->assertSame('Default title', $form['test_settings']['title']['#default_value']);
-    $this->assertSame('Default alt', $form['test_settings']['alt']['#default_value']);
-    $this->assertSame(400, $form['test_settings']['select']['#default_value']);
-    $this->assertTrue($form['test_settings']['boolean']['#default_value']);
-    $this->assertSame(66.66, $form['test_settings']['decimal']['#default_value']);
-    $this->assertSame(30, $form['test_settings']['number']['#default_value']);
+    $expected = [
+      'width' => 32,
+      'height' => 33,
+      'title' => 'Default title',
+      'alt' => 'Default alt',
+      'select' => 400,
+      'boolean' => TRUE,
+      'decimal' => 66.66,
+      'number' => 30,
+    ];
+    foreach ($expected as $key => $value) {
+      $this->assertSame($value, $form['test_settings'][$key]['#default_value']);
+    }
 
     // Test definition without value.
     $this->assertArrayNotHasKey('#default_value', $form['test_svg']['size']);
-    $this->assertArrayNotHasKey('#default_value', $form['test_svg']['alt']);
 
     $default_settings = ['test_settings' => ['width' => 100, 'height' => 110, 'title' => 'Test']];
 
@@ -294,14 +306,14 @@ class IconPackManagerKernelTest extends KernelTestBase {
     $this->assertSame('Foo', $definition['label']);
 
     $relative_path = 'modules/custom/ui_icons/tests/modules/ui_icons_test';
-    $this->assertEquals($relative_path, $definition['definition_relative_path']);
+    $this->assertEquals($relative_path, $definition['relative_path']);
 
     $absolute_path = sprintf('%s/%s', $this->appRoot, $relative_path);
-    $this->assertEquals($absolute_path, $definition['definition_absolute_path']);
+    $this->assertEquals($absolute_path, $definition['absolute_path']);
   }
 
   /**
-   * Test the processDefinition method.
+   * Test the processDefinition method with exception.
    */
   public function testProcessDefinitionExceptionName(): void {
     $definition = ['provider' => 'foo'];
@@ -311,7 +323,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
   }
 
   /**
-   * Test the processDefinition method.
+   * Test the processDefinition method with exception.
    */
   public function testProcessDefinitionExceptionExtractor(): void {
     $definition = [
@@ -326,7 +338,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
   }
 
   /**
-   * Test the processDefinition method.
+   * Test the processDefinition method with exception.
    */
   public function testProcessDefinitionExceptionTemplate(): void {
     $definition = [

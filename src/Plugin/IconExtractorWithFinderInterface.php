@@ -10,16 +10,11 @@ namespace Drupal\ui_icons\Plugin;
 interface IconExtractorWithFinderInterface extends IconExtractorInterface {
 
   /**
-   * Create files from sources config.
+   * Create files data from sources config.
    *
-   * @param array $sources
-   *   The extractor config sources, path or url.
-   * @param string $relative_path
-   *   The definition relative path.
-   *
-   * @return array
+   * @return array<string, array<string, string|null>>
    *   List of files with metadata.
    */
-  public function getFilesFromSources(array $sources, string $relative_path): array;
+  public function getFilesFromSources(): array;
 
 }

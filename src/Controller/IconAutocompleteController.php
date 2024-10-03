@@ -62,7 +62,7 @@ class IconAutocompleteController extends ControllerBase {
 
     $max_result = (int) $request->query->get('max_result', 20);
 
-    $icons = $this->pluginManagerIconPack->getIcons();
+    $icons = $this->pluginManagerIconPack->getIcons($allowed_icon_pack);
     if (empty($icons)) {
       return new JsonResponse([]);
     }
@@ -71,6 +71,7 @@ class IconAutocompleteController extends ControllerBase {
     if (empty($query) || empty($query[0] ?? '')) {
       return new JsonResponse([]);
     }
+
     $result = $this->searchIcon($icons, $query, $max_result, $allowed_icon_pack);
 
     return new JsonResponse($result);
@@ -78,6 +79,12 @@ class IconAutocompleteController extends ControllerBase {
 
   /**
    * Find an icon based on search string.
+   *
+   * The search is fuzzy on words with a priority:
+   *  - Words in order
+   *  - Words in any order
+   *  - Any parts of words
+   * For example if I search.
    *
    * @param \Drupal\ui_icons\IconDefinitionInterface[] $icons
    *   The list of icons definitions.
@@ -96,41 +103,26 @@ class IconAutocompleteController extends ControllerBase {
     $exactOrderPattern = '/' . implode('\s+', array_map(function ($word) {
       return '\b' . preg_quote($word, '/') . '\b';
     }, $words)) . '/i';
-    // Fallback to any order.
+    // Then any order.
     $anyOrderPattern = '/' . implode('.*', array_map(function ($word) {
       return '\b' . preg_quote($word, '/') . '\b';
     }, $words)) . '/i';
-    // Fallback to any words part.
+    // Any words part.
     $anyPartPattern = '/' . implode('.*', array_map('preg_quote', $words)) . '/i';
 
     $matches = [];
-    foreach ($icons as $icon_id => $icon) {
-
-      // First ignore allowed pack.
-      if ($allowed_icon_pack) {
-        $icon_pack_match = FALSE;
-        foreach ($allowed_icon_pack as $icon_pack) {
-          if (str_starts_with($icon_id, $icon_pack . ':')) {
-            $icon_pack_match = TRUE;
-            break;
-          }
-        }
-        if (!$icon_pack_match) {
-          continue;
-        }
-      }
-
-      // Search is based on icon clean label and icon_pack_label.
-      $item = $icon->getLabel() . ' ' . $icon->getIconPackLabel();
+    foreach ($icons as $icon) {
+      // Search is based on icon clean label and pack_label.
+      $item = trim($icon->getLabel() . ' ' . $icon->getData('pack_label'));
 
       if (preg_match($exactOrderPattern, $item)) {
-        $matches[] = $this->createResultEntry($icon_id, $icon);
+        $matches[] = $this->createResultEntry($icon);
       }
       elseif (preg_match($anyOrderPattern, $item)) {
-        $matches[] = $this->createResultEntry($icon_id, $icon);
+        $matches[] = $this->createResultEntry($icon);
       }
       elseif (preg_match($anyPartPattern, $item)) {
-        $matches[] = $this->createResultEntry($icon_id, $icon);
+        $matches[] = $this->createResultEntry($icon);
       }
 
       if (count($matches) >= $max_result) {
@@ -144,22 +136,21 @@ class IconAutocompleteController extends ControllerBase {
   /**
    * Create icon result.
    *
-   * @param string $icon_id
-   *   The full icon id.
    * @param \Drupal\ui_icons\IconDefinitionInterface $icon
    *   The icon definition.
    *
    * @return array
    *   The icon result with keys 'value' and 'label'.
    */
-  private function createResultEntry(string $icon_id, IconDefinitionInterface $icon): array {
-    $label = sprintf('%s (%s)', $icon->getLabel(), $icon->getIconPackLabel());
+  private function createResultEntry(IconDefinitionInterface $icon): array {
     $icon_renderable = $icon->getPreview(['size' => 24]);
     $renderable = $this->renderer->renderInIsolation($icon_renderable);
+
+    $label = sprintf('%s (%s)', $icon->getLabel(), $icon->getData('pack_label') ?? $icon->getPackId());
     $param = ['@icon' => $renderable, '@name' => $label];
     $label = new FormattableMarkup('<span class="ui-menu-icon">@icon</span> @name', $param);
 
-    return ['value' => $icon_id, 'label' => $label];
+    return ['value' => $icon->getId(), 'label' => $label];
   }
 
 }

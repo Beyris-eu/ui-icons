@@ -27,11 +27,13 @@ use Drupal\ui_icons\IconDefinitionInterface;
  *   MACHINE_NAME:
  *     label: STRING
  *     description: STRING
+ *     license: STRING
+ *     license_url: STRING
  *     links:
  *       - DOCUMENTATION
  *     version: 1.0.0
  *     enabled: BOOL
- *     extractor: MACHINE_NAME
+ *     extractor: PLUGIN_NAME
  *     config:
  *       sources: ARRAY
  *     settings:
@@ -96,7 +98,60 @@ class IconPackManager extends DefaultPluginManager implements IconPackManagerInt
   /**
    * {@inheritdoc}
    */
-  public function getIcons(): array {
+  public function getDefinitions(): ?array {
+    $definitions = $this->getCachedDefinitions();
+
+    if (NULL !== $definitions) {
+      return $definitions;
+    }
+
+    $definitions = $this->findDefinitions();
+    foreach ($definitions as $id => $definition) {
+      // Do not include disabled definition with `enabled: false`.
+      if (isset($definition['enabled']) && $definition['enabled'] === FALSE) {
+        unset($definitions[$id]);
+        continue;
+      }
+
+      // Get the icons from the extractor and include them in each definition.
+      $definitions[$id]['icons'] = $this->getIconsFromDefinition($definition);
+    }
+
+    $this->setCachedDefinitions($definitions);
+
+    return $definitions;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function processDefinition(&$definition, $plugin_id): void {
+    if (preg_match('@[^a-z0-9_]@', $plugin_id)) {
+      throw new IconPackConfigErrorException(sprintf('Invalid Icon Pack id in: %s, name: %s must contain only lowercase letters, numbers, and underscores.', $definition['provider'], $plugin_id));
+    }
+
+    // @todo replace with json validation.
+    if (!isset($definition['template'])) {
+      throw new IconPackConfigErrorException('Missing `template:` key in your definition!');
+    }
+    if (!isset($definition['extractor'])) {
+      throw new IconPackConfigErrorException('Missing `extractor:` key in your definition!');
+    }
+
+    // Provide path information for extractors.
+    $relative_path = $this->moduleHandler->moduleExists($definition['provider'])
+      ? $this->moduleHandler->getModule($definition['provider'])->getPath()
+      : $this->themeHandler->getTheme($definition['provider'])->getPath();
+
+    $definition['relative_path'] = $relative_path;
+    // To avoid the need for appRoot in extractors.
+    $definition['absolute_path'] = sprintf('%s/%s', $this->appRoot, $relative_path);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getIcons(?array $allowed_icon_pack = NULL): array {
     $definitions = $this->getDefinitions();
 
     if (NULL === $definitions) {
@@ -105,15 +160,10 @@ class IconPackManager extends DefaultPluginManager implements IconPackManagerInt
 
     $icons = [];
     foreach ($definitions as $definition) {
-      if (!isset($definition['extractor'])) {
+      if ($allowed_icon_pack && !in_array($definition['id'], $allowed_icon_pack)) {
         continue;
       }
-
-      if (!isset($definition['_icons']['list'])) {
-        $icons += $this->getIconsFromDefinition($definition);
-        continue;
-      }
-      $icons += $definition['_icons']['list'];
+      $icons = array_merge($icons, $definition['icons'] ?? []);
     }
 
     return $icons;
@@ -124,8 +174,11 @@ class IconPackManager extends DefaultPluginManager implements IconPackManagerInt
    */
   public function getIcon(string $icon_id): ?IconDefinitionInterface {
     $icons = $this->getIcons();
-    if (isset($icons[$icon_id])) {
-      return $icons[$icon_id];
+
+    foreach ($icons as $icon) {
+      if ($icon->getId() === $icon_id) {
+        return $icon;
+      }
     }
 
     return NULL;
@@ -134,131 +187,21 @@ class IconPackManager extends DefaultPluginManager implements IconPackManagerInt
   /**
    * {@inheritdoc}
    */
-  public function listIconPackOptions(): array {
-    $icon_pack_definition = $this->getDefinitions();
-
-    if (NULL === $icon_pack_definition) {
-      return [];
-    }
-
-    $options = [];
-    foreach ($icon_pack_definition as $icon_pack_id => $definition) {
-      if (!isset($definition['_icons']['count'][$definition['extractor']])) {
-        continue;
-      }
-      $count = $definition['_icons']['count'][$definition['extractor']];
-      if (0 === $count) {
-        continue;
-      }
-      $options[$icon_pack_id] = sprintf('%s (%u)', $definition['label'] ?? $definition['id'], $count);
-    }
-
-    natsort($options);
-    return $options;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function listIconPackWithDescriptionOptions(): array {
-    $icon_pack_definition = $this->getDefinitions();
-
-    if (NULL === $icon_pack_definition) {
-      return [];
-    }
-
-    $options = [];
-    foreach ($icon_pack_definition as $icon_pack_id => $definition) {
-      if (!isset($definition['_icons']['count'][$definition['extractor']])) {
-        continue;
-      }
-      $count = $definition['_icons']['count'][$definition['extractor']];
-      if (0 === $count) {
-        continue;
-      }
-      $description = '';
-      if (isset($definition['description'])) {
-        $description = ' - ' . $definition['description'];
-      }
-      $options[$icon_pack_id] = sprintf('%s (%u)%s', $definition['label'] ?? $definition['id'], $count, $description);
-    }
-
-    return $options;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function listIconOptions(?array $allowed_icon_pack = NULL): array {
-    $icons = $this->getIcons();
-
-    if (empty($icons)) {
-      return [];
-    }
-
-    $result = [];
-    foreach ($icons as $icon_full_id => $icon) {
-      if ($allowed_icon_pack) {
-        if (in_array($icon->getIconPackId(), $allowed_icon_pack)) {
-          $result[$icon_full_id] = $icon->getLabel();
-        }
-      }
-      else {
-        $result[$icon_full_id] = $icon->getLabel();
-      }
-    }
-
-    return $result;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getExtractorFormDefaults(string $icon_pack_id): array {
+  public function getExtractorFormDefaults(string $pack_id): array {
     $all_icon_pack = $this->getDefinitions();
 
-    if (!isset($all_icon_pack[$icon_pack_id]) || !isset($all_icon_pack[$icon_pack_id]['settings'])) {
+    if (!isset($all_icon_pack[$pack_id]) || !isset($all_icon_pack[$pack_id]['settings'])) {
       return [];
     }
 
     $default = [];
-    foreach ($all_icon_pack[$icon_pack_id]['settings'] as $name => $definition) {
+    foreach ($all_icon_pack[$pack_id]['settings'] as $name => $definition) {
       if (isset($definition['default'])) {
         $default[$name] = $definition['default'];
       }
     }
 
     return $default;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getDefinitions(): ?array {
-    $definitions = $this->getCachedDefinitions();
-
-    if (NULL !== $definitions) {
-      return $definitions;
-    }
-
-    $definitions = $this->findDefinitions();
-    foreach ($definitions as $key => $definition) {
-      if (isset($definition['enabled']) && $definition['enabled'] === FALSE) {
-        unset($definitions[$key]);
-        continue;
-      }
-      $icons = $this->getIconsFromDefinition($definition);
-      $count_icons = count($icons);
-      $definitions[$key]['_icons'] = [
-        'list' => $icons,
-        'count' => [],
-      ];
-      $definitions[$key]['_icons']['count'][$definition['extractor']] = $count_icons;
-    }
-
-    $this->setCachedDefinitions($definitions);
-
-    return $definitions;
   }
 
   /**
@@ -280,7 +223,7 @@ class IconPackManager extends DefaultPluginManager implements IconPackManagerInt
       return;
     }
 
-    foreach ($icon_pack as $icon_pack_id => $plugin) {
+    foreach ($icon_pack as $pack_id => $plugin) {
       // Simply skip if no settings declared in definition.
       if (!isset($plugin['settings']) || empty($plugin['settings'])) {
         continue;
@@ -288,18 +231,44 @@ class IconPackManager extends DefaultPluginManager implements IconPackManagerInt
 
       // Create the container for each extractor settings used to have the
       // extractor form.
-      $form[$icon_pack_id] = [
+      $form[$pack_id] = [
         '#type' => $wrap_details ? 'details' : 'container',
         '#title' => $wrap_details ? $plugin['label'] : '',
       ];
 
       // Create the extractor form and set settings so we can build with values.
-      $subform_state = SubformState::createForSubform($form[$icon_pack_id], $form, $form_state);
-      $subform_state->getCompleteFormState()->setValue('saved_values', $default_settings[$icon_pack_id] ?? []);
-      if (is_a($extractor_forms[$icon_pack_id], '\Drupal\Core\Plugin\PluginFormInterface')) {
-        $form[$icon_pack_id] += $extractor_forms[$icon_pack_id]->buildConfigurationForm($form[$icon_pack_id], $subform_state);
+      $subform_state = SubformState::createForSubform($form[$pack_id], $form, $form_state);
+      $subform_state->getCompleteFormState()->setValue('saved_values', $default_settings[$pack_id] ?? []);
+      if (is_a($extractor_forms[$pack_id], '\Drupal\Core\Plugin\PluginFormInterface')) {
+        $form[$pack_id] += $extractor_forms[$pack_id]->buildConfigurationForm($form[$pack_id], $subform_state);
       }
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function listIconPackOptions(bool $include_description = FALSE): array {
+    $definitions = $this->getDefinitions();
+
+    if (NULL === $definitions) {
+      return [];
+    }
+
+    $options = [];
+    foreach ($definitions as $definition) {
+      if (empty($definition['icons'])) {
+        continue;
+      }
+      $label = $definition['label'] ?? $definition['id'];
+      if ($include_description && isset($definition['description'])) {
+        $label = sprintf('%s - %s', $label, $definition['description']);
+      }
+      $options[$definition['id']] = sprintf('%s (%u)', $label, count($definition['icons']));
+    }
+
+    natsort($options);
+    return $options;
   }
 
   /**
@@ -311,35 +280,6 @@ class IconPackManager extends DefaultPluginManager implements IconPackManagerInt
       $this->discovery = new ContainerDerivativeDiscoveryDecorator($this->discovery);
     }
     return $this->discovery;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function processDefinition(&$definition, $plugin_id): void {
-    if (preg_match('@[^a-z0-9_]@', $plugin_id)) {
-      throw new IconPackConfigErrorException(sprintf('Invalid Icon Pack id in: %s, name: %s must contain only lowercase letters, numbers, and underscores.', $definition['provider'], $plugin_id));
-    }
-
-    // @todo replace with json validation.
-    if (!isset($definition['template'])) {
-      throw new IconPackConfigErrorException('Missing `template:` key in your definition!');
-    }
-    if (!isset($definition['extractor'])) {
-      throw new IconPackConfigErrorException('Missing `extractor:` key in your definition!');
-    }
-
-    $relative_path = $this->moduleHandler->moduleExists($definition['provider'])
-      ? $this->moduleHandler->getModule($definition['provider'])->getPath()
-      : $this->themeHandler->getTheme($definition['provider'])->getPath();
-
-    // Provide path information for extractors and Icon pack data.
-    $definition += [
-      'definition_relative_path' => $relative_path,
-      'definition_absolute_path' => sprintf('%s/%s', $this->appRoot, $relative_path),
-      'icon_pack_id' => $definition['id'],
-      'icon_pack_label' => $definition['label'],
-    ];
   }
 
   /**

@@ -8,6 +8,8 @@
       "*.svg",
       "**/build/icon.js",
       "*.json",
+      "*.yml",
+      "*.codepoints",
       "phpstan.neon",
       "phpmd.xml",
       "mkdocs.yml"

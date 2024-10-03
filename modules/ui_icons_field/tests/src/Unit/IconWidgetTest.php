@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_icons_field\Unit\Plugin;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Tests\ui_icons\Unit\IconUnitTestCase;
 use Drupal\ui_icons_field\Plugin\Field\FieldWidget\IconWidget;
 
 /**
- * Tests the IconWidget field class.
+ * @coversDefaultClass \Drupal\ui_icons_field\Plugin\Field\FieldWidget\IconWidget
  *
  * @group ui_icons
  */
@@ -24,13 +22,6 @@ class IconWidgetTest extends IconUnitTestCase {
    * @var \Drupal\ui_icons_field\Plugin\Field\FieldWidget\IconWidget
    */
   private IconWidget $widget;
-
-  /**
-   * The field definition.
-   *
-   * @var \Drupal\Core\Field\FieldDefinitionInterface
-   */
-  private FieldDefinitionInterface $fieldDefinition;
 
   /**
    * The container.
@@ -49,12 +40,14 @@ class IconWidgetTest extends IconUnitTestCase {
     $this->container->set('string_translation', $this->createMock(TranslationInterface::class));
     \Drupal::setContainer($this->container);
 
-    $this->fieldDefinition = $this->createMock(FieldDefinitionInterface::class);
+    $fieldDefinition = $this->getMockBuilder('Drupal\Core\Field\FieldDefinition')
+      ->disableOriginalConstructor()
+      ->getMock();
 
     $this->widget = new IconWidget(
       'icon_widget',
       [],
-      $this->fieldDefinition,
+      $fieldDefinition,
       [],
       []
     );
@@ -64,7 +57,9 @@ class IconWidgetTest extends IconUnitTestCase {
    * Tests the massageFormValues method.
    */
   public function testMassageFormValues(): void {
-    $form_state = $this->createMock(FormStateInterface::class);
+    $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
+      ->disableOriginalConstructor()
+      ->getMock();
     $values = [];
 
     // Invalid icon.
@@ -75,7 +70,7 @@ class IconWidgetTest extends IconUnitTestCase {
     // Icon with data.
     $values[]['value'] = [
       'icon' => $this->createMockIcon([
-        'icon_pack_id' => 'foo',
+        'pack_id' => 'foo',
         'icon_id' => 'bar',
       ]),
     ];

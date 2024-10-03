@@ -14,7 +14,7 @@ use Drupal\ui_icons\Element\IconAutocomplete;
  * Provides a form element to select an icon with a fancy picker.
  *
  * Properties:
- * - #default_value: (string) Icon value as icon_pack_id:icon_id.
+ * - #default_value: (string) Icon value as pack_id:icon_id.
  * - #show_settings: (bool) Enable extractor settings, default FALSE.
  * - #default_settings: (array) Settings for the extractor settings.
  * - #settings_title: (string) Extractor settings details title.

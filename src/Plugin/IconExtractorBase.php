@@ -9,8 +9,10 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\PluginWithFormsInterface;
 use Drupal\Core\Plugin\PluginWithFormsTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\ui_icons\Exception\IconPackConfigErrorException;
 use Drupal\ui_icons\Form\IconExtractorSettingsForm;
 use Drupal\ui_icons\IconDefinition;
+use Drupal\ui_icons\IconDefinitionInterface;
 
 /**
  * Base class for ui_icons_extractor plugins.
@@ -60,8 +62,19 @@ abstract class IconExtractorBase extends PluginBase implements IconExtractorInte
   /**
    * {@inheritdoc}
    */
-  public static function createIcon(string $icon_id, array $data, ?string $source = NULL, ?string $group = NULL): IconDefinition {
-    return IconDefinition::create($icon_id, $data, $source, $group);
+  public function createIcon(string $icon_id, ?string $source = NULL, ?string $group = NULL, ?array $data = NULL): IconDefinitionInterface {
+    if (!isset($this->configuration['template'])) {
+      throw new IconPackConfigErrorException(sprintf('Missing `template` in your definition, extractor %s require this value.', $this->getPluginId()));
+    }
+
+    return IconDefinition::create(
+      $this->configuration['id'],
+      $icon_id,
+      $this->configuration['template'],
+      $source,
+      $group,
+      $data ? array_merge($data, $this->configuration) : $this->configuration,
+    );
   }
 
 }

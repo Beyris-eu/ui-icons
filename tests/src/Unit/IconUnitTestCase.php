@@ -4,68 +4,38 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons\Unit;
 
-use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons\IconDefinition;
 use Drupal\ui_icons\IconDefinitionInterface;
 
 /**
- * Tests IconUnitTestCase Controller class.
+ * Base test IconUnitTestCase Controller class.
  */
 abstract class IconUnitTestCase extends UnitTestCase {
 
   /**
-   * Creates icon data search result array.
-   *
-   * @param string|null $icon_pack_id
-   *   The ID of the icon set.
-   * @param string|null $icon_id
-   *   The ID of the icon.
-   * @param string|null $icon_pack_label
-   *   The label of the icon set.
-   *
-   * @return array
-   *   The icon data array.
-   */
-  protected static function createIconResultData(?string $icon_pack_id = NULL, ?string $icon_id = NULL, ?string $icon_pack_label = NULL): array {
-    $label = ucfirst(str_replace(['-', '_', '.'], ' ', ($icon_id ?? 'bar')));
-    return [
-      'value' => ($icon_pack_id ?? 'foo') . ':' . ($icon_id ?? 'bar'),
-      'label' => new FormattableMarkup('<span class="ui-menu-icon">@icon</span> @name', [
-        '@icon' => '_rendered_',
-        '@name' => $label . ' (' . ($icon_pack_label ?? 'Baz') . ')',
-      ]),
-    ];
-  }
-
-  /**
    * Creates icon data array.
    *
-   * @param string|null $icon_pack_id
-   *   The ID of the icon set.
-   * @param string|null $icon_id
-   *   The ID of the icon.
-   * @param string|null $icon_pack_label
-   *   The label of the icon set.
+   * @param array<string, string> $data
+   *   The icon data to create for test.
    *
-   * @return array
+   * @return array<string, string|null>
    *   The icon data array.
    */
-  protected static function createIconData(?string $icon_pack_id = NULL, ?string $icon_id = NULL, ?string $icon_pack_label = NULL): array {
+  protected static function createIconData(array $data = []): array {
+    $icon_id = $data['icon_id'] ?? 'foo';
     return [
-      ($icon_pack_id ?? 'foo') . ':' . ($icon_id ?? 'bar') => [
-        'icon_id' => $icon_id ?? 'bar',
-        'source' => 'qux/corge',
-        'icon_pack_id' => $icon_pack_id ?? 'foo',
-        'icon_pack_label' => $icon_pack_label ?? 'Baz',
-      ],
+      'icon_id' => $icon_id,
+      'source' => $data['source'] ?? sprintf('foo/bar/%s.svg', $icon_id),
+      'absolute_path' => $data['absolute_path'] ?? sprintf('/_ROOT_/web/modules/my_module/foo/bar/%s.svg', $icon_id),
+      'group' => $data['group'] ?? NULL,
     ];
   }
 
   /**
    * Create a mock icon.
    *
-   * @param array|null $iconData
+   * @param array<string, string>|null $iconData
    *   The icon data to create.
    *
    * @return \Drupal\ui_icons\IconDefinitionInterface
@@ -74,7 +44,7 @@ abstract class IconUnitTestCase extends UnitTestCase {
   protected function createMockIcon(?array $iconData = NULL): IconDefinitionInterface {
     if (NULL === $iconData) {
       $iconData = [
-        'icon_pack_id' => 'foo',
+        'pack_id' => 'foo',
         'icon_id' => 'bar',
       ];
     }
@@ -84,10 +54,10 @@ abstract class IconUnitTestCase extends UnitTestCase {
       ->getRenderable(['width' => $iconData['width'] ?? '', 'height' => $iconData['height'] ?? ''])
       ->willReturn(['#markup' => '<svg></svg>']);
 
-    $id = $iconData['icon_pack_id'] . ':' . $iconData['icon_id'];
+    $icon_full_id = IconDefinition::createIconId($iconData['pack_id'], $iconData['icon_id']);
     $icon
       ->getId()
-      ->willReturn($id);
+      ->willReturn($icon_full_id);
 
     return $icon->reveal();
   }
@@ -102,19 +72,18 @@ abstract class IconUnitTestCase extends UnitTestCase {
    *   The icon mocked.
    */
   protected function createTestIcon(array $data): IconDefinitionInterface {
-    $filtered_data = [];
-    $keys = ['icon_pack_id', 'icon_pack_label', 'template', 'config', 'library', 'content', 'extractor', 'preview'];
+    $filtered_data = $data;
+    $keys = ['pack_id', 'icon_id', 'template', 'source', 'group'];
     foreach ($keys as $key) {
-      if (isset($data[$key])) {
-        $filtered_data[$key] = $data[$key];
-      }
+      unset($filtered_data[$key]);
     }
-
     return IconDefinition::create(
-      $data['icon_id'] ?? '',
-      $filtered_data,
-      $data['source'] ?? '',
+      $data['pack_id'] ?? 'foo',
+      $data['icon_id'] ?? 'bar',
+      $data['template'] ?? 'baz',
+      $data['source'] ?? NULL,
       $data['group'] ?? NULL,
+      $filtered_data,
     );
   }
 

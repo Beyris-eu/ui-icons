@@ -5,15 +5,13 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_icons_field\Unit\Plugin;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
-use Drupal\Core\Field\FieldDefinitionInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons\Plugin\IconPackManagerInterface;
 use Drupal\ui_icons_field\Plugin\Field\FieldFormatter\IconFormatter;
 
 /**
- * Tests the IconFormatter field class.
+ * @coversDefaultClass \Drupal\ui_icons_field\Plugin\Field\FieldFormatter\IconFormatter
  *
  * @group ui_icons
  */
@@ -25,13 +23,6 @@ class IconFormatterTest extends UnitTestCase {
    * @var \Drupal\ui_icons_field\Plugin\Field\FieldFormatter\IconFormatter
    */
   private IconFormatter $formatter;
-
-  /**
-   * The field definition.
-   *
-   * @var \Drupal\Core\Field\FieldDefinitionInterface
-   */
-  private FieldDefinitionInterface $fieldDefinition;
 
   /**
    * The IconPackManager instance.
@@ -58,12 +49,14 @@ class IconFormatterTest extends UnitTestCase {
     \Drupal::setContainer($this->container);
 
     $this->pluginManagerIconPack = $this->createMock(IconPackManagerInterface::class);
-    $this->fieldDefinition = $this->createMock(FieldDefinitionInterface::class);
+    $fieldDefinition = $this->getMockBuilder('Drupal\Core\Field\FieldDefinition')
+      ->disableOriginalConstructor()
+      ->getMock();
 
     $this->formatter = new IconFormatter(
       'icon_formatter',
       [],
-      $this->fieldDefinition,
+      $fieldDefinition,
       [],
       'label',
       'view_mode',
@@ -87,7 +80,9 @@ class IconFormatterTest extends UnitTestCase {
    */
   public function testSettingsForm(): void {
     $form = [];
-    $form_state = $this->createMock(FormStateInterface::class);
+    $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
+      ->disableOriginalConstructor()
+      ->getMock();
 
     $form = $this->formatter->settingsForm($form, $form_state);
 

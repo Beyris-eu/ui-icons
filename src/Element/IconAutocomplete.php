@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\ui_icons\Element;
 
+// cspell:ignore autocompleteclose
 use Drupal\Component\Utility\Html;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Ajax\AjaxResponse;
@@ -14,6 +15,7 @@ use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Render\Element\FormElementBase;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\ui_icons\IconDefinition;
 use Drupal\ui_icons\IconDefinitionInterface;
 use Drupal\ui_icons\Plugin\IconPackManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,7 +24,7 @@ use Symfony\Component\HttpFoundation\Request;
  * Provides a form element to select an icon.
  *
  * Properties:
- * - #default_value: (string) Icon value as icon_pack_id:icon_id.
+ * - #default_value: (string) Icon value as pack_id:icon_id.
  * - #show_settings: (bool) Enable extractor settings, default FALSE.
  * - #default_settings: (array) Settings for the extractor settings.
  * - #settings_title: (string) Extractor settings details title.
@@ -109,9 +111,9 @@ class IconAutocomplete extends FormElementBase {
 
       // Settings filtered to store only the current icon values. Keep indexed
       // with the icon pack id to match the forms default settings parameter.
-      $icon_pack_id = $icon->getIconPackId();
-      if (isset($input['icon_settings'][$icon_pack_id])) {
-        $return['icon_settings'] = [$icon_pack_id => $input['icon_settings'][$icon_pack_id]];
+      $pack_id = $icon->getPackId();
+      if (isset($input['icon_settings'][$pack_id])) {
+        $return['icon_settings'] = [$pack_id => $input['icon_settings'][$pack_id]];
       }
     }
     else {
@@ -258,7 +260,7 @@ class IconAutocomplete extends FormElementBase {
 
     // ProcessIcon will handle #value or #default_value.
     $icon_full_id = $element['#value']['icon_id'] ?? $element['icon_id']['#value'] ?? NULL;
-    if (!$icon_full_id || !is_string($icon_full_id) || FALSE === strpos($icon_full_id, ':') || NULL === self::iconPack()->getIcon($icon_full_id)) {
+    if (!$icon_full_id || !is_string($icon_full_id) || FALSE === strpos($icon_full_id, IconDefinition::ICON_SEPARATOR) || NULL === self::iconPack()->getIcon($icon_full_id)) {
       // If a default value based on a disabled icon pack exist, clear it.
       unset($element['icon_id']['#value']);
       return $element;
@@ -275,11 +277,11 @@ class IconAutocomplete extends FormElementBase {
       '#title' => $element['#settings_title'],
     ];
 
-    $icon_full_id = explode(':', $icon_full_id);
-    $icon_pack_id = $icon_full_id[0];
+    $icon_full_id = explode(IconDefinition::ICON_SEPARATOR, $icon_full_id);
+    $pack_id = $icon_full_id[0];
 
     if (!empty($element['#allowed_icon_pack'])) {
-      if (!in_array($icon_pack_id, $element['#allowed_icon_pack'])) {
+      if (!in_array($pack_id, $element['#allowed_icon_pack'])) {
         unset($element['icon_settings']);
         return $element;
       }
@@ -293,7 +295,7 @@ class IconAutocomplete extends FormElementBase {
       $element['icon_settings'],
       $form_state,
       $element['#default_settings'] ?? [],
-     [$icon_pack_id => $icon_pack_id],
+     [$pack_id => $pack_id],
     );
 
     // Remove if no extractor form is found.
@@ -344,19 +346,19 @@ class IconAutocomplete extends FormElementBase {
       return;
     }
 
-    $icon_pack_id = $icon->getIconPackId();
-    if (!empty($element['#allowed_icon_pack']) && !in_array($icon_pack_id, $element['#allowed_icon_pack'])) {
-      $form_state->setError($element['icon_id'], new TranslatableMarkup('Icon for %title is not valid anymore because it is part of icon pack: %icon_pack_id. This field limit icon pack to: %limit.', [
+    $pack_id = $icon->getPackId();
+    if (!empty($element['#allowed_icon_pack']) && !in_array($pack_id, $element['#allowed_icon_pack'])) {
+      $form_state->setError($element['icon_id'], new TranslatableMarkup('Icon for %title is not valid anymore because it is part of icon pack: %pack_id. This field limit icon pack to: %limit.', [
         '%title' => FormElementHelper::getElementTitle($element),
-        '%icon_pack_id' => $icon_pack_id,
+        '%pack_id' => $pack_id,
         '%limit' => implode(', ', $element['#allowed_icon_pack']),
       ]));
       return;
     }
 
     $settings = [];
-    if (isset($input['icon_settings'][$icon_pack_id])) {
-      $settings[$icon_pack_id] = $input['icon_settings'][$icon_pack_id];
+    if (isset($input['icon_settings'][$pack_id])) {
+      $settings[$pack_id] = $input['icon_settings'][$pack_id];
       // @todo validateConfigurationForm from extractor plugin.
     }
 
