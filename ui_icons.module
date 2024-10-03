@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\ui_icons\IconDefinition;
 use Drupal\ui_icons\IconDefinitionInterface;
 
 /**
@@ -42,10 +43,12 @@ function ui_icons_theme(array $existing, string $type, string $theme, string $pa
     ],
     'icon_preview' => [
       'variables' => [
-        'icon_id' => NULL,
-        'icon_label' => NULL,
-        'source' => NULL,
+        'pack_id' => '',
+        'icon_id' => '',
+        'icon_label' => '',
         'extractor' => NULL,
+        'source' => NULL,
+        'library' => NULL,
         'settings' => [],
       ],
     ],
@@ -65,18 +68,18 @@ function template_preprocess_input__icon(array &$variables): void {
   $variables['has_settings'] = $variables['element']['#show_settings'] ?? FALSE;
   $variables['icon_form'] = $variables['element']['icon_id'] ?? '';
 
-  if (isset($variables['element']['icon_id']['#value']) && FALSE !== strpos($variables['element']['icon_id']['#value'], ':')) {
-    [$icon_pack_id, $icon_id] = explode(':', $variables['element']['icon_id']['#value']);
-    $variables['icon_pack_id'] = $icon_pack_id;
+  if (isset($variables['element']['icon_id']['#value']) && FALSE !== strpos($variables['element']['icon_id']['#value'], IconDefinition::ICON_SEPARATOR)) {
+    [$pack_id, $icon_id] = explode(IconDefinition::ICON_SEPARATOR, $variables['element']['icon_id']['#value']);
+    $variables['pack_id'] = $pack_id;
     $variables['icon_id'] = $icon_id;
   }
   elseif (isset($variables['element']['#value']['object']) && $variables['element']['#value']['object'] instanceof IconDefinitionInterface) {
-    $variables['icon_pack_id'] = $variables['element']['#value']['object']->getIconPackId();
+    $variables['pack_id'] = $variables['element']['#value']['object']->getPackId();
     $variables['icon_id'] = $variables['element']['#value']['object']->getId();
   }
   elseif (isset($variables['element']['#default_value'])) {
-    [$icon_pack_id, $icon_id] = explode(':', $variables['element']['#default_value']);
-    $variables['icon_pack_id'] = $icon_pack_id;
+    [$pack_id, $icon_id] = explode(IconDefinition::ICON_SEPARATOR, $variables['element']['#default_value']);
+    $variables['pack_id'] = $pack_id;
     $variables['icon_id'] = $icon_id;
   }
 

@@ -4,7 +4,7 @@
  * Theme for an 'icon_autocomplete' #type form element.
  *
  * Variables:
- * - icon_pack_id: The icon set id.
+ * - pack_id: The icon set id.
  * - icon_id: The icon id.
  * - icon_form: The icon input form.
  * - has_settings: Boolean flag if settings is enabled.
@@ -17,8 +17,8 @@
 <div class="ui-icons-wrapper">
   <div class="ui-icons-input-wrapper">
     <div class="ui-icons-preview form-item">
-      {% if icon_pack_id and icon_id %}
-        <div class="ui-icons-preview-icon">{{ icon_preview(icon_pack_id, icon_id, {size: 42}) }}</div>
+      {% if pack_id and icon_id %}
+        <div class="ui-icons-preview-icon">{{ icon_preview(pack_id, icon_id, {size: 42}) }}</div>
       {% endif %}
     </div>
     <div class="ui-icons-select">

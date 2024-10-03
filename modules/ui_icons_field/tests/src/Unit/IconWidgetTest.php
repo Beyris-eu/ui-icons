@@ -75,7 +75,7 @@ class IconWidgetTest extends IconUnitTestCase {
     // Icon with data.
     $values[]['value'] = [
       'icon' => $this->createMockIcon([
-        'icon_pack_id' => 'foo',
+        'pack_id' => 'foo',
         'icon_id' => 'bar',
       ]),
     ];

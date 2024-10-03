@@ -1,4 +1,4 @@
-{% if extractor == 'svg_sprite' %}
+{% if extractor is defined and extractor == 'svg_sprite' %}
   <svg class="icon icon-preview" width="{{ settings.size|default(48) }}" height="{{ settings.size|default(48) }}" fill="currentColor">
     <title>{{ icon_label }}</title>
     <use xlink:href="{{ source }}#{{ icon_id }}"/>

@@ -272,13 +272,13 @@ Enable the submodule `UI Icons for UI Patterns` to allow usage with
 `UI Icons` module provide a specific Twig function is available anywhere:
 
 ```twig
-{{ icon('my_icon_pack_id', 'my_icon_id') }}
+{{ icon('my_pack_id', 'my_icon_id') }}
 ```
 
 Assuming a settings `size` is declared:
 
 ```twig
-{{ icon('my_icon_pack_id', 'my_icon_id', {size: 64}) }}
+{{ icon('my_pack_id', 'my_icon_id', {size: 64}) }}
 ```
 
 #### Render API
@@ -290,7 +290,7 @@ of an icon with the Drupal Render API.
 <?php
 $build['icon'] = [
   '#type' => 'ui_icon',
-  '#icon_pack' => 'my_icon_pack_id',
+  '#icon_pack' => 'my_pack_id',
   '#icon' => 'my_icon_id',
   '#settings' => [
     'size' => 64,
@@ -314,9 +314,9 @@ used with the Drupal Form API.
 $form['icon'] = [
   '#type' => 'icon_autocomplete',
   '#title' => $this->t('Select icon'),
-  '#default_value' => 'my_icon_pack_id:my_icon_id_default',
+  '#default_value' => 'my_pack_id:my_icon_id_default',
   '#allowed_icon_pack' => [
-    'my_icon_pack_id',
+    'my_pack_id',
     'other_icon_pack',
   ],
   '#show_settings' => TRUE,
@@ -325,7 +325,7 @@ $form['icon'] = [
 
 Specific properties:
 
-- `#default_value`: (string) Icon value as icon_pack_id:icon_id.
+- `#default_value`: (string) Icon value as pack_id:icon_id.
 - `#show_settings`: (bool) Enable extractor settings, default FALSE.
 - `#default_settings`: (array) Settings for the extractor settings.
 - `#settings_title`: (string) Extractor settings details title.

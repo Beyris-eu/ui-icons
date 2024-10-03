@@ -7,49 +7,88 @@ namespace Drupal\ui_icons;
 use Drupal\ui_icons\Exception\IconDefinitionInvalidDataException;
 
 /**
- * Handle a UI Icon definition.
+ * Handle an Icon definition.
  */
 class IconDefinition implements IconDefinitionInterface {
+
+  public const ICON_SEPARATOR = ':';
 
   /**
    * Constructor for IconDefinition.
    *
+   * @param string $pack_id
+   *   The id of the icon pack.
    * @param string $icon_id
    *   The id of the icon.
+   * @param string $template
+   *   The template of the icon.
+   * @param string|null $source
+   *   The source, url or path of the icon.
+   * @param string|null $group
+   *   The group of the icon.
    * @param array $data
    *   The additional data of the icon.
-   * @param string|null $source
-   *   The source of the icon (optional).
-   * @param string|null $group
-   *   The group of the icon (optional).
    */
   private function __construct(
+    private string $pack_id,
     private string $icon_id,
-    private array $data,
-    private ?string $source = NULL,
-    private ?string $group = NULL,
+    private string $template,
+    private ?string $source,
+    private ?string $group,
+    private ?array $data,
   ) {}
 
   /**
    * {@inheritdoc}
    */
-  public static function create(string $icon_id, array $data, ?string $source = NULL, ?string $group = NULL): self {
-    self::validateData($icon_id, $data);
-    return new self($icon_id, $data, $source, $group);
+  public static function create(
+    string $pack_id,
+    string $icon_id,
+    string $template,
+    ?string $source = NULL,
+    ?string $group = NULL,
+    ?array $data = NULL,
+  ): self {
+    $errors = [];
+    if (empty($pack_id)) {
+      $errors[] = 'Empty pack_id provided!';
+    }
+    if (empty($icon_id)) {
+      $errors[] = 'Empty icon_id provided!';
+    }
+    if (empty($template)) {
+      $errors[] = 'Empty template provided!';
+    }
+
+    if (count($errors)) {
+      throw new IconDefinitionInvalidDataException(implode(' ', $errors));
+    }
+
+    // @todo cleanup of data, check we don't need to pass these anywhere.
+    unset($data['config']['sources'], $data['relative_path'], $data['absolute_path']);
+
+    return new self($pack_id, $icon_id, $template, $source, $group, $data);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function createIconId(string $pack_id, string $icon_id): string {
+    return sprintf('%s%s%s', $pack_id, self::ICON_SEPARATOR, $icon_id);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getLabel(): string {
-    return ucfirst(str_replace(['-', '_', '.'], ' ', $this->icon_id));
+    return self::humanize($this->icon_id);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getId(): string {
-    return $this->getIconPackId() . ':' . $this->getIconId();
+    return sprintf('%s%s%s', $this->pack_id, self::ICON_SEPARATOR, $this->icon_id);
   }
 
   /**
@@ -57,6 +96,13 @@ class IconDefinition implements IconDefinitionInterface {
    */
   public function getIconId(): string {
     return $this->icon_id;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPackId(): string {
+    return $this->pack_id;
   }
 
   /**
@@ -76,39 +122,15 @@ class IconDefinition implements IconDefinitionInterface {
   /**
    * {@inheritdoc}
    */
-  public function getContent(): ?string {
-    if (!isset($this->data['content'])) {
-      return NULL;
-    }
-    return $this->data['content'];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getTemplate(): string {
-    return $this->data['template'] ?? '';
+    return $this->template;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getLibrary(): ?string {
-    return $this->data['library'] ?? NULL;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getIconPackId(): string {
-    return $this->data['icon_pack_id'];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getIconPackLabel(): string {
-    return $this->data['icon_pack_label'] ?? '';
+  public function getData(string $key): ?string {
+    return $this->data[$key] ?? NULL;
   }
 
   /**
@@ -117,8 +139,8 @@ class IconDefinition implements IconDefinitionInterface {
   public function getRenderable(array $settings = []): array {
     return [
       '#type' => 'ui_icon',
-      '#icon_pack' => $this->getIconPackId(),
-      '#icon' => $this->getIconId(),
+      '#icon_pack' => $this->pack_id,
+      '#icon' => $this->icon_id,
       '#settings' => $settings,
     ];
   }
@@ -127,59 +149,63 @@ class IconDefinition implements IconDefinitionInterface {
    * {@inheritdoc}
    */
   public function getPreview(array $settings = []): array {
+    $label = $this->getLabel();
+    if (isset($this->data['pack_label'])) {
+      $label = ' - ' . $this->data['pack_label'];
+    }
+
     if ($preview = $this->data['preview'] ?? NULL) {
-      return [
+      $renderable = [
         '#type' => 'inline_template',
         '#template' => $preview,
-        '#attached' => $this->getLibrary() ? ['library' => [$this->getLibrary()]] : [],
         '#context' => [
-          'icon_id' => $this->getIconId(),
-          'label' => sprintf('%s - %s', $this->getLabel(), $this->getIconPackLabel()),
-          'source' => $this->getSource(),
-          'extractor' => $this->data['extractor'] ?? '',
-          'content' => $this->getContent(),
+          'label' => $label,
+          'icon_id' => $this->icon_id,
+          'pack_id' => $this->pack_id,
+          'extractor' => $this->data['extractor'] ?? NULL,
+          'source' => $this->source ?? NULL,
+          'content' => $this->data['content'] ?? NULL,
           'size' => $settings['size'] ?? 48,
         ],
       ];
+
+      if (isset($this->data['library']) && !empty($this->data['library'])) {
+        $renderable['#attached'] = ['library' => [$this->data['library']]];
+      }
+
+      return $renderable;
     }
 
     // Fallback to template based preview.
     $renderable = [
       '#theme' => 'icon_preview',
-      '#icon_id' => $this->getIconId(),
-      '#extractor' => $this->data['extractor'] ?? '',
-      '#icon_label' => sprintf('%s - %s', $this->getLabel(), $this->getIconPackLabel()),
-      '#source' => $this->getSource(),
+      '#icon_label' => $label,
+      '#icon_id' => $this->icon_id,
+      '#pack_id' => $this->pack_id,
+      '#extractor' => $this->data['extractor'] ?? NULL,
+      '#source' => $this->source ?? NULL,
+      '#library' => $this->data['library'] ?? NULL,
       '#settings' => $settings,
-      '#library' => $this->getLibrary(),
     ];
 
     return $renderable;
   }
 
   /**
-   * Basic validation before creating the icon.
+   * Humanize a text for admin display.
    *
-   * @param string $icon_id
-   *   The id of the icon.
-   * @param array $data
-   *   The additional data of the icon.
+   * Inspired by https://github.com/coduo/php-humanizer/blob/5.x/src/Coduo/PHPHumanizer/String/Humanize.php.
+   *
+   * @param string $text
+   *   The text to humanize.
+   *
+   * @return string
+   *   The human friendly text.
    */
-  private static function validateData(string $icon_id, array $data): void {
-    $errors = NULL;
+  public static function humanize(string $text): string {
+    $humanized = mb_strtolower((string) preg_replace(['/([A-Z])/', sprintf('/[%s\s]+/', '_')], ['_$1', ' '], $text));
 
-    // Empty can have "0" as false positive.
-    if ('' === $icon_id) {
-      $errors[] = 'Empty icon_id provided';
-    }
-
-    if (!isset($data['icon_pack_id']) || empty($data['icon_pack_id'])) {
-      $errors[] = 'Missing Icon Pack Id in data';
-    }
-
-    if ($errors) {
-      throw new IconDefinitionInvalidDataException(implode('. ', $errors) . '.');
-    }
+    return ucfirst(trim($humanized));
   }
 
 }

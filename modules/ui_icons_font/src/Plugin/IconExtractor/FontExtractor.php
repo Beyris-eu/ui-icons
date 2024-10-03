@@ -13,6 +13,8 @@ use Drupal\ui_icons\Plugin\IconExtractorBase;
 use Drupal\ui_icons\PluginForm\IconPackExtractorForm;
 use FontLib\Font;
 
+// cspell:ignore codepoints
+
 /**
  * Plugin implementation of the ui_icons_extractor.
  */
@@ -36,7 +38,7 @@ class FontExtractor extends IconExtractorBase {
 
     $icons = [];
     foreach ($this->configuration['config']['sources'] as $filename) {
-      $filepath = sprintf('%s/%s', $this->configuration['definition_absolute_path'], $filename);
+      $filepath = sprintf('%s/%s', $this->configuration['absolute_path'], $filename);
       $fileinfo = pathinfo($filepath);
 
       if (!isset($fileinfo['extension'])) {
@@ -45,21 +47,21 @@ class FontExtractor extends IconExtractorBase {
 
       switch ($fileinfo['extension']) {
         case 'codepoints':
-          $icons = array_merge($icons, $this->getCodePoints($filepath, $this->configuration['icon_pack_id']));
+          $icons = array_merge($icons, $this->getCodePoints($filepath, $this->configuration['id']));
           break;
 
         case 'ttf':
         case 'woff':
-          $icons = array_merge($icons, $this->getFontIcons($filepath, $this->configuration['icon_pack_id']));
+          $icons = array_merge($icons, $this->getFontIcons($filepath, $this->configuration['id']));
           break;
 
         case 'json':
-          $icons = array_merge($icons, $this->getJsonIcons($filepath, $this->configuration['icon_pack_id']));
+          $icons = array_merge($icons, $this->getJsonIcons($filepath, $this->configuration['id']));
           break;
 
         case 'yml':
         case 'yaml':
-          $icons = array_merge($icons, $this->getYamlIcons($filepath, $this->configuration['icon_pack_id']));
+          $icons = array_merge($icons, $this->getYamlIcons($filepath, $this->configuration['id']));
           break;
 
         default:
@@ -79,13 +81,13 @@ class FontExtractor extends IconExtractorBase {
    *
    * @param string $filepath
    *   The Code points file absolute path.
-   * @param string $icon_pack_id
+   * @param string $pack_id
    *   The Icon pack ID.
    *
    * @return array
    *   List of icons indexed by ID.
    */
-  private function getFontIcons(string $filepath, string $icon_pack_id): array {
+  private function getFontIcons(string $filepath, string $pack_id): array {
     $icons = [];
 
     if (!class_exists('\FontLib\Font')) {
@@ -107,9 +109,8 @@ class FontExtractor extends IconExtractorBase {
     }
 
     $icons = [];
-    foreach ($icons_names as $name) {
-      $icon_full_id = $icon_pack_id . ':' . $name;
-      $icons[$icon_full_id] = $this->createIcon($name, $this->configuration);
+    foreach ($icons_names as $icon_id) {
+      $icons[] = $this->createIcon($icon_id);
     }
 
     return $icons;
@@ -120,13 +121,13 @@ class FontExtractor extends IconExtractorBase {
    *
    * @param string $filepath
    *   The Code points file absolute path.
-   * @param string $icon_pack_id
+   * @param string $pack_id
    *   The Icon pack ID.
    *
    * @return array
    *   List of icons indexed by ID.
    */
-  private function getJsonIcons(string $filepath, string $icon_pack_id): array {
+  private function getJsonIcons(string $filepath, string $pack_id): array {
     $data = file_get_contents($filepath);
     if (FALSE === $data) {
       return [];
@@ -138,7 +139,7 @@ class FontExtractor extends IconExtractorBase {
 
     $icons = [];
     foreach (array_keys(json_decode($data, TRUE)) as $icon_id) {
-      $icons[$icon_pack_id . ':' . (string) $icon_id] = $this->createIcon((string) $icon_id, $this->configuration);
+      $icons[] = $this->createIcon((string) $icon_id);
     }
 
     return $icons;
@@ -149,13 +150,13 @@ class FontExtractor extends IconExtractorBase {
    *
    * @param string $filepath
    *   The Code points file absolute path.
-   * @param string $icon_pack_id
+   * @param string $pack_id
    *   The Icon pack ID.
    *
    * @return array
    *   List of icons indexed by ID.
    */
-  private function getYamlIcons(string $filepath, string $icon_pack_id): array {
+  private function getYamlIcons(string $filepath, string $pack_id): array {
     $data = file_get_contents($filepath);
     if (FALSE === $data) {
       return [];
@@ -170,7 +171,7 @@ class FontExtractor extends IconExtractorBase {
 
     $icons = [];
     foreach (array_keys($data) as $icon_id) {
-      $icons[$icon_pack_id . ':' . (string) $icon_id] = $this->createIcon((string) $icon_id, $this->configuration);
+      $icons[] = $this->createIcon((string) $icon_id);
     }
 
     return $icons;
@@ -181,21 +182,24 @@ class FontExtractor extends IconExtractorBase {
    *
    * @param string $filepath
    *   The Code points file absolute path.
-   * @param string $icon_pack_id
+   * @param string $pack_id
    *   The Icon pack ID.
    *
    * @return array
    *   List of icons indexed by ID.
    */
-  private function getCodePoints(string $filepath, string $icon_pack_id): array {
+  private function getCodePoints(string $filepath, string $pack_id): array {
     $icons = [];
 
     $handle = fopen($filepath, 'r');
     if ($handle) {
       while (($line = fgets($handle)) !== FALSE) {
         $values = explode(' ', $line);
-        $this->configuration['content'] = $values[1];
-        $icons[$icon_pack_id . ':' . $values[0]] = $this->createIcon($values[0], $this->configuration);
+        $icon_id = $values[0] ?? NULL;
+        if (NULL === $icon_id) {
+          continue;
+        }
+        $icons[] = $this->createIcon((string) $icon_id, NULL, NULL, ['content' => $values[1] ?? '']);
       }
       fclose($handle);
     }

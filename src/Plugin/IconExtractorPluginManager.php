@@ -54,12 +54,12 @@ class IconExtractorPluginManager extends DefaultPluginManager {
   public function getExtractorForms(array $icon_pack_configurations): array {
     $extractor_forms = [];
     foreach ($icon_pack_configurations as $icon_pack_configuration) {
-      $icon_pack_id = $icon_pack_configuration['id'];
+      $pack_id = $icon_pack_configuration['id'];
       $form = $this->getExtractorForm($icon_pack_configuration);
       if (NULL === $form) {
         continue;
       }
-      $extractor_forms[$icon_pack_id] = $form;
+      $extractor_forms[$pack_id] = $form;
     }
 
     return $extractor_forms;

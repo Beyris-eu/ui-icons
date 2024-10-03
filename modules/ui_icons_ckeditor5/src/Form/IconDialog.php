@@ -105,7 +105,7 @@ final class IconDialog extends FormBase {
 
     if ($icon instanceof IconDefinitionInterface) {
       $values['settings']['icon'] = $icon->getId();
-      $values['settings']['icon_settings'] = $value['settings'][$icon->getIconPackId()] ?? [];
+      $values['settings']['icon_settings'] = $value['settings'][$icon->getPackId()] ?? [];
     }
 
     $response->addCommand(new EditorDialogSave($values));

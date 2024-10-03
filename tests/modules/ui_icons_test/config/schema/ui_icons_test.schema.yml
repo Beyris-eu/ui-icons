@@ -1,6 +1,6 @@
-ui_icons.icon_pack_options.test:
+ui_icons.icon_pack_options.test_path:
   type: mapping
-  label: 'Local files settings'
+  label: 'Test path settings'
   constraints:
     FullyValidatable: ~
   mapping:
@@ -16,13 +16,10 @@ ui_icons.icon_pack_options.test:
       constraints:
         Range:
           min: 0
-    alt:
-      type: label
-      label: 'Alt'
 
 ui_icons.icon_pack_options.test_svg:
   type: mapping
-  label: 'Local svg files settings'
+  label: 'Test svg settings'
   constraints:
     FullyValidatable: ~
   mapping:
@@ -32,13 +29,10 @@ ui_icons.icon_pack_options.test_svg:
       constraints:
         Range:
           min: 0
-    alt:
-      type: label
-      label: 'Alt'
 
 ui_icons.icon_pack_options.test_svg_sprite:
   type: mapping
-  label: 'Local svg sprite file settings'
+  label: 'Test sprite settings'
   constraints:
     FullyValidatable: ~
   mapping:
@@ -60,7 +54,7 @@ ui_icons.icon_pack_options.test_svg_sprite:
 
 ui_icons.icon_pack_options.test_settings:
   type: mapping
-  label: 'A lot of settings'
+  label: 'Test settings'
   constraints:
     FullyValidatable: ~
   mapping:
@@ -94,29 +88,3 @@ ui_icons.icon_pack_options.test_settings:
     number:
       title: "Test number min/max/step"
       type: "integer"
-
-ui_icons.icon_pack_options.test_disabled:
-  type: mapping
-  label: 'Disabled settings'
-  constraints:
-    FullyValidatable: ~
-  mapping:
-    title:
-      type: label
-      label: 'Title'
-
-ui_icons.icon_pack_options.test_no_icons:
-  type: mapping
-  label: 'No Icons settings'
-  constraints:
-    FullyValidatable: ~
-  mapping:
-    title:
-      type: label
-      label: 'Title'
-
-ui_icons.icon_pack_options.test_no_settings:
-  type: mapping
-  label: 'No Settings settings'
-  constraints:
-    FullyValidatable: ~

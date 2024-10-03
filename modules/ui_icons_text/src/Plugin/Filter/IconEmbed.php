@@ -110,7 +110,7 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
     $form['allowed_icon_pack'] = [
       '#title' => $this->t('Icon Pack selectable'),
       '#type' => 'checkboxes',
-      '#options' => $this->pluginManagerIconPack->listIconPackWithDescriptionOptions(),
+      '#options' => $this->pluginManagerIconPack->listIconPackOptions(TRUE),
       '#default_value' => $this->settings['allowed_icon_pack'],
       '#description' => $this->t('If none are selected, all will be allowed.'),
       '#element_validate' => [[static::class, 'validateOptions']],
@@ -148,7 +148,7 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
 
     $query = $xpath->query('//drupal-icon[normalize-space(@data-icon-id)!=""]');
 
-    if (FALSE === $query) {
+    if (FALSE === $query || empty($query->count())) {
       return $result;
     }
 
@@ -212,7 +212,7 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       return $this->t('
       <p>You can embed icon:</p>
       <ul>
-        <li>Choose which icon item to embed: <code>&lt;drupal-icon data-icon-id="icon_pack_id:icon_id" /&gt;</code></li>
+        <li>Choose which icon item to embed: <code>&lt;drupal-icon data-icon-id="pack_id:icon_id" /&gt;</code></li>
         <li>Optionally also pass settings with data-icon-settings: <code>data-icon-settings="{\'width\':100}"</code>, otherwise the default settings from the Icon Pack definition are used.</li>
       </ul>');
     }

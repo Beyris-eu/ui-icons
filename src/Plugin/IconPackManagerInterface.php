@@ -14,57 +14,37 @@ use Drupal\ui_icons\IconDefinitionInterface;
 interface IconPackManagerInterface extends PluginManagerInterface {
 
   /**
-   * Get a list of all the icons available for this icon pack.
+   * Get a list of all the icons within definitions.
    *
-   * The icons provided as an associative array with the keys and values equal
-   * to the icon ID and icon definition respectively.
+   * @param array|null $allowed_icon_pack
+   *   Limit the icons to some definition id.
    *
    * @return \Drupal\ui_icons\IconDefinitionInterface[]
-   *   Gets a built list of icons that are in this icon pack. Array is keyed by
-   *   the icon ID and the array values are the icon definition for each of
-   *   the icons listed.
+   *   Gets a built list of icons.
    */
-  public function getIcons(): array;
+  public function getIcons(?array $allowed_icon_pack = NULL): array;
 
   /**
    * Get definition of a specific icon.
    *
-   * @param string $icon_id
-   *   The ID of the icon to retrieve definition of.
+   * @param string $icon_full_id
+   *   The ID of the icon to retrieve, include pack id.
    *
    * @return \Drupal\ui_icons\IconDefinitionInterface|null
    *   Icon definition.
    */
-  public function getIcon(string $icon_id): ?IconDefinitionInterface;
-
-  /**
-   * Populates a key-value pair of available icons.
-   *
-   * Can be used to create a limited select list of icons.
-   *
-   * @param array|null $allowed_icon_pack
-   *   Include only icons of these icon pack.
-   *
-   * @return array
-   *   An array of translated icons labels, keyed by ID.
-   */
-  public function listIconOptions(?array $allowed_icon_pack = NULL): array;
+  public function getIcon(string $icon_full_id): ?IconDefinitionInterface;
 
   /**
    * Populates a key-value pair of available icon pack.
    *
+   * @param bool $include_description
+   *   Include Pack description if set, default to not include.
+   *
    * @return array
    *   An array of translated icon pack labels, keyed by ID.
    */
-  public function listIconPackOptions(): array;
-
-  /**
-   * Populates a key-value pair of available icon pack with description.
-   *
-   * @return array
-   *   An array of translated icon pack labels and description, keyed by ID.
-   */
-  public function listIconPackWithDescriptionOptions(): array;
+  public function listIconPackOptions(bool $include_description = FALSE): array;
 
   /**
    * Retrieve extractor forms based on the provided icon set limit.
@@ -86,12 +66,12 @@ interface IconPackManagerInterface extends PluginManagerInterface {
   /**
    * Retrieve extractor default options.
    *
-   * @param string $icon_pack_id
+   * @param string $pack_id
    *   The icon pack to look for.
    *
    * @return array
    *   The extractor defaults options.
    */
-  public function getExtractorFormDefaults(string $icon_pack_id): array;
+  public function getExtractorFormDefaults(string $pack_id): array;
 
 }
