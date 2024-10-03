@@ -90,7 +90,7 @@ final class LibrarySearchForm extends FormBase {
     if (!empty($icon_pack)) {
       $group_options = [];
       foreach ($icons_list as $icon) {
-        if ($icon_pack !== $icon->getIconPackId()) {
+        if ($icon_pack !== $icon->getPackId()) {
           continue;
         }
         $group_id = $icon->getGroup();
@@ -114,7 +114,7 @@ final class LibrarySearchForm extends FormBase {
     }
 
     if (!empty($search)) {
-      $icons_list = array_filter($icons_list, fn($id) => str_contains($id, $search), ARRAY_FILTER_USE_KEY);
+      $icons_list = array_filter($icons_list, fn($icon) => str_contains($icon->getId(), mb_strtolower($search)));
     }
 
     $icons = $this->filterIcons($icons_list, $icon_pack, $group);
@@ -199,18 +199,18 @@ final class LibrarySearchForm extends FormBase {
   private function filterIcons(array $icons_list, string $icon_pack, string $group): array {
     $icons = [];
     foreach ($icons_list as $icon) {
-      if (!empty($icon_pack) && $icon_pack !== $icon->getIconPackId()) {
+      if (!empty($icon_pack) && $icon_pack !== $icon->getPackId()) {
         continue;
       }
       if (!empty($group) && $group !== $icon->getGroup()) {
         continue;
       }
       // Generate a key for sorting.
-      $key = $icon->getLabel() . ' ' . $icon->getIconPackLabel();
+      $key = $icon->getId();
       $icons[$key] = $icon->getPreview(['size' => 48]);
-      $icons[$key]['#group'] = $icon->getGroup();
+      $icons[$key]['#group'] = $group;
       $icons[$key]['#label'] = $icon->getLabel();
-      $icons[$key]['#pack_label'] = $icon->getIconPackLabel();
+      $icons[$key]['#pack_label'] = $icon->getData('pack_label');
     }
 
     return $icons;

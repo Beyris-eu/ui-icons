@@ -10,7 +10,7 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons\PluginForm\IconPackExtractorForm;
 
 /**
- * Tests IconPackExtractorForm pluginForm.
+ * @coversDefaultClass \Drupal\ui_icons\PluginForm\IconPackExtractorForm
  *
  * @group ui_icons
  */

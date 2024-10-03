@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons\Unit\Element;
 
+// cspell:ignore corge quux
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Tests\ui_icons\Unit\IconUnitTestCase;
 use Drupal\ui_icons\Element\IconAutocomplete;
+use Drupal\ui_icons\IconDefinition;
 use Drupal\ui_icons\Plugin\IconPackManagerInterface;
 use Prophecy\Argument;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Tests IconAutocomplete FormElement class.
+ * @coversDefaultClass \Drupal\ui_icons\Element\IconAutocomplete
  *
  * @group ui_icons
  */
@@ -231,7 +233,7 @@ class IconAutocompleteTest extends IconUnitTestCase {
     $complete_form = [];
 
     $icon_id = 'foo:bar';
-    $icon_pack_id = 'baz';
+    $pack_id = 'baz';
 
     $element = [
       '#parents' => ['foo', 'bar'],
@@ -243,11 +245,11 @@ class IconAutocompleteTest extends IconUnitTestCase {
       ],
     ];
 
-    $icon = self::createTestIcon([
-      'icon_pack_id' => $icon_pack_id,
+    $icon = $this->createTestIcon([
+      'pack_id' => $pack_id,
       'icon_id' => $icon_id,
       'source' => 'foo/path',
-      'icon_pack_label' => 'Baz',
+      'pack_label' => 'Baz',
     ]);
 
     $ui_icons_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
@@ -269,7 +271,7 @@ class IconAutocompleteTest extends IconUnitTestCase {
     $complete_form = [];
 
     $icon_id = 'foo:bar';
-    $icon_pack_id = 'baz';
+    $pack_id = 'baz';
 
     $element = [
       '#parents' => ['foo', 'bar'],
@@ -281,11 +283,11 @@ class IconAutocompleteTest extends IconUnitTestCase {
       ],
     ];
 
-    $icon = self::createTestIcon([
-      'icon_pack_id' => $icon_pack_id,
+    $icon = $this->createTestIcon([
+      'pack_id' => $pack_id,
       'icon_id' => $icon_id,
       'source' => 'foo/path',
-      'icon_pack_label' => 'Baz',
+      'pack_label' => 'Baz',
     ]);
 
     $ui_icons_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
@@ -308,11 +310,42 @@ class IconAutocompleteTest extends IconUnitTestCase {
   }
 
   /**
+   * Data provider for ::testValidateIcon().
+   *
+   * @return array
+   *   The data to test.
+   */
+  public static function providerValidateIcon(): array {
+    return [
+      'valid icon' => [
+        'element' => [
+          '#parents' => ['icon'],
+          'icon_id' => [
+            '#title' => 'Foo',
+          ],
+        ],
+        'pack_id' => 'foo',
+        'values' => [
+          'icon' => [
+            'icon_id' => 'foo:baz',
+            'icon_settings' => [
+              'foo' => [
+                'settings_1' => [],
+              ],
+            ],
+          ],
+        ],
+        'expected_error' => NULL,
+      ],
+    ];
+  }
+
+  /**
    * Test the validateIcon method.
    *
    * @param array $element
    *   The element data.
-   * @param string $icon_pack_id
+   * @param string $pack_id
    *   The icon set id.
    * @param array $values
    *   The values data.
@@ -321,15 +354,15 @@ class IconAutocompleteTest extends IconUnitTestCase {
    *
    * @dataProvider providerValidateIcon
    */
-  public function testValidateIcon(array $element, string $icon_pack_id, array $values, ?TranslatableMarkup $expected_error): void {
+  public function testValidateIcon(array $element, string $pack_id, array $values, ?TranslatableMarkup $expected_error): void {
     $complete_form = [];
     $settings = $values['icon']['icon_settings'];
 
-    $icon = self::createTestIcon([
-      'icon_id' => explode(':', $values['icon']['icon_id'])[1],
+    $icon = $this->createTestIcon([
+      'icon_id' => explode(IconDefinition::ICON_SEPARATOR, $values['icon']['icon_id'])[1],
       'source' => 'foo/bar',
-      'icon_pack_id' => $icon_pack_id,
-      'icon_pack_label' => $element['icon_id']['#title'],
+      'pack_id' => $pack_id,
+      'pack_label' => $element['icon_id']['#title'],
     ]);
 
     $ui_icons_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
@@ -366,37 +399,6 @@ class IconAutocompleteTest extends IconUnitTestCase {
     // Test $input_exists is FALSE.
     $element['#parents'] = ['foo'];
     IconAutocomplete::validateIcon($element, $form_state, $complete_form);
-  }
-
-  /**
-   * Provides data for testValidateIcon.
-   *
-   * @return array
-   *   The data to test.
-   */
-  public static function providerValidateIcon(): array {
-    return [
-      'valid icon' => [
-        'element' => [
-          '#parents' => ['icon'],
-          'icon_id' => [
-            '#title' => 'Foo',
-          ],
-        ],
-        'icon_pack_id' => 'foo',
-        'values' => [
-          'icon' => [
-            'icon_id' => 'foo:baz',
-            'icon_settings' => [
-              'foo' => [
-                'settings_1' => [],
-              ],
-            ],
-          ],
-        ],
-        'expected_error' => NULL,
-      ],
-    ];
   }
 
   /**
@@ -456,8 +458,9 @@ class IconAutocompleteTest extends IconUnitTestCase {
   public function testValidateIconErrorNotAllowed(): void {
     $complete_form = [];
     $icon_id = 'bar';
-    $icon_pack_id = 'foo';
-    $icon_full_id = $icon_pack_id . ':' . $icon_id;
+    $pack_id = 'foo';
+    $icon_full_id = IconDefinition::createIconId($pack_id, $icon_id);
+
     $element = [
       '#parents' => ['icon'],
       'icon_id' => [
@@ -466,11 +469,11 @@ class IconAutocompleteTest extends IconUnitTestCase {
       '#allowed_icon_pack' => ['qux', 'corge'],
     ];
 
-    $icon = self::createTestIcon([
-      'icon_pack_id' => $icon_pack_id,
+    $icon = $this->createTestIcon([
+      'pack_id' => $pack_id,
       'icon_id' => $icon_id,
       'source' => 'foo/path',
-      'icon_pack_label' => 'Baz',
+      'pack_label' => 'Baz',
     ]);
 
     $form_state = $this->createMock(FormStateInterface::class);
@@ -487,9 +490,9 @@ class IconAutocompleteTest extends IconUnitTestCase {
     $form_state
       ->expects($this->once())
       ->method('setError')
-      ->with($element['icon_id'], new TranslatableMarkup('Icon for %title is not valid anymore because it is part of icon pack: %icon_pack_id. This field limit icon pack to: %limit.', [
+      ->with($element['icon_id'], new TranslatableMarkup('Icon for %title is not valid anymore because it is part of icon pack: %pack_id. This field limit icon pack to: %limit.', [
         '%title' => $element['icon_id']['#title'],
-        '%icon_pack_id' => $icon_pack_id,
+        '%pack_id' => $pack_id,
         '%limit' => implode(', ', $element['#allowed_icon_pack']),
       ]));
 
@@ -514,19 +517,19 @@ class IconAutocompleteTest extends IconUnitTestCase {
     $element = [];
 
     $icon_id = 'bar';
-    $icon_pack_id = 'foo';
-    $icon_full_id = $icon_pack_id . ':' . $icon_id;
+    $pack_id = 'foo';
+    $icon_full_id = IconDefinition::createIconId($pack_id, $icon_id);
 
     $input = [
       'icon_id' => $icon_full_id,
       'icon_settings' => ['foo' => 'bar'],
     ];
 
-    $icon = self::createTestIcon([
-      'icon_pack_id' => $icon_pack_id,
+    $icon = $this->createTestIcon([
+      'pack_id' => $pack_id,
       'icon_id' => $icon_id,
       'source' => 'foo/path',
-      'icon_pack_label' => 'Baz',
+      'pack_label' => 'Baz',
     ]);
 
     $form_state = $this->createMock(FormStateInterface::class);

@@ -11,7 +11,7 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons\Attribute\IconExtractor;
 
 /**
- * Tests IconExtractor FormAttributeElement class.
+ * @coversDefaultClass \Drupal\ui_icons\Attribute\IconExtractor
  *
  * @group ui_icons
  */

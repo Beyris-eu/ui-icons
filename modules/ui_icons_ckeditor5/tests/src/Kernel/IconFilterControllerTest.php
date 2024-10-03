@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_icons_ckeditor5\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\ui_icons\IconDefinition;
 use Drupal\ui_icons_ckeditor5\Controller\IconFilterController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Test the IconFilterController.
+ * @coversDefaultClass \Drupal\ui_icons_ckeditor5\Controller\IconFilterController
  *
  * @group ui_icons
  */
@@ -19,7 +20,7 @@ class IconFilterControllerTest extends KernelTestBase {
   /**
    * Icon pack from ui_icons_test module.
    */
-  private const TEST_ICON_PACK_ID = 'test';
+  private const TEST_ICON_PACK_ID = 'test_path';
 
   /**
    * Icon from ui_icons_test module.
@@ -71,7 +72,7 @@ class IconFilterControllerTest extends KernelTestBase {
    * Test the preview method.
    */
   public function testPreview(): void {
-    $icon_id = self::TEST_ICON_PACK_ID . ':' . self::TEST_ICON_ID;
+    $icon_id = IconDefinition::createIconId(self::TEST_ICON_PACK_ID, self::TEST_ICON_ID);
 
     // Test case 1: Valid icon request.
     $request = new Request(['icon_id' => $icon_id]);

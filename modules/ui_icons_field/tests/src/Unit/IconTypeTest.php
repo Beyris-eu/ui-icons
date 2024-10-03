@@ -10,7 +10,7 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons_field\Plugin\Field\FieldType\IconType;
 
 /**
- * Defines a test for the IconType field-type.
+ * @coversDefaultClass \Drupal\ui_icons_field\Plugin\Field\FieldType\IconType
  *
  * @group ui_icons
  */

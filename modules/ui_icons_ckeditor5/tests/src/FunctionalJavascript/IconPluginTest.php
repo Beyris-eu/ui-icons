@@ -10,6 +10,7 @@ use Drupal\Tests\ckeditor5\Traits\CKEditor5TestTrait;
 use Drupal\ckeditor5\Plugin\Editor\CKEditor5;
 use Drupal\editor\Entity\Editor;
 use Drupal\filter\Entity\FilterFormat;
+use Drupal\ui_icons\IconDefinition;
 use Symfony\Component\Validator\ConstraintViolation;
 
 /**
@@ -24,7 +25,7 @@ class IconPluginTest extends WebDriverTestBase {
   /**
    * Icon pack from ui_icons_test module.
    */
-  private const TEST_ICON_PACK_ID = 'test';
+  private const TEST_ICON_PACK_ID = 'test_path';
 
   /**
    * Icon from ui_icons_test module.
@@ -130,31 +131,34 @@ class IconPluginTest extends WebDriverTestBase {
   }
 
   /**
-   * Provide values for testIconPlugin.
+   * Provide values for ::testIconPlugin.
    */
   public static function providerIconPlugin(): array {
+    $icon_full_id_1 = IconDefinition::createIconId(self::TEST_ICON_PACK_ID, self::TEST_ICON_ID_1);
+    $icon_full_id_2 = IconDefinition::createIconId(self::TEST_ICON_PACK_ID, self::TEST_ICON_ID_2);
+
     return [
-      'icon' => [
-        'icon_id' => self::TEST_ICON_PACK_ID . ':' . self::TEST_ICON_ID_1,
+      'icon with default settings' => [
+        'icon_id' => $icon_full_id_1,
         'icon_class' => self::TEST_ICON_CLASS_1,
         'icon_filename' => self::TEST_ICON_FILENAME_1,
         'fill_settings' => FALSE,
         // @see tests/modules/ui_icons_test/ui_icons_test.ui_icons.yml
         'settings' => [
-          'width' => '32',
-          'height' => '33',
-          'alt' => 'Default alt',
+          'width' => 32,
+          'height' => 33,
+          'title' => 'Default title',
         ],
       ],
-      'icon with settings' => [
-        'icon_id' => self::TEST_ICON_PACK_ID . ':' . self::TEST_ICON_ID_2,
+      'icon with changed settings' => [
+        'icon_id' => $icon_full_id_2,
         'icon_class' => self::TEST_ICON_CLASS_2,
         'icon_filename' => self::TEST_ICON_FILENAME_2,
         'fill_settings' => TRUE,
         'settings' => [
-          'width' => '98',
-          'height' => '99',
-          'alt' => 'Test alt',
+          'width' => 98,
+          'height' => 99,
+          'title' => 'Test title',
         ],
       ],
     ];
@@ -200,13 +204,13 @@ class IconPluginTest extends WebDriverTestBase {
 
     $this->assertNotNull($icon_preview);
     // Autocomplete preview has own settings and preview class.
-    $this->assertIconValues($icon_preview, $icon_filename, 'icon icon-preview', []);
+    $this->assertIconValues($icon_preview, $icon_filename, 'icon icon-preview');
 
     if (TRUE === $fill_settings) {
       // Need to open settings to be able to interact.
       $page->find('css', '.ui-icons-settings-wrapper details summary')->click();
       $setting_name = '[name="icon[icon_settings][%s][%s]"]';
-      // Fill settings with value.
+      // Fill settings with value, printed and form id are not the same.
       foreach ($settings as $key => $value) {
         $assert_session->elementExists('css', sprintf($setting_name, self::TEST_ICON_PACK_ID, $key))->setValue($value);
       }
@@ -224,12 +228,13 @@ class IconPluginTest extends WebDriverTestBase {
     // Check the text filter <drupal-icon> inserted properly.
     $xpath = new \DOMXPath($this->getEditorDataAsDom());
     $drupal_icon = $xpath->query('//drupal-icon')[0];
-    $expected_attributes = [
-      'data-icon-id' => $icon_id,
-      'data-icon-settings' => json_encode($settings),
-    ];
-    foreach ($expected_attributes as $name => $expected) {
-      $this->assertSame($expected, $drupal_icon->getAttribute($name));
+    $this->assertSame($icon_id, $drupal_icon->getAttribute('data-icon-id'));
+
+    // Compare settings in the html.
+    $data_icon_settings = json_decode($drupal_icon->getAttribute('data-icon-settings'), TRUE);
+    foreach ($settings as $key => $setting) {
+      // Because of json we lost types.
+      $this->assertSame((string) $data_icon_settings[$key], (string) $setting);
     }
 
     $this->submitForm([
@@ -255,11 +260,11 @@ class IconPluginTest extends WebDriverTestBase {
    * @param array $settings
    *   An associative array of additional attributes and their expected values.
    */
-  private function assertIconValues(NodeElement $element, string $filename, string $class, array $settings): void {
+  private function assertIconValues(NodeElement $element, string $filename, string $class, array $settings = []): void {
     $this->assertStringEndsWith($filename, $element->getAttribute('src'));
     $this->assertEquals($class, $element->getAttribute('class'));
     foreach ($settings as $key => $expected) {
-      $this->assertSame($expected, $element->getAttribute($key));
+      $this->assertSame((string) $expected, (string) $element->getAttribute($key));
     }
   }
 

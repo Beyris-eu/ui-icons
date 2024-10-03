@@ -54,15 +54,16 @@ final class IconFilterController implements ContainerInjectionInterface {
       $settings = json_decode($query_settings, TRUE);
     }
 
+    /** @var \Drupal\ui_icons\IconDefinitionInterface $icon */
     $icon = $this->pluginManagerIconPack->getIcon($icon_id);
-    // Use default settings if none set.
-    if (empty($settings)) {
-      [$icon_pack_id] = explode(':', $icon_id);
-      $settings = $this->pluginManagerIconPack->getExtractorFormDefaults($icon_pack_id);
-    }
 
     if (!$icon instanceof IconDefinitionInterface) {
       return (new Response('', 404));
+    }
+
+    // Use default settings if none set.
+    if (empty($settings)) {
+      $settings = $this->pluginManagerIconPack->getExtractorFormDefaults($icon->getPackId());
     }
 
     $build = $icon->getRenderable($settings);

@@ -133,15 +133,26 @@ class IconType extends FieldItemBase {
    * {@inheritdoc}
    */
   public static function generateSampleValue(FieldDefinitionInterface $field_definition): array {
+    $default_value = $field_definition->get('default_value');
+    if (isset($default_value[0]['target_id'])) {
+      return [
+        'target_id' => $default_value[0]['target_id'],
+      ];
+    }
+
+    // Pick a random icon from allowed if no default.
     $allowed_icon_pack = $field_definition->getSetting('allowed_icon_pack');
-    $icons = \Drupal::service('plugin.manager.ui_icons_pack')->listIconOptions($allowed_icon_pack);
+    if (empty($allowed_icon_pack)) {
+      $allowed_icon_pack = NULL;
+    }
+    $icons = \Drupal::service('plugin.manager.ui_icons_pack')->getIcons($allowed_icon_pack);
 
     if (empty($icons)) {
       return [];
     }
 
     return [
-      'target_id' => array_rand($icons),
+      'target_id' => $icons[array_rand($icons)]->getId(),
     ];
   }
 

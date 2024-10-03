@@ -8,10 +8,9 @@ use Drupal\ui_icons\IconDefinitionInterface;
 use Drupal\ui_icons\Plugin\IconPackManagerInterface;
 use Drupal\ui_icons\Template\IconTwigExtension;
 use PHPUnit\Framework\TestCase;
-use Twig\TwigFunction;
 
 /**
- * Test the class IconTwigExtension.
+ * @coversDefaultClass \Drupal\ui_icons\Template\IconTwigExtension
  *
  * @group ui_icons
  */
@@ -45,9 +44,7 @@ class IconTwigExtensionTest extends TestCase {
   public function testGetFunctions(): void {
     $functions = $this->iconTwigExtension->getFunctions();
     $this->assertCount(2, $functions);
-    $this->assertInstanceOf(TwigFunction::class, $functions[0]);
     $this->assertEquals('icon', $functions[0]->getName());
-    $this->assertInstanceOf(TwigFunction::class, $functions[1]);
     $this->assertEquals('icon_preview', $functions[1]->getName());
   }
 
@@ -59,7 +56,7 @@ class IconTwigExtensionTest extends TestCase {
       ->method('getIcon')
       ->willReturn(NULL);
 
-    $result = $this->iconTwigExtension->getIconRenderable('icon_pack_id', 'icon_id');
+    $result = $this->iconTwigExtension->getIconRenderable('pack_id', 'icon_id');
     $this->assertEmpty($result);
   }
 
@@ -77,7 +74,7 @@ class IconTwigExtensionTest extends TestCase {
       ->method('getIcon')
       ->willReturn($iconMock);
 
-    $result = $this->iconTwigExtension->getIconRenderable('icon_pack_id', 'icon_id', $settings);
+    $result = $this->iconTwigExtension->getIconRenderable('pack_id', 'icon_id', $settings);
     $this->assertEquals(['rendered_icon'] + $settings, $result);
   }
 
@@ -95,7 +92,7 @@ class IconTwigExtensionTest extends TestCase {
       ->method('getIcon')
       ->willReturn($iconMock);
 
-    $result = $this->iconTwigExtension->getIconPreview('icon_pack_id', 'icon_id', $settings);
+    $result = $this->iconTwigExtension->getIconPreview('pack_id', 'icon_id', $settings);
     $this->assertEquals(['preview_icon'] + $settings, $result);
   }
 
@@ -107,7 +104,7 @@ class IconTwigExtensionTest extends TestCase {
       ->method('getIcon')
       ->willReturn(NULL);
 
-    $result = $this->iconTwigExtension->getIconPreview('icon_pack_id', 'icon_id', []);
+    $result = $this->iconTwigExtension->getIconPreview('pack_id', 'icon_id', []);
     $this->assertEquals([], $result);
   }
 

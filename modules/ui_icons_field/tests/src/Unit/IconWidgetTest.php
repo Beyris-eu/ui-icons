@@ -12,7 +12,7 @@ use Drupal\Tests\ui_icons\Unit\IconUnitTestCase;
 use Drupal\ui_icons_field\Plugin\Field\FieldWidget\IconWidget;
 
 /**
- * Tests the IconWidget field class.
+ * @coversDefaultClass \Drupal\ui_icons_field\Plugin\Field\FieldWidget\IconWidget
  *
  * @group ui_icons
  */
@@ -75,7 +75,7 @@ class IconWidgetTest extends IconUnitTestCase {
     // Icon with data.
     $values[]['value'] = [
       'icon' => $this->createMockIcon([
-        'icon_pack_id' => 'foo',
+        'pack_id' => 'foo',
         'icon_id' => 'bar',
       ]),
     ];

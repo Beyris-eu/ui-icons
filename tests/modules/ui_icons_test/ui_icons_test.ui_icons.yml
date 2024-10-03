@@ -1,6 +1,15 @@
-test:
-  label: Test icons
-  description: Local files relative available for test.
+test_minimal:
+  extractor: path
+  config:
+    sources:
+      - icons/flat/foo.png
+  template: >
+    {{ icon_id }}: <img src="{{ source }}" width="32" height="32">
+
+test_path:
+  enabled: true
+  label: Test path
+  description: Local png files available for test.
   links:
     - https://www.drupal.org/project/ui_icons
   version: 1.0.0
@@ -12,7 +21,7 @@ test:
       - icons/flat/*.png
       - icons/group/{group}/*.png
       - icons/group/*/{group}/*.png
-  # For tests keep same name attribute as HTMl fore easier IconPluginTest.
+  # For tests keep same name attribute as HTML for IconPluginTest.
   settings:
     width:
       title: "Width"
@@ -22,25 +31,23 @@ test:
       title: "Height"
       type: "integer"
       default: 33
-    alt:
-      title: "Alt text"
+    title:
+      title: "Title"
       type: "string"
-      default: "Default alt"
+      default: 'Default title'
+  # Template class is important for tests.
   template: >
-    <img
+    {{ icon_id }}: <img
       class="icon icon-{{ icon_id|clean_class }}"
       src="{{ source }}"
       width="{{ width|default(32) }}"
       height="{{ height|default(33) }}"
-      {% if alt is empty %}
-        role="presentation"
-      {% else %}
-        alt="{{ alt }}"
-      {% endif %}
+      title="{{ title }}"
     >
 
 test_svg:
-  label: Test SVG
+  enabled: true
+  label: Test svg
   extractor: svg
   config:
     sources:
@@ -52,28 +59,20 @@ test_svg:
     size:
       title: "Size"
       type: "integer"
-    alt:
-      title: "Alt text"
-      type: "string"
   template: >
-    <svg
+    {{ icon_id }}: <svg
       xmlns="https://www.w3.org/2000/svg"
-      fill="currentColor"
-      viewBox="0 0 163.83 124.92"
+      viewBox="0 0 14 14"
       width="{{ size|default(32) }}"
       height="{{ size|default(32) }}"
-      {% if alt is empty %}
-        aria-hidden="true"
-        role="img"
-      {% else %}
-        aria-label="{{ alt }}"
-      {% endif %}
+      aria-hidden="true"
     >
       {{ content }}
     </svg>
 
 test_svg_sprite:
-  label: Small sprite
+  enabled: true
+  label: Test sprite
   extractor: svg_sprite
   config:
     sources:
@@ -87,27 +86,18 @@ test_svg_sprite:
       title: "Height"
       type: "integer"
       default: 32
-    alt:
-      title: "Alt text"
-      type: "string"
   template: >
-    <svg
-      fill="currentColor"
+    {{ icon_id }}: <svg
+      xmlns="https://www.w3.org/2000/svg"
       width="{{ width|default(32) }}"
       height="{{ height|default(32) }}"
-      role="img"
-      {% if alt is empty %}
-        aria-hidden="true"
-      {% else %}
-        aria-label="{{ alt }}"
-        aria-labelledby="{{ icon_id }}"
-      {% endif %}
+      aria-hidden="true"
     >
-      <title id="{{ icon_id }}">{{ title }}</title>
       <use xlink:href="{{ source }}#{{ icon_id }}"/>
     </svg>
 
 test_settings:
+  enabled: true
   label: Test settings
   extractor: path
   config:
@@ -150,7 +140,7 @@ test_settings:
       description: "Test for a decimal with step property."
       type: "number"
       default: 66.66
-    #   multipleOf: 0.01
+      multipleOf: 0.01
     number:
       title: "Test number min/max/step"
       description: "Test for number with constraints."
@@ -160,15 +150,11 @@ test_settings:
       maximum: 100
     #   multipleOf: 10
   template: >
-    <img
+    {{ icon_id }}: <img
       class="icon icon-{{ icon_id|clean_class }}"
       src="{{ source }}"
       title="{{ title }}"
-      {% if alt is empty %}
-        role="presentation"
-      {% else %}
-        alt="{{ alt }}"
-      {% endif %}
+      alt="{{ alt }}"
       width="{{ width|default(32) }}"
       height="{{ height|default(32) }}"
       data-select="{{ select }}"
@@ -177,102 +163,80 @@ test_settings:
       data-number="{{ number }}"
     >
 
-test_url_path:
-  label: Test url path
-  extractor: path
-  config:
-    sources:
-      - http://test.com/foo.svg
-      - https://test.com/foo.svg
-      - https://test.com/bar.png
-      - https://test.com/baz.gif
-      - ftp://test.com/ignored.png
-      - ssh://test.com/ignored.png
-      - htp://test.com/invalid.jpg
-      - https://test.com/ignored.jpg
-      - https://test.com/ignored.jpeg
-      - https://test.com/ignored.webp
-  template: >
-    <img src={{ source }}>
-
-test_url_svg:
-  enabled: false
-  label: Test url svg
-  extractor: svg
-  config:
-    sources:
-      - https://test.com/foo.svg
-      - https://test.com/bar.svg
-      - https://test.com/baz.svg
-      - https://test.com/ignored.png
-  template: >
-    <svg xmlns="https://www.w3.org/2000/svg">
-      {{ content }}
-    </svg>
-
-test_url_svg_sprite:
-  enabled: false
-  label: Test url svg sprite
-  extractor: svg_sprite
-  config:
-    sources:
-      - https://test.com/foo.svg
-      - https://test.com/bar.svg
-      - https://test.com/ignored.png
-  template: >
-    <svg xmlns="https://www.w3.org/2000/svg">
-      <use xlink:href="{{ source }}#{{ icon_id }}"/>
-    </svg>
-
-test_disabled:
-  label: Disabled
-  extractor: path
-  enabled: false
-  config:
-    sources:
-      - icons/png/*.png
-  settings:
-    title:
-      title: "Title"
-      type: "string"
-      default: "default title"
-  template: >
-    <img
-      class="icon icon-{{ icon_id|clean_class }}"
-      src="{{ source }}"
-      width="32"
-      height="32"
-    >
-
-test_no_icons:
-  label: No Icons
-  extractor: path
-  config:
-    sources:
-      - invalid_path/*.png
-  settings:
-    title:
-      title: "Title"
-      type: "string"
-      default: "default title"
-  template: >
-    <img
-      class="icon icon-{{ icon_id|clean_class }}"
-      src="{{ source }}"
-      width="32"
-      height="32"
-    >
-
 test_no_settings:
-  label: No Settings
+  enabled: true
   extractor: path
   config:
     sources:
       - icons/no_settings/*.svg
   template: >
-    <img
-      class="icon icon-{{ icon_id|clean_class }}"
+    {{ icon_id }}: <img
       src="{{ source }}"
       width="32"
       height="32"
     >
+
+test_url_path:
+  enabled: true
+  label: Test url path
+  extractor: path
+  config:
+    sources:
+      - https://www.drupal.org/files/D10-logo.png
+      - https://www.drupal.org/files/drupal-wordmark.png
+      - ftp://test.com/ignored_1.png
+      - ssh://test.com/ignored_2.png
+      - htp://test.com/invalid.jpg
+  template: >
+    {{ icon_id }}: <img src="{{ source }}" width="32" height="32">
+
+test_url_svg:
+  enabled: true
+  label: Test url svg
+  extractor: svg
+  config:
+    sources:
+      - https://www.drupal.org/files/drupal-wordmark.svg
+  template: >
+    {{ icon_id }}: <svg xmlns="https://www.w3.org/2000/svg">
+      {{ content }}
+    </svg>
+
+test_url_svg_sprite:
+  enabled: false
+  label: Test svg sprite
+  extractor: svg_sprite
+  config:
+    sources:
+      - https://test.com/ignored.png
+      - https://test.com/ignored.gif
+  template: >
+    <svg xmlns="https://www.w3.org/2000/svg">
+      <use xlink:href="{{ source }}#{{ icon_id }}"/>
+    </svg>
+
+test_no_icons:
+  enabled: true
+  label: No Icons
+  extractor: path
+  config:
+    sources:
+      - icons/empty/*
+  template: '{{ icon_id }}'
+
+# @todo enable and log error instead.
+test_invalid_path:
+  enabled: true
+  extractor: path
+  config:
+    sources:
+      - invalid_path/*.png
+  template: '{{ icon_id }}'
+
+test_disabled:
+  enabled: false
+  extractor: path
+  config:
+    sources:
+      - icons/png/*
+  template: '{{ icon_id }}'

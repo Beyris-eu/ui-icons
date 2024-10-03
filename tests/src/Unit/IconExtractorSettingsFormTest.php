@@ -9,7 +9,7 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons\Form\IconExtractorSettingsForm;
 
 /**
- * Tests ui_icons configuration form.
+ * @coversDefaultClass \Drupal\ui_icons\Form\IconExtractorSettingsForm
  *
  * @group ui_icons
  */
@@ -18,9 +18,9 @@ class IconExtractorSettingsFormTest extends UnitTestCase {
   /**
    * Test the generateSettingsForm method.
    *
-   * @param array $settings
+   * @param array<string, array<string, string>> $settings
    *   The settings to test.
-   * @param array $expected
+   * @param array<string, array<string, string>> $expected
    *   The expected result.
    *
    * @dataProvider settingsFormDataProvider

@@ -63,25 +63,30 @@ final class IconSelectForm extends FormBase {
       return [];
     }
 
-    $allowed_icon_pack = $options['query']['allowed_icon_pack'] ?? '';
+    $allowed_icon_pack = $options['query']['allowed_icon_pack'] ?? NULL;
+    if (!empty($allowed_icon_pack)) {
+      $allowed_icon_pack = explode('+', $allowed_icon_pack);
+    }
+    else {
+      $allowed_icon_pack = NULL;
+    }
 
     if (!$modal_state = static::getModalState($form_state)) {
       $modal_state = [
         'page' => 0,
-        'icon_list' => $this->pluginManagerIconPack->getIcons(),
+        'icon_list' => $this->pluginManagerIconPack->getIcons($allowed_icon_pack),
       ];
       static::setModalState($form_state, $modal_state);
     }
 
     $input = $form_state->getUserInput();
     $search = $input['filter'] ?? '';
-    $icons_list = $modal_state['icon_list'];
+    $icons = $modal_state['icon_list'];
 
     if (!empty($search) && strlen($search) >= self::SEARCH_MIN_LENGTH) {
-      $icons_list = array_filter($icons_list, fn($id) => str_contains($id, $search), ARRAY_FILTER_USE_KEY);
+      $icons = array_filter($icons, fn($id) => str_contains($id, $search), ARRAY_FILTER_USE_KEY);
     }
 
-    $icons = $this->filterIcons($icons_list, $allowed_icon_pack);
     $pager = $this->createPager($modal_state['page'], count($icons));
     ksort($icons);
     $icons = array_slice($icons, $pager['offset'], self::NUM_PER_PAGE);
@@ -165,18 +170,22 @@ final class IconSelectForm extends FormBase {
     $options['_none_'] = '<div class="icon-preview-none icon-preview-wrapper"><img class="icon icon-preview" src="/core/themes/claro/images/icons/e34f4f/crossout.svg" title="None" width="32" height="32"></div>';
 
     foreach ($icons as $icon) {
-      $form['list']['icons_preview'][$icon['icon_full_id']] = [
+      $id = $icon->getId();
+      $preview = $icon->getPreview([
+        'size' => 32,
+      ]);
+      $form['list']['icons_preview'][$id] = [
         '#type' => 'html_tag',
         '#tag' => 'div',
         '#attributes' => [
           'class' => [
             'icon-preview-wrapper',
           ],
-          'data-icon-id' => $icon['icon_full_id'],
+          'data-icon-id' => $id,
         ],
-        'icon' => $icon['preview'],
+        'icon' => $preview,
       ];
-      $options[$icon['icon_full_id']] = $icon['#label'] ?? $icon['#context']['label'] ?? $icon['icon_full_id'];
+      $options[$id] = $icon->getLabel();
     }
 
     $form['list']['icon_full_id'] = [
@@ -400,38 +409,6 @@ final class IconSelectForm extends FormBase {
    */
   public static function setModalState(FormStateInterface $form_state, array $field_state): void {
     NestedArray::setValue($form_state->getStorage(), ['list_state'], $field_state);
-  }
-
-  /**
-   * Filter icons based on criteria.
-   *
-   * @param array $icons_list
-   *   The list of icons to filter.
-   * @param string $icon_pack
-   *   The icon packs to filter by.
-   *
-   * @return array
-   *   The filtered list of icons.
-   */
-  private function filterIcons(array $icons_list, string $icon_pack = ''): array {
-    if (!empty($icon_pack)) {
-      $icon_pack = explode('+', $icon_pack);
-    }
-
-    $icons = [];
-    foreach ($icons_list as $icon_full_id => $icon) {
-      if (!empty($icon_pack) && !in_array($icon->getIconPackId(), $icon_pack)) {
-        continue;
-      }
-      $icons[$icon->getIconId()] = [
-        'icon_full_id' => $icon_full_id,
-        'preview' => $icon->getPreview([
-          'size' => 32,
-        ]),
-      ];
-    }
-
-    return $icons;
   }
 
   /**

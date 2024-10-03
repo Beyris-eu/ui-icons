@@ -1,0 +1,10 @@
+test_font:
+  extractor: font
+  config:
+    sources:
+      - icons/foo.codepoints
+      - icons/foo.ttf
+      - icons/foo.json
+      - icons/foo.yml
+  template: >
+    {{ icon_id }}: <img src="{{ source }}" width="32" height="32">

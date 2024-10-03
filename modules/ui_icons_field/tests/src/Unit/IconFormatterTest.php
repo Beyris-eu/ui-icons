@@ -13,7 +13,7 @@ use Drupal\ui_icons\Plugin\IconPackManagerInterface;
 use Drupal\ui_icons_field\Plugin\Field\FieldFormatter\IconFormatter;
 
 /**
- * Tests the IconFormatter field class.
+ * @coversDefaultClass \Drupal\ui_icons_field\Plugin\Field\FieldFormatter\IconFormatter
  *
  * @group ui_icons
  */

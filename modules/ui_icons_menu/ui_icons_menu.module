@@ -7,6 +7,7 @@
 
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\ui_icons\IconDefinition;
 
 /**
  * Implements hook_help().
@@ -92,7 +93,7 @@ function ui_icons_menu__preprocess_menu_item(array &$item): void {
   }
 
   $icon_full_id = $options['icon']['target_id'];
-  if (FALSE === strpos($icon_full_id, ':')) {
+  if (FALSE === strpos($icon_full_id, IconDefinition::ICON_SEPARATOR)) {
     return;
   }
 
@@ -105,8 +106,8 @@ function ui_icons_menu__preprocess_menu_item(array &$item): void {
   }
 
   $icon_settings = [];
-  if (isset($options['icon']['settings'][$icon->getIconPackId()])) {
-    $icon_settings = $options['icon']['settings'][$icon->getIconPackId()];
+  if (isset($options['icon']['settings'][$icon->getPackId()])) {
+    $icon_settings = $options['icon']['settings'][$icon->getPackId()];
   }
   $icon = $icon->getRenderable($icon_settings);
 

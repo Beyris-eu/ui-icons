@@ -147,8 +147,8 @@ class IconFormatter extends FormatterBase implements ContainerFactoryPluginInter
    * foo
    *   bar
    *     settings:
-   *       icon_pack_id_1: settings array
-   *       icon_pack_id_2: settings array
+   *       pack_id_1: settings array
+   *       pack_id_2: settings array
    *       icon_settings: ... this element key
    * This method isolate the 'settings', remove icon_settings part and save it
    * by setting it as value to the element.
@@ -214,21 +214,16 @@ class IconFormatter extends FormatterBase implements ContainerFactoryPluginInter
       }
 
       $icon_id = $item->get('target_id')->getValue();
-      if ($icon_id === NULL) {
+      if (!$icon = $this->pluginManagerIconPack->getIcon((string) $icon_id)) {
         continue;
       }
 
-      $icon = $this->pluginManagerIconPack->getIcon($icon_id);
-      if ($icon === NULL) {
-        continue;
-      }
-
-      $icon_pack_id = $icon->getIconPackId();
+      $pack_id = $icon->getPackId();
 
       $settings = [];
       $formatter_settings = $this->getSetting('icon_settings') ?? [];
-      if (isset($formatter_settings[$icon_pack_id])) {
-        $settings = $formatter_settings[$icon_pack_id];
+      if (isset($formatter_settings[$pack_id])) {
+        $settings = $formatter_settings[$pack_id];
       }
 
       $elements[$delta] = $icon->getRenderable($settings);
