@@ -15,7 +15,7 @@ use Drupal\ui_icons\IconDefinition;
 use Drupal\ui_icons\IconDefinitionInterface;
 
 /**
- * Base class for ui_icons_extractor plugins.
+ * Base class for icon_extractor plugins.
  */
 abstract class IconExtractorBase extends PluginBase implements IconExtractorInterface, PluginWithFormsInterface {
 

@@ -13,7 +13,7 @@ use Drupal\ui_icons\IconFinder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Base class for ui_icons_extractor plugins.
+ * Base class for icon_extractor plugins.
  *
  * This is a wrapper for the IconFinder class to load icon files based on path
  * or urls.
@@ -84,7 +84,7 @@ abstract class IconExtractorWithFinder extends IconExtractorBase implements Icon
       empty($this->configuration['config']['sources']) ||
       !is_array($this->configuration['config']['sources'])
     ) {
-      throw new IconPackConfigErrorException(sprintf('Missing `config: sources` in your definition, extractor %s require this value.', $this->getPluginId()));
+      throw new IconPackConfigErrorException(sprintf('Missing or invalid `config: sources` in your definition, extractor %s require this value as array.', $this->getPluginId()));
     }
   }
 

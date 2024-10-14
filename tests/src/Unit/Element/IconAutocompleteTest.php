@@ -37,7 +37,7 @@ class IconAutocompleteTest extends IconUnitTestCase {
     parent::setUp();
 
     $this->container = new ContainerBuilder();
-    $this->container->set('plugin.manager.ui_icons_pack', $this->createMock(IconPackManagerInterface::class));
+    $this->container->set('plugin.manager.icon_pack', $this->createMock(IconPackManagerInterface::class));
     \Drupal::setContainer($this->container);
   }
 
@@ -204,15 +204,15 @@ class IconAutocompleteTest extends IconUnitTestCase {
     $this->assertArrayNotHasKey('icon_settings', $element);
 
     // Test settings enabled with icon_id.
-    $ui_icons_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
-    $ui_icons_pack_plugin_manager->expects($this->once())->method('getIcon')->willReturn($this->createMockIcon());
-    $ui_icons_pack_plugin_manager->expects($this->once())
+    $ui_icon_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
+    $ui_icon_pack_plugin_manager->expects($this->once())->method('getIcon')->willReturn($this->createMockIcon());
+    $ui_icon_pack_plugin_manager->expects($this->once())
       ->method('getExtractorPluginForms')
       ->with($this->anything())
       ->willReturnCallback(function (&$form): void {
         $form['sub_form'] = TRUE;
       });
-    $this->container->set('plugin.manager.ui_icons_pack', $ui_icons_pack_plugin_manager);
+    $this->container->set('plugin.manager.icon_pack', $ui_icon_pack_plugin_manager);
 
     $element = $base_element;
     $element['#show_settings'] = TRUE;
@@ -258,11 +258,11 @@ class IconAutocompleteTest extends IconUnitTestCase {
       'pack_label' => 'Baz',
     ]);
 
-    $ui_icons_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
-    $ui_icons_pack_plugin_manager->method('getIcon')
+    $ui_icon_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
+    $ui_icon_pack_plugin_manager->method('getIcon')
       ->with('foo:bar')
       ->willReturn($icon);
-    $this->container->set('plugin.manager.ui_icons_pack', $ui_icons_pack_plugin_manager);
+    $this->container->set('plugin.manager.icon_pack', $ui_icon_pack_plugin_manager);
 
     IconAutocomplete::processIcon($element, $form_state, $complete_form);
     IconAutocomplete::processIconAjaxForm($element, $form_state, $complete_form);
@@ -298,11 +298,11 @@ class IconAutocompleteTest extends IconUnitTestCase {
       'pack_label' => 'Baz',
     ]);
 
-    $ui_icons_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
-    $ui_icons_pack_plugin_manager->method('getIcon')
+    $ui_icon_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
+    $ui_icon_pack_plugin_manager->method('getIcon')
       ->with($icon_id)
       ->willReturn($icon);
-    $this->container->set('plugin.manager.ui_icons_pack', $ui_icons_pack_plugin_manager);
+    $this->container->set('plugin.manager.icon_pack', $ui_icon_pack_plugin_manager);
 
     // Test with no Extractor form.
     IconAutocomplete::processIcon($element, $form_state, $complete_form);
@@ -373,11 +373,11 @@ class IconAutocompleteTest extends IconUnitTestCase {
       'pack_label' => $element['icon_id']['#title'],
     ]);
 
-    $ui_icons_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
-    $ui_icons_pack_plugin_manager->method('getIcon')
+    $ui_icon_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
+    $ui_icon_pack_plugin_manager->method('getIcon')
       ->with($icon->getId())
       ->willReturn($icon);
-    $this->container->set('plugin.manager.ui_icons_pack', $ui_icons_pack_plugin_manager);
+    $this->container->set('plugin.manager.icon_pack', $ui_icon_pack_plugin_manager);
 
     $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
       ->disableOriginalConstructor()
@@ -492,11 +492,11 @@ class IconAutocompleteTest extends IconUnitTestCase {
     $form_state->method('getValues')
       ->willReturn(['icon' => ['icon_id' => $icon_full_id]]);
 
-    $ui_icons_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
-    $ui_icons_pack_plugin_manager->method('getIcon')
+    $ui_icon_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
+    $ui_icon_pack_plugin_manager->method('getIcon')
       ->with($icon_full_id)
       ->willReturn($icon);
-    $this->container->set('plugin.manager.ui_icons_pack', $ui_icons_pack_plugin_manager);
+    $this->container->set('plugin.manager.icon_pack', $ui_icon_pack_plugin_manager);
 
     // The test is to expect the setError().
     $form_state
@@ -546,11 +546,11 @@ class IconAutocompleteTest extends IconUnitTestCase {
 
     $form_state = $this->createMock(FormStateInterface::class);
 
-    $ui_icons_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
-    $ui_icons_pack_plugin_manager->method('getIcon')
+    $ui_icon_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
+    $ui_icon_pack_plugin_manager->method('getIcon')
       ->with($icon_full_id)
       ->willReturn($icon);
-    $this->container->set('plugin.manager.ui_icons_pack', $ui_icons_pack_plugin_manager);
+    $this->container->set('plugin.manager.icon_pack', $ui_icon_pack_plugin_manager);
 
     $actual = IconAutocomplete::valueCallback($element, $input, $form_state);
 
@@ -593,10 +593,10 @@ class IconAutocompleteTest extends IconUnitTestCase {
 
     $form_state = $this->createMock(FormStateInterface::class);
 
-    $ui_icons_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
-    $ui_icons_pack_plugin_manager->method('getIcon')
+    $ui_icon_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
+    $ui_icon_pack_plugin_manager->method('getIcon')
       ->willReturn(NULL);
-    $this->container->set('plugin.manager.ui_icons_pack', $ui_icons_pack_plugin_manager);
+    $this->container->set('plugin.manager.icon_pack', $ui_icon_pack_plugin_manager);
 
     $actual = IconAutocomplete::valueCallback($element, $input, $form_state);
     $this->assertSame($input, $actual);
@@ -612,10 +612,10 @@ class IconAutocompleteTest extends IconUnitTestCase {
 
     $form_state = $this->createMock(FormStateInterface::class);
 
-    $ui_icons_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
-    $ui_icons_pack_plugin_manager->method('getIcon')
+    $ui_icon_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
+    $ui_icon_pack_plugin_manager->method('getIcon')
       ->willReturn(NULL);
-    $this->container->set('plugin.manager.ui_icons_pack', $ui_icons_pack_plugin_manager);
+    $this->container->set('plugin.manager.icon_pack', $ui_icon_pack_plugin_manager);
 
     $actual = IconAutocomplete::valueCallback($element, $input, $form_state);
     $this->assertSame($input, $actual);

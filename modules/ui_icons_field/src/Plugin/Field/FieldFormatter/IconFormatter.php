@@ -80,7 +80,7 @@ class IconFormatter extends FormatterBase implements ContainerFactoryPluginInter
       $configuration['label'],
       $configuration['view_mode'],
       $configuration['third_party_settings'],
-      $container->get('plugin.manager.ui_icons_pack')
+      $container->get('plugin.manager.icon_pack')
     );
   }
 

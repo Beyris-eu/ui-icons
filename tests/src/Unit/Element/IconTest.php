@@ -120,7 +120,7 @@ class IconTest extends IconUnitTestCase {
       ->willReturn($icon);
 
     $pluginManagerIconPack = $prophecy->reveal();
-    $this->container->set('plugin.manager.ui_icons_pack', $pluginManagerIconPack);
+    $this->container->set('plugin.manager.icon_pack', $pluginManagerIconPack);
 
     $element = [
       '#type' => 'icon',
@@ -142,7 +142,7 @@ class IconTest extends IconUnitTestCase {
     $prophecy->getIcon('foo:bar')->willReturn(NULL);
 
     $pluginManagerIconPack = $prophecy->reveal();
-    $this->container->set('plugin.manager.ui_icons_pack', $pluginManagerIconPack);
+    $this->container->set('plugin.manager.icon_pack', $pluginManagerIconPack);
 
     $element = [
       '#type' => 'icon',

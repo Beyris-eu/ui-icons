@@ -68,7 +68,7 @@ class IconEmbedFilterTest extends KernelTestBase {
 
     $this->installConfig(['system', 'filter', 'ui_icons']);
 
-    $this->pluginManagerIconPack = $this->container->get('plugin.manager.ui_icons_pack');
+    $this->pluginManagerIconPack = $this->container->get('plugin.manager.icon_pack');
 
     /** @var \Drupal\filter\FilterPluginManager $filterManager */
     $filterManager = $this->container->get('plugin.manager.filter');

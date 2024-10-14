@@ -8,7 +8,7 @@ use Drupal\Component\Plugin\Attribute\AttributeBase;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
- * The ui_icons_extractor attribute.
+ * The icon_extractor attribute.
  */
 #[\Attribute(\Attribute::TARGET_CLASS)]
 class IconExtractor extends AttributeBase {

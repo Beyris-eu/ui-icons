@@ -8,7 +8,7 @@ use Drupal\Core\Plugin\PluginFormInterface;
 use Drupal\ui_icons\IconDefinitionInterface;
 
 /**
- * Interface for ui_icons_extractor plugins.
+ * Interface for icon_extractor plugins.
  */
 interface IconExtractorInterface extends PluginFormInterface {
 

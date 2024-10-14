@@ -109,7 +109,7 @@ class UiIconsMenuTest extends KernelTestBase {
     // Mock the icon pack manager service.
     $icon_pack_manager = $this->createMock(IconPackManagerInterface::class);
     $icon_pack_manager->method('getIcon')->willReturn($icon);
-    $this->container->set('plugin.manager.ui_icons_pack', $icon_pack_manager);
+    $this->container->set('plugin.manager.icon_pack', $icon_pack_manager);
 
     ui_icons_menu_preprocess_menu($variables);
 

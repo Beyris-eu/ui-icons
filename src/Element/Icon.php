@@ -57,7 +57,7 @@ class Icon extends RenderElementBase {
    */
   public static function preRenderIcon(array $element): array {
     /** @var \Drupal\ui_icons\Plugin\IconPackManagerInterface $pluginManagerIconPack */
-    $pluginManagerIconPack = \Drupal::service('plugin.manager.ui_icons_pack');
+    $pluginManagerIconPack = \Drupal::service('plugin.manager.icon_pack');
 
     $icon_full_id = IconDefinition::createIconId($element['#icon_pack'], $element['#icon']);
     $icon = $pluginManagerIconPack->getIcon($icon_full_id);
@@ -84,7 +84,7 @@ class Icon extends RenderElementBase {
       '#context' => $context + $element['#settings'],
     ];
 
-    if ($library = $icon->getData('library')) {
+    if ($library = $icon->getLibrary()) {
       $element['inline-template']['#attached'] = ['library' => [$library]];
     }
 

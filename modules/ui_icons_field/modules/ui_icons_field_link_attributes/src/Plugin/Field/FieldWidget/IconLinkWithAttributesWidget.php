@@ -87,7 +87,7 @@ class IconLinkWithAttributesWidget extends IconLinkWidget implements ContainerFa
       $configuration['field_definition'],
       $configuration['settings'],
       $configuration['third_party_settings'],
-      $container->get('plugin.manager.ui_icons_pack'),
+      $container->get('plugin.manager.icon_pack'),
       $container->get('plugin.manager.link_attributes'),
     );
   }

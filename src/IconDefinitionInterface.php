@@ -107,6 +107,22 @@ interface IconDefinitionInterface {
   public function getTemplate(): string;
 
   /**
+   * Get the Icon pack label.
+   *
+   * @return string|null
+   *   The Icon pack label.
+   */
+  public function getPackLabel(): ?string;
+
+  /**
+   * Get the Icon Twig library.
+   *
+   * @return string|null
+   *   The Icon library.
+   */
+  public function getLibrary(): ?string;
+
+  /**
    * Get the Icon data.
    *
    * @param string $key

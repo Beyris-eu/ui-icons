@@ -29,7 +29,7 @@ final class LibrarySearchForm extends FormBase {
    */
   public static function create(ContainerInterface $container): self {
     return new static(
-      $container->get('plugin.manager.ui_icons_pack'),
+      $container->get('plugin.manager.icon_pack'),
       $container->get('pager.manager'),
     );
   }
@@ -118,6 +118,7 @@ final class LibrarySearchForm extends FormBase {
     }
 
     $icons = $this->filterIcons($icons_list, $icon_pack, $group);
+    // Based on the key we mix pack and use icon id for order.
     $icons_keys = array_keys($icons);
     array_multisort($icons_keys, SORT_NATURAL, $icons);
 
@@ -206,11 +207,11 @@ final class LibrarySearchForm extends FormBase {
         continue;
       }
       // Generate a key for sorting.
-      $key = $icon->getId();
+      $key = $icon->getIconId() . '_' . $icon->getPackId();
       $icons[$key] = $icon->getPreview(['size' => 48]);
       $icons[$key]['#group'] = $group;
       $icons[$key]['#label'] = $icon->getLabel();
-      $icons[$key]['#pack_label'] = $icon->getData('label');
+      $icons[$key]['#pack_label'] = $icon->getPackLabel();
     }
 
     return $icons;

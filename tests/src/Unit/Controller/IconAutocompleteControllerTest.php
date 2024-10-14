@@ -75,7 +75,7 @@ class IconAutocompleteControllerTest extends IconUnitTestCase {
 
     /** @var \Drupal\ui_icons\Plugin\IconPackManagerInterface $iconPackManager */
     $iconPackManager = $prophecy->reveal();
-    $this->container->set('plugin.manager.ui_icons_pack', $iconPackManager);
+    $this->container->set('plugin.manager.icon_pack', $iconPackManager);
 
     $prophecy = $this->prophesize(RendererInterface::class);
     $prophecy->renderInIsolation(Argument::any())->willReturn('_rendered_');

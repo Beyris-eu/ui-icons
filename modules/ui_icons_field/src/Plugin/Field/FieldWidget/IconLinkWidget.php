@@ -74,7 +74,7 @@ class IconLinkWidget extends LinkWidget implements ContainerFactoryPluginInterfa
       $configuration['field_definition'],
       $configuration['settings'],
       $configuration['third_party_settings'],
-      $container->get('plugin.manager.ui_icons_pack'),
+      $container->get('plugin.manager.icon_pack'),
     );
   }
 

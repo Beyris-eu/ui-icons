@@ -97,7 +97,7 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('plugin.manager.ui_icons_pack'),
+      $container->get('plugin.manager.icon_pack'),
       $container->get('renderer'),
       $container->get('logger.factory')
     );

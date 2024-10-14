@@ -98,7 +98,7 @@ function ui_icons_menu__preprocess_menu_item(array &$item): void {
   }
 
   /** @var \Drupal\ui_icons\Plugin\IconPackManagerInterface $pluginManagerIconPack */
-  $pluginManagerIconPack = \Drupal::service('plugin.manager.ui_icons_pack');
+  $pluginManagerIconPack = \Drupal::service('plugin.manager.icon_pack');
   $icon = $pluginManagerIconPack->getIcon($icon_full_id);
 
   if (NULL === $icon) {

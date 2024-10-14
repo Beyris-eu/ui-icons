@@ -15,7 +15,7 @@ use Drupal\ui_icons_iconify_api\IconifyApiInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Plugin implementation of the ui_icons_extractor.
+ * Plugin implementation of the icon_extractor.
  */
 #[IconExtractor(
   id: 'iconify',

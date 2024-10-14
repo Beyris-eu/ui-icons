@@ -35,7 +35,7 @@ final class IconSelectForm extends FormBase {
    */
   public static function create(ContainerInterface $container): self {
     return new static(
-      $container->get('plugin.manager.ui_icons_pack'),
+      $container->get('plugin.manager.icon_pack'),
     );
   }
 
@@ -84,7 +84,7 @@ final class IconSelectForm extends FormBase {
     $icons = $modal_state['icon_list'];
 
     if (!empty($search) && strlen($search) >= self::SEARCH_MIN_LENGTH) {
-      $icons = array_filter($icons, fn($id) => str_contains($id, $search), ARRAY_FILTER_USE_KEY);
+      $icons = array_filter($icons, fn($icon) => str_contains($icon->getId(), mb_strtolower($search)));
     }
 
     $pager = $this->createPager($modal_state['page'], count($icons));

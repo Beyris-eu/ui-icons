@@ -37,8 +37,8 @@ class IconExtractorPluginManager extends DefaultPluginManager {
       IconExtractorInterface::class,
       IconExtractor::class
     );
-    $this->alterInfo('ui_icons_extractor_info');
-    $this->setCacheBackend($cache_backend, 'ui_icons_extractor_plugins');
+    $this->alterInfo('icon_extractor_info');
+    $this->setCacheBackend($cache_backend, 'icon_extractor_plugins');
     $this->pluginFormFactory = $plugin_form_manager;
   }
 

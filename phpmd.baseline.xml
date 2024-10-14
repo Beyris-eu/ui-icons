@@ -6,4 +6,5 @@
   <violation rule="PHPMD\Rule\Design\NpathComplexity" file="/builds/project/ui_icons/modules/ui_icons_text/src/Plugin/Filter/IconEmbed.php" method="process"/>
   <violation rule="PHPMD\Rule\Design\CouplingBetweenObjects" file="/builds/project/ui_icons/src/Element/IconAutocomplete.php"/>
   <violation rule="PHPMD\Rule\Design\NpathComplexity" file="/builds/project/ui_icons/src/Element/IconAutocomplete.php" method="validateIcon"/>
+  <violation rule="PHPMD\Rule\Design\CouplingBetweenObjects" file="/builds/project/ui_icons/src/Plugin/IconPackManager.php"/>
 </phpmd-baseline>

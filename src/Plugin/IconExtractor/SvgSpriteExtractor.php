@@ -10,7 +10,7 @@ use Drupal\ui_icons\Plugin\IconExtractorWithFinder;
 use Drupal\ui_icons\PluginForm\IconPackExtractorForm;
 
 /**
- * Plugin implementation of the ui_icons_extractor.
+ * Plugin implementation of the icon_extractor.
  *
  * This extractor need the file content, remote url will raise too much risks
  * and slow down if the file is not available anymore. Then `path` extractor

@@ -41,7 +41,7 @@ class IconType extends FieldItemBase {
    */
   private function getIconPackManager(): IconPackManagerInterface {
     if (!isset($this->pluginManagerIconPack)) {
-      $this->pluginManagerIconPack = \Drupal::service('plugin.manager.ui_icons_pack');
+      $this->pluginManagerIconPack = \Drupal::service('plugin.manager.icon_pack');
     }
 
     return $this->pluginManagerIconPack;
@@ -145,7 +145,7 @@ class IconType extends FieldItemBase {
     if (empty($allowed_icon_pack)) {
       $allowed_icon_pack = NULL;
     }
-    $icons = \Drupal::service('plugin.manager.ui_icons_pack')->getIcons($allowed_icon_pack);
+    $icons = \Drupal::service('plugin.manager.icon_pack')->getIcons($allowed_icon_pack);
 
     if (empty($icons)) {
       return [];

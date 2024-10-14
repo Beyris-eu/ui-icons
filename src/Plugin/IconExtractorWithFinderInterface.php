@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ui_icons\Plugin;
 
 /**
- * Interface for ui_icons_extractor plugins.
+ * Interface for icon_extractor plugins.
  */
 interface IconExtractorWithFinderInterface extends IconExtractorInterface {
 

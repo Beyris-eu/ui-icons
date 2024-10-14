@@ -96,7 +96,7 @@ class IconLinkFormatter extends LinkFormatter {
       $configuration['view_mode'],
       $configuration['third_party_settings'],
       $container->get('path.validator'),
-      $container->get('plugin.manager.ui_icons_pack'),
+      $container->get('plugin.manager.icon_pack'),
       $container->get('entity_display.repository')
     );
   }

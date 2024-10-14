@@ -307,7 +307,7 @@ class IconAutocomplete extends FormElementBase {
   }
 
   /**
-   * Form element validation extractor for ui_icons_autocomplete elements.
+   * Form element validation extractor for icon_autocomplete elements.
    *
    * @param array $element
    *   The element to validate.
@@ -377,7 +377,7 @@ class IconAutocomplete extends FormElementBase {
    *   The icon pack manager service.
    */
   protected static function iconPack(): IconPackManagerInterface {
-    return \Drupal::service('plugin.manager.ui_icons_pack');
+    return \Drupal::service('plugin.manager.icon_pack');
   }
 
 }

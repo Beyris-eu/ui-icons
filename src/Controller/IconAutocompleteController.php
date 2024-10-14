@@ -32,7 +32,7 @@ class IconAutocompleteController extends ControllerBase {
    */
   public static function create(ContainerInterface $container): self {
     return new static(
-      $container->get('plugin.manager.ui_icons_pack'),
+      $container->get('plugin.manager.icon_pack'),
       $container->get('renderer'),
     );
   }
@@ -113,7 +113,7 @@ class IconAutocompleteController extends ControllerBase {
     $matches = [];
     foreach ($icons as $icon) {
       // Search is based on icon clean icon label and pack label.
-      $item = trim($icon->getLabel() . ' ' . $icon->getData('label'));
+      $item = trim($icon->getLabel() . ' ' . $icon->getPackLabel());
 
       if (preg_match($exactOrderPattern, $item)) {
         $matches[] = $this->createResultEntry($icon);
@@ -146,7 +146,7 @@ class IconAutocompleteController extends ControllerBase {
     $icon_renderable = $icon->getPreview(['size' => 24]);
     $renderable = $this->renderer->renderInIsolation($icon_renderable);
 
-    $label = sprintf('%s (%s)', $icon->getLabel(), $icon->getData('label') ?? $icon->getPackId());
+    $label = sprintf('%s (%s)', $icon->getLabel(), $icon->getPackLabel() ?? $icon->getPackId());
     $param = ['@icon' => $renderable, '@name' => $label];
     $label = new FormattableMarkup('<span class="ui-menu-icon">@icon</span> @name', $param);
 

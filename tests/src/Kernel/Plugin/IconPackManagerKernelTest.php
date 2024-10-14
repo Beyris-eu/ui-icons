@@ -58,27 +58,27 @@ class IconPackManagerKernelTest extends KernelTestBase {
     $module_handler = $this->container->get('module_handler');
     $theme_handler = $this->container->get('theme_handler');
     $cache_backend = $this->container->get('cache.default');
-    $ui_icons_extractor_plugin_manager = $this->container->get('plugin.manager.ui_icons_extractor');
+    $icon_extractor_plugin_manager = $this->container->get('plugin.manager.icon_extractor');
     $this->appRoot = $this->container->getParameter('app.root');
 
     $this->pluginManagerIconPack = new IconPackManager(
       $module_handler,
       $theme_handler,
       $cache_backend,
-      $ui_icons_extractor_plugin_manager,
+      $icon_extractor_plugin_manager,
       $this->appRoot,
     );
   }
 
   /**
-   * Test the _construct method.
+   * Test the IconPackManager::_construct method.
    */
   public function testConstructor(): void {
     $this->assertInstanceOf(IconPackManager::class, $this->pluginManagerIconPack);
   }
 
   /**
-   * Test the getIcons method.
+   * Test the IconPackManager::getIcons method.
    */
   public function testGetIcons(): void {
     $icons = $this->pluginManagerIconPack->getIcons();
@@ -98,7 +98,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
   }
 
   /**
-   * Test the getIcon method.
+   * Test the IconPackManager::getIcon method.
    */
   public function testGetIcon(): void {
     $icon = $this->pluginManagerIconPack->getIcon(self::TEST_ICON_FULL_ID);
@@ -109,7 +109,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
   }
 
   /**
-   * Test the listIconPackOptions method.
+   * Test the IconPackManager::listIconPackOptions method.
    */
   public function testListIconPackOptions(): void {
     $actual = $this->pluginManagerIconPack->listIconPackOptions();
@@ -140,7 +140,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
   }
 
   /**
-   * Test the getExtractorFormDefault method.
+   * Test the IconPackManager::getExtractorFormDefault method.
    */
   public function testGetExtractorFormDefaults(): void {
     $actual = $this->pluginManagerIconPack->getExtractorFormDefaults('test_settings');
@@ -162,7 +162,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
   }
 
   /**
-   * Test the getExtractorPluginForms method.
+   * Test the IconPackManager::getExtractorPluginForms method.
    */
   public function testGetExtractorPluginForms(): void {
     $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
@@ -213,7 +213,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
   }
 
   /**
-   * Test the getExtractorPluginForms method.
+   * Test the IconPackManager::getExtractorPluginForms method.
    */
   public function testGetExtractorPluginFormsWithAllowed(): void {
     $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
@@ -233,7 +233,7 @@ class IconPackManagerKernelTest extends KernelTestBase {
   }
 
   /**
-   * Test the getExtractorPluginForms method.
+   * Test the IconPackManager::getExtractorPluginForms method with default.
    */
   public function testGetExtractorPluginFormsWithDefault(): void {
     $form = [
@@ -288,16 +288,16 @@ class IconPackManagerKernelTest extends KernelTestBase {
   }
 
   /**
-   * Test the processDefinition method.
+   * Test the IconPackManager::processDefinition method.
    */
   public function testProcessDefinition(): void {
+    $relative_path = 'modules/custom/ui_icons/tests/modules/ui_icons_test';
+
     $definition = [
       'id' => 'foo',
       'label' => 'Foo',
       'provider' => 'ui_icons_test',
-      'extractor' => 'bar',
-      'template' => '',
-      'config' => [],
+      'extractor' => 'test',
     ];
 
     $this->pluginManagerIconPack->processDefinition($definition, 'foo');
@@ -305,15 +305,57 @@ class IconPackManagerKernelTest extends KernelTestBase {
     $this->assertSame('foo', $definition['id']);
     $this->assertSame('Foo', $definition['label']);
 
-    $relative_path = 'modules/custom/ui_icons/tests/modules/ui_icons_test';
     $this->assertEquals($relative_path, $definition['relative_path']);
 
     $absolute_path = sprintf('%s/%s', $this->appRoot, $relative_path);
     $this->assertEquals($absolute_path, $definition['absolute_path']);
+
+    $this->assertArrayHasKey('icons', $definition);
+    $this->assertEmpty($definition['icons']);
+
+    $definition = [
+      'id' => 'foo',
+      'provider' => 'ui_icons_test',
+      'extractor' => 'test_finder',
+      'template' => '{{ icon_id }}',
+      'config' => [
+        'sources' => ['icons/flat/*.svg'],
+      ],
+    ];
+
+    $this->pluginManagerIconPack->processDefinition($definition, 'foo');
+
+    $this->assertArrayHasKey('icons', $definition);
+    $this->assertNotEmpty($definition['icons']);
+    $this->assertCount(5, $definition['icons']);
+    foreach ($definition['icons'] as $icon) {
+      $this->assertInstanceOf(IconDefinitionInterface::class, $icon);
+    }
   }
 
   /**
-   * Test the processDefinition method with exception.
+   * Test the IconPackManager::processDefinition method with disable pack.
+   */
+  public function testProcessDefinitionDisabled(): void {
+    $definition = [
+      'id' => 'foo',
+      'enabled' => FALSE,
+      'provider' => 'ui_icons_test',
+      'extractor' => 'bar',
+      'template' => '',
+    ];
+
+    $this->pluginManagerIconPack->processDefinition($definition, 'foo');
+
+    $this->assertSame('foo', $definition['id']);
+
+    $this->assertArrayNotHasKey('relative_path', $definition);
+    $this->assertArrayNotHasKey('absolute_path', $definition);
+    $this->assertArrayNotHasKey('icons', $definition);
+  }
+
+  /**
+   * Test the IconPackManager::processDefinition method with exception.
    */
   public function testProcessDefinitionExceptionName(): void {
     $definition = ['provider' => 'foo'];
@@ -323,32 +365,16 @@ class IconPackManagerKernelTest extends KernelTestBase {
   }
 
   /**
-   * Test the processDefinition method with exception.
+   * Test the IconPackManager::processDefinition method with exception.
    */
-  public function testProcessDefinitionExceptionExtractor(): void {
+  public function testProcessDefinitionExceptionRequired(): void {
     $definition = [
       'id' => 'foo',
-      'label' => 'Foo',
       'provider' => 'ui_icons_test',
-      'template' => '',
     ];
+    $this->pluginManagerIconPack->setValidator();
     $this->expectException(IconPackConfigErrorException::class);
-    $this->expectExceptionMessage('Missing `extractor:` key in your definition!');
-    $this->pluginManagerIconPack->processDefinition($definition, 'foo');
-  }
-
-  /**
-   * Test the processDefinition method with exception.
-   */
-  public function testProcessDefinitionExceptionTemplate(): void {
-    $definition = [
-      'id' => 'foo',
-      'label' => 'Foo',
-      'provider' => 'ui_icons_test',
-      'extractor' => 'bar',
-    ];
-    $this->expectException(IconPackConfigErrorException::class);
-    $this->expectExceptionMessage('Missing `template:` key in your definition!');
+    $this->expectExceptionMessage('ui_icons_test:foo Error in definition `foo`:[extractor] The property extractor is required, [template] The property template is required');
     $this->pluginManagerIconPack->processDefinition($definition, 'foo');
   }
 

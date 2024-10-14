@@ -57,6 +57,7 @@ class IconDefinitionTest extends IconUnitTestCase {
         'group' => '',
         'data' => [
           'content' => '',
+          'library' => '',
         ],
       ],
     ];
@@ -70,6 +71,7 @@ class IconDefinitionTest extends IconUnitTestCase {
         'group' => NULL,
         'data' => [
           'content' => NULL,
+          'library' => NULL,
         ],
       ],
     ];
@@ -84,6 +86,7 @@ class IconDefinitionTest extends IconUnitTestCase {
         'data' => [
           'content' => 'corge',
           'label' => 'Qux',
+          'library' => 'foo/bar',
         ],
       ],
     ];
@@ -138,8 +141,12 @@ class IconDefinitionTest extends IconUnitTestCase {
     }
 
     if ($icon_data) {
+      if (isset($icon_data['library'])) {
+        $this->assertEquals($icon_data['library'], $actual->getLibrary());
+      }
+
       if (isset($icon_data['label'])) {
-        $this->assertEquals($icon_data['label'], $actual->getData('label'));
+        $this->assertEquals($icon_data['label'], $actual->getPackLabel());
       }
       if (isset($icon_data['content'])) {
         $this->assertEquals($icon_data['content'], $actual->getData('content'));

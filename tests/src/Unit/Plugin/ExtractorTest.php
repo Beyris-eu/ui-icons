@@ -160,7 +160,7 @@ class ExtractorTest extends UnitTestCase {
     );
 
     $this->expectException(IconPackConfigErrorException::class);
-    $this->expectExceptionMessage('Missing `config: sources` in your definition, extractor test_extractor require this value.');
+    $this->expectExceptionMessage('Missing or invalid `config: sources` in your definition, extractor test_extractor require this value as array.');
     $extractorPlugin->discoverIcons();
   }
 
@@ -178,7 +178,7 @@ class ExtractorTest extends UnitTestCase {
     );
 
     $this->expectException(IconPackConfigErrorException::class);
-    $this->expectExceptionMessage('Missing `config: sources` in your definition, extractor test_extractor require this value.');
+    $this->expectExceptionMessage('Missing or invalid `config: sources` in your definition, extractor test_extractor require this value as array.');
     $pathExtractorPlugin->discoverIcons();
   }
 

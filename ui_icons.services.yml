@@ -1,25 +1,27 @@
 services:
-  plugin.manager.ui_icons_pack:
+  plugin.manager.icon_pack:
     class: Drupal\ui_icons\Plugin\IconPackManager
+    calls:
+      - [setValidator, []]
     arguments:
       [
         '@module_handler',
         '@theme_handler',
         '@cache.discovery',
-        '@plugin.manager.ui_icons_extractor',
+        '@plugin.manager.icon_extractor',
         '%app.root%',
       ]
-  Drupal\ui_icons\Plugin\IconPackManagerInterface: '@plugin.manager.ui_icons_pack'
+  Drupal\ui_icons\Plugin\IconPackManagerInterface: '@plugin.manager.icon_pack'
 
-  plugin.manager.ui_icons_extractor:
+  plugin.manager.icon_extractor:
     class: Drupal\ui_icons\Plugin\IconExtractorPluginManager
     parent: default_plugin_manager
     arguments: ['@plugin_form.factory']
-  Drupal\ui_icons\Plugin\IconExtractorInterface: '@plugin.manager.ui_icons_extractor'
+  Drupal\ui_icons\Plugin\IconExtractorInterface: '@plugin.manager.icon_extractor'
 
   ui_icons.twig_extension:
     class: Drupal\ui_icons\Template\IconTwigExtension
-    arguments: ['@plugin.manager.ui_icons_pack']
+    arguments: ['@plugin.manager.icon_pack']
     tags:
       - { name: twig.extension }
 

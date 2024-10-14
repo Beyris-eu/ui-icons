@@ -13,8 +13,10 @@ test_path:
   links:
     - https://www.drupal.org/project/ui_icons
   version: 1.0.0
-  license: GPL-3.0-or-later
-  license_url: https://www.gnu.org/licenses/gpl-3.0.html
+  license:
+    name: GPL-3.0-or-later
+    url: https://www.gnu.org/licenses/gpl-3.0.html
+    gpl-compatible: true
   extractor: path
   config:
     sources:
@@ -128,7 +130,7 @@ test_settings:
       title: "Test select"
       description: "Test for a select with enum property."
       type: "integer"
-      # enum: [100, 200, 300, 400, 500, 600, 700, 800, 900]
+      enum: [100, 200, 300, 400, 500, 600, 700, 800, 900]
       default: 400
     boolean:
       title: "Test boolean"
@@ -148,7 +150,7 @@ test_settings:
       default: 30
       minimum: 10
       maximum: 100
-    #   multipleOf: 10
+      multipleOf: 10
   template: >
     {{ icon_id }}: <img
       class="icon icon-{{ icon_id|clean_class }}"

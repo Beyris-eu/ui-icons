@@ -10,7 +10,7 @@ use Drupal\ui_icons\Plugin\IconExtractorWithFinder;
 use Drupal\ui_icons\PluginForm\IconPackExtractorForm;
 
 /**
- * Plugin implementation of the ui_icons_extractor.
+ * Plugin implementation of the icon_extractor.
  */
 #[IconExtractor(
   id: 'test_finder',
@@ -26,8 +26,16 @@ class TestExtractorWithFinder extends IconExtractorWithFinder {
    * {@inheritdoc}
    */
   public function discoverIcons(): array {
-    $this->getFilesFromSources();
-    return [];
+    $files = $this->getFilesFromSources();
+    $icons = [];
+    foreach ($files as $file) {
+      if (!isset($file['icon_id'])) {
+        continue;
+      }
+      $icons[] = $this->createIcon($file['icon_id'], $file['source'], $file['group'] ?? NULL);
+    }
+
+    return $icons;
   }
 
 }

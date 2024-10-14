@@ -129,6 +129,20 @@ class IconDefinition implements IconDefinitionInterface {
   /**
    * {@inheritdoc}
    */
+  public function getPackLabel(): ?string {
+    return $this->data['label'] ?? NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getLibrary(): ?string {
+    return $this->data['library'] ?? NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getData(string $key): ?string {
     return $this->data[$key] ?? NULL;
   }
