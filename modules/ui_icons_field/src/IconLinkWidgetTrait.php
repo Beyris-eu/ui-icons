@@ -164,7 +164,7 @@ trait IconLinkWidgetTrait {
       '#options' => $this->getDisplayPositions(),
       '#states' => [
         'visible' => [
-          ':input[name="' . $field_name . '[' . $delta . '][options][icon]"]' => ['empty' => FALSE],
+          ':input[name="' . $field_name . '[' . $delta . '][options][icon][icon_id]"]' => ['empty' => FALSE],
         ],
       ],
       // Put the parent to allow saving under `options`.
