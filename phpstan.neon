@@ -32,7 +32,6 @@ parameters:
     - identifier: missingType.iterableValue
     # Specific ui_icons errors to ignore
     - "#^Call to an undefined method Drupal\\\\Component\\\\Plugin\\\\PluginInspectionInterface#"
-    - "#^Method Drupal\\\\ui_icons_backport\\\\Plugin\\\\IconPackManager\\:\\:processDefinition\\(\\) has parameter#"
     # new static() is a best practice in Drupal, so we cannot fix that.
     - "#^Unsafe usage of new static#"
     # Ignore common errors for now.

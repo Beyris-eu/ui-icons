@@ -42,8 +42,6 @@ class IconFieldTest extends BrowserTestBase {
     'node',
     'field_ui',
     'ui_icons',
-    // @todo remove for 11.1.
-    'ui_icons_backport',
     'ui_icons_field',
     'ui_icons_test',
   ];

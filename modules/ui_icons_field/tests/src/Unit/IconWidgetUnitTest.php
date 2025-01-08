@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons_field\Unit\Plugin;
 
-@class_alias('Drupal\Tests\ui_icons_backport\IconTestTrait', 'Drupal\Tests\Core\Theme\Icon\IconTestTrait');
-
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\StringTranslation\TranslationInterface;
 use Drupal\Tests\Core\Theme\Icon\IconTestTrait;

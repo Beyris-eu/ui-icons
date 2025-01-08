@@ -1,21 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Cannot access offset 'description' on array\\|Drupal\\\\Component\\\\Plugin\\\\Definition\\\\PluginDefinitionInterface\\.$#"
-			count: 1
-			path: modules/ui_icons_backport/src/IconExtractorBase.php
-
-		-
-			message: "#^Cannot access offset 'label' on array\\|Drupal\\\\Component\\\\Plugin\\\\Definition\\\\PluginDefinitionInterface\\.$#"
-			count: 1
-			path: modules/ui_icons_backport/src/IconExtractorBase.php
-
-		-
-			message: "#^Call to an undefined method Drupal\\\\Core\\\\Form\\\\FormStateInterface\\:\\:getCompleteFormState\\(\\)\\.$#"
-			count: 1
-			path: modules/ui_icons_backport/src/IconExtractorSettingsForm.php
-
-		-
 			message: "#^Call to an undefined method Drupal\\\\filter\\\\FilterPluginCollection\\|Drupal\\\\filter\\\\Plugin\\\\FilterInterface\\:\\:has\\(\\)\\.$#"
 			count: 1
 			path: modules/ui_icons_ckeditor5/src/Plugin/CKEditor5Plugin/IconPlugin.php

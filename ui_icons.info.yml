@@ -2,7 +2,4 @@ name: 'UI Icons Form element'
 type: module
 description: 'Core Icons main form element for Icon autocomplete.'
 package: User interface
-core_version_requirement: ^10.3 || ^11.0
-# @todo remove for 11.1
-dependencies:
-  - ui_icons:ui_icons_backport
+core_version_requirement: ^11.1

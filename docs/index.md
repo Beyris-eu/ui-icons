@@ -10,8 +10,8 @@ for further information.
 
 !!! note "Backward compatibility"
 
-    For Drupal versions below 11.1, the `ui_icons_backport` module is a copy of the core icon API.  
-    Synchronization with the core API is planned until version 11.3 is released.
+    For Drupal versions below 11.1, only UI Icons Beta3 provide a minimal sync with core icon API.
+    Beta4 and forward is only compatible with Drupal 11.1+
 
 ## Usage
 

@@ -1,7 +1,0 @@
-services:
-  ui_icons_iconify.iconify_api:
-    class: Drupal\ui_icons_iconify_api\IconifyApi
-    arguments: [
-      '@http_client',
-      '@logger.channel.default',
-    ]

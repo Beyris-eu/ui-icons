@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons_menu\Kernel;
 
-// @todo remove for 11.1.
-@class_alias('Drupal\ui_icons_backport\IconFinder', 'Drupal\Core\Theme\Icon\IconFinder');
-
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
@@ -27,7 +24,6 @@ class UiIconsMenuTest extends KernelTestBase {
     'menu_link_content',
     'link',
     'ui_icons',
-    'ui_icons_backport',
     'ui_icons_menu',
     'ui_icons_test',
   ];

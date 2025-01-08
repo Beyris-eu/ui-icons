@@ -25,7 +25,6 @@ class IconWidgetKernelTest extends KernelTestBase {
     'user',
     'entity_test',
     'ui_icons',
-    'ui_icons_backport',
     'ui_icons_field',
     'ui_icons_test',
   ];

@@ -69,6 +69,9 @@ class IconSearch implements ContainerInjectionInterface {
       $cache_key .= implode('', $result_callback);
     }
     $cache_key = hash('xxh3', $cache_key);
+
+    $cache_data = [];
+
     if ($cache = $this->cache->get('icon_search')) {
       $cache_data = $cache->data;
       if (isset($cache_data[$cache_key])) {

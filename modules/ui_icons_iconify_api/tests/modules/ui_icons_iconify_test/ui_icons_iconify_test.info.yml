@@ -1,7 +1,0 @@
-name: 'UI Icons Tests iconify'
-type: module
-description: 'Provides test icons and settings for iconify extractor.'
-package: 'Testing'
-dependencies:
-  - ui_icons:ui_icons
-  - ui_icons:ui_icons_iconify_api

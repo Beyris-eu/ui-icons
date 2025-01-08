@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons_ckeditor5\Kernel;
 
-// @todo remove for 11.1.
-@class_alias('Drupal\ui_icons_backport\IconDefinition', 'Drupal\Core\Theme\Icon\IconDefinition');
-@class_alias('Drupal\ui_icons_backport\IconFinder', 'Drupal\Core\Theme\Icon\IconFinder');
-
 use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_icons_ckeditor5\Controller\IconFilterController;
@@ -47,7 +43,6 @@ class IconFilterControllerTest extends KernelTestBase {
   protected static $modules = [
     'system',
     'ui_icons',
-    'ui_icons_backport',
     'ui_icons_ckeditor5',
     'ui_icons_test',
   ];
