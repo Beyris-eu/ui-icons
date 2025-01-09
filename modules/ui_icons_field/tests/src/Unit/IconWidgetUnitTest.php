@@ -90,4 +90,34 @@ class IconWidgetUnitTest extends UnitTestCase {
     }
   }
 
+  /**
+   * Create a mock icon.
+   *
+   * @param array<string, string>|null $iconData
+   *   The icon data to create.
+   *
+   * @return \Drupal\Core\Theme\Icon\IconDefinitionInterface
+   *   The icon mocked.
+   */
+  private function createMockIcon(?array $iconData = NULL): IconDefinitionInterface {
+    if (NULL === $iconData) {
+      $iconData = [
+        'pack_id' => 'foo',
+        'icon_id' => 'bar',
+      ];
+    }
+
+    $icon = $this->prophesize(IconDefinitionInterface::class);
+    $icon
+      ->getRenderable(['width' => $iconData['width'] ?? '', 'height' => $iconData['height'] ?? ''])
+      ->willReturn(['#markup' => '<svg></svg>']);
+
+    $icon_full_id = IconDefinition::createIconId($iconData['pack_id'], $iconData['icon_id']);
+    $icon
+      ->getId()
+      ->willReturn($icon_full_id);
+
+    return $icon->reveal();
+  }
+
 }
