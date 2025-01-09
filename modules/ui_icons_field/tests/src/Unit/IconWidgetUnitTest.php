@@ -6,6 +6,8 @@ namespace Drupal\Tests\ui_icons_field\Unit\Plugin;
 
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\StringTranslation\TranslationInterface;
+use Drupal\Core\Theme\Icon\IconDefinition;
+use Drupal\Core\Theme\Icon\IconDefinitionInterface;
 use Drupal\Tests\Core\Theme\Icon\IconTestTrait;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons_field\Plugin\Field\FieldWidget\IconWidget;
