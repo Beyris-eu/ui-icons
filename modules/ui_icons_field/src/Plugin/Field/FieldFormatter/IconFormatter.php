@@ -108,7 +108,7 @@ class IconFormatter extends FormatterBase implements ContainerFactoryPluginInter
     $filtered_values = IconFieldHelpers::validateSettings($element, $form_state->getValues());
 
     // Set the value for the element in the form state to be saved.
-    $form_state->setValueForElement($element, reset($filtered_values));
+    $form_state->setValueForElement($element, $filtered_values);
   }
 
   /**
