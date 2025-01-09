@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons_ckeditor5\Functional;
 
-// @todo remove for 11.1.
 @class_alias('Drupal\ui_icons_backport\IconDefinition', 'Drupal\Core\Theme\Icon\IconDefinition');
 
 use Behat\Mink\Element\NodeElement;

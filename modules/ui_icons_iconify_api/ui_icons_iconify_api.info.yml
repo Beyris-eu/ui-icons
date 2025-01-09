@@ -1,7 +1,9 @@
 name: 'UI Icons Iconify API'
 type: module
-description: 'Iconify API extractor to allow definition of icons from Iconify.'
+description: 'Replaced by dedicated module Iconify Icons.'
 package: User interface
 core_version_requirement: ^10.3 || ^11.0
+lifecycle: deprecated
+lifecycle_link: https://www.drupal.org/project/iconify_icons
 dependencies:
   - ui_icons:ui_icons

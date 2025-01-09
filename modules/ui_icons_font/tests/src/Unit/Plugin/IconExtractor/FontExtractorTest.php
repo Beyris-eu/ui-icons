@@ -5,7 +5,6 @@ declare(strict_types=1);
 // cspell:ignore corge
 namespace Drupal\Tests\ui_icons_font\Unit;
 
-// @todo remove for 11.1.
 @class_alias('Drupal\Tests\ui_icons_backport\IconTestTrait', 'Drupal\Tests\Core\Theme\Icon\IconTestTrait');
 @class_alias('Drupal\ui_icons_backport\Exception\IconPackConfigErrorException', 'Drupal\Core\Theme\Icon\Exception\IconPackConfigErrorException');
 @class_alias('Drupal\ui_icons_backport\IconDefinition', 'Drupal\Core\Theme\Icon\IconDefinition');

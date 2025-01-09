@@ -5,7 +5,6 @@ declare(strict_types=1);
 // cspell:ignore corge quux
 namespace Drupal\Tests\ui_icons\Unit\Controller;
 
-// @todo remove for 11.1.
 @class_alias('Drupal\ui_icons_backport\Plugin\IconPackManagerInterface', 'Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface');
 @class_alias('Drupal\ui_icons_backport\IconDefinition', 'Drupal\Core\Theme\Icon\IconDefinition');
 @class_alias('Drupal\ui_icons_backport\IconDefinitionInterface', 'Drupal\Core\Theme\Icon\IconDefinitionInterface');

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons_iconify_api\Unit\Plugin\IconExtractor;
 
-// @todo remove for 11.1.
 @class_alias('Drupal\ui_icons_backport\Exception\IconPackConfigErrorException', 'Drupal\Core\Theme\Icon\Exception\IconPackConfigErrorException');
 @class_alias('Drupal\ui_icons_backport\IconDefinition', 'Drupal\Core\Theme\Icon\IconDefinition');
 @class_alias('Drupal\ui_icons_backport\IconExtractorBase', 'Drupal\Core\Theme\Icon\IconExtractorBase');

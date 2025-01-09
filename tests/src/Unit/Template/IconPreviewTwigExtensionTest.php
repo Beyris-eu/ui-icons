@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons\Unit;
 
-// @todo remove for 11.1.
 @class_alias('Drupal\ui_icons_backport\Template\IconsTwigExtension', 'Drupal\Core\Theme\Icon\Template\IconsTwigExtension');
 @class_alias('Drupal\Tests\ui_icons_backport\IconTestTrait', 'Drupal\Tests\Core\Theme\Icon\IconTestTrait');
 

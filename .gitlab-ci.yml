@@ -9,6 +9,10 @@ include:
       - "/includes/include.drupalci.variables.yml"
       - "/includes/include.drupalci.workflows.yml"
 
+composer:
+  variables:
+    DRUPAL_CORE: 10.4.1
+
 .skip-phpmd-rule: &skip-phpmd-rule
   if: '$SKIP_PHPMD == "1"'
   when: never

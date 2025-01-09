@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons_media\Kernel;
 
-// @todo remove for 11.1.
 @class_alias('Drupal\ui_icons_backport\IconFinder', 'Drupal\Core\Theme\Icon\IconFinder');
 
 use Drupal\Tests\media\Kernel\MediaKernelTestBase;
