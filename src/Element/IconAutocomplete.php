@@ -247,10 +247,6 @@ class IconAutocomplete extends FormElementBase {
           'element_parents' => implode('/', $element['#array_parents']),
         ],
       ],
-      // Autocomplete is already doing the ajax progress.
-      'progress' => [
-        'type' => 'none',
-      ],
       'disable-refocus' => TRUE,
       'wrapper' => $ajax_wrapper_id,
       'effect' => 'none',
