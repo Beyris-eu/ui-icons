@@ -8,16 +8,29 @@ Install as you would normally install a contributed Drupal module.
 See: [Installing Modules](https://www.drupal.org/docs/extending-drupal/installing-modules)
 for further information.
 
-!!! note "Backward compatibility"
+!!! note "Drupal compatibility"
 
-    For Drupal versions below 11.1, only UI Icons Beta3 provide a minimal sync with core icon API.
-    Beta4 and forward is only compatible with Drupal 11.1+
+    The **1.0.x** branch is for **Drupal 10.4 to 11.0** and include a backport
+    of Drupal core Icon API.  
+    This branch will be **minimally** maintained.
+
+    The **1.1.x** branch is for **Drupal 11.1+** and upgrade from previous
+    version.  
+    This branch include empty backport and Iconify sub modules to be removed.
 
 ## Usage
 
-See the [API documentation](https://git.drupalcode.org/project/drupal/-/blob/11.x/core/lib/Drupal/Core/Theme/Icon/Plugin/IconPackManager.php) to add your icon pack. Links to quick examples of icon packs are provided below.
+See the [Drupal Icon API documentation](https://www.drupal.org/docs/develop/drupal-apis/icon-api) to add your icon pack.  
+Links to quick examples of icon packs are provided below.
 
 ### Starter for icon pack provider
+
+Third party themes include definition for some icon pack:
+
+- [UI Suite Bootstrap 5.x](https://www.drupal.org/project/ui_suite_bootstrap) include [Bootstrap icons](https://git.drupalcode.org/project/ui_suite_bootstrap/-/blob/5.1.x/ui_suite_bootstrap.icons.yml)
+- [UI Suite DSFR](https://www.drupal.org/project/ui_suite_dsfr) include [DSFR icons](https://git.drupalcode.org/project/ui_suite_dsfr/-/blob/1.1.x/ui_suite_dsfr.icons.yml)
+- [UI Suite USWDS](https://www.drupal.org/project/ui_suite_uswds) include [USWDS icons](https://git.drupalcode.org/project/ui_suite_uswds/-/blob/4.0.x/ui_suite_uswds.icons.yml)
+- [UI Suite DaisyUI](https://www.drupal.org/project/ui_suite_daisyui) include [Hero icons](https://git.drupalcode.org/project/ui_suite_daisyui/-/blob/4.0.x/ui_suite_daisyui.icons.yml)
 
 You can find examples in the external project [UI Icons Example](https://gitlab.com/ui-icons/ui-icons-example).
 
@@ -42,7 +55,6 @@ These examples include widely used third-party icon packs like:
 Icon pack builders:
 
 - [IcoMoon](https://icomoon.io) - Import your icons or choose from existing sets
-- [Iconify](https://iconify.design) - All popular icon sets, one framework.
 
 Specific Design System Icons:
 
@@ -55,8 +67,8 @@ You can contribute a pull request (PR) for any third-party icon pack to the proj
 
 ## Drupal Implementations
 
-Different submodules provide implementations for Fields, Field Links, Menus, and
-CKEditor.
+Different submodules provide implementations for Fields, Field Links, Menus,
+CKEditor and Media.
 
 ### Field UI
 
@@ -69,7 +81,7 @@ widget and formatter under **Manage form display** and **Manage display**.
 ### Menu
 
 Enable the `UI Icons for Menu` module to be able to add an Icon to a menu item.
-
+Note
 After enabling the module, edit a menu item to access the Icon selection.
 
 There is no implementation from the Node edit form yet.
@@ -82,6 +94,10 @@ Enable the `UI Icons CKEditor 5` module, then navigate to:
 
 Configure your text format to add the `Icon` button and enable the `Embed icon`
 filter.
+
+!!! warning "Third party incompatibility"
+
+    `UI Icons CKEditor 5` is not compatible with [`ckeditor5_icons` module](https://www.drupal.org/project/ckeditor5_icons)
 
 ### Media
 
