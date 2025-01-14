@@ -3,4 +3,4 @@ ui_icons_picker.ui:
   defaults:
     _form: 'Drupal\ui_icons_picker\Form\IconSelectForm'
   requirements:
-    _permission: 'access ui icons library'
+    _permission: 'access content'
