@@ -152,14 +152,14 @@ function ui_icons_menu_generate_markup(mixed &$text, string $icon_full_id, array
 
   switch ($icon_display) {
     case 'before':
-      $text = new FormattableMarkup('@icon&nbsp;<span class="ui-icons-menu-text">@title</span>', [
+      $text = new FormattableMarkup('@icon<span class="ui-icons-menu-text">@title</span>', [
         '@title' => $text,
         '@icon' => $icon,
       ]);
       break;
 
     case 'after':
-      $text = new FormattableMarkup('<span class="ui-icons-menu-text">@title</span>&nbsp;@icon', [
+      $text = new FormattableMarkup('<span class="ui-icons-menu-text">@title</span>@icon', [
         '@title' => $text,
         '@icon' => $icon,
       ]);
