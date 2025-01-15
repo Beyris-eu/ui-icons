@@ -10,6 +10,7 @@
       "*.json",
       "*.yml",
       "*.codepoints",
+      "*.svg",
       "phpstan.neon",
       "phpmd.xml",
       "mkdocs.yml"
