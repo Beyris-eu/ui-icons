@@ -1,6 +1,6 @@
 field.widget.settings.icon_linkit_attributes_widget:
   type: field.widget.settings.linkit
-  label: 'icon linkit attributes widget settings'
+  label: 'Icon linkit attributes widget settings'
   constraints:
     FullyValidatable: ~
   mapping:
@@ -20,10 +20,10 @@ field.widget.settings.icon_linkit_attributes_widget:
       label: 'Widget expand behavior'
     allowed_icon_pack:
       type: sequence
-      label: 'Icon Pack limitation for selection'
+      label: 'Icon pack limitation for selection'
       sequence:
         type: string
-        label: 'Icon Pack id'
+        label: 'Icon pack id'
     show_settings:
       type: boolean
       label: 'Show extractor settings'

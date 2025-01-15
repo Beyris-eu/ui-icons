@@ -1,6 +1,6 @@
 field.widget.settings.icon_link_attributes_widget:
   type: field.widget.settings.icon_link_widget
-  label: 'icon link attributes widget settings'
+  label: 'Icon link attributes widget settings'
   constraints:
     FullyValidatable: ~
   mapping:

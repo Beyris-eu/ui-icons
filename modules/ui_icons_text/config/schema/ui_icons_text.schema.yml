@@ -6,7 +6,7 @@ filter_settings.icon_embed:
   mapping:
     allowed_icon_pack:
       type: sequence
-      label: 'IconPack allowed for selection'
+      label: 'Icon pack allowed for selection'
       sequence:
         type: string
-        label: 'IconPack id'
+        label: 'Icon pack id'

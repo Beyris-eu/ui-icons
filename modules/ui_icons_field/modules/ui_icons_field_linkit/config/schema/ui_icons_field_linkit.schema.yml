@@ -1,6 +1,6 @@
 field.formatter.settings.icon_linkit_formatter:
   type: field.formatter.settings.linkit
-  label: 'Linkit with icon format settings'
+  label: 'Icon linkit with icon format settings'
   constraints:
     FullyValidatable: ~
   mapping:
@@ -15,16 +15,16 @@ field.formatter.settings.icon_linkit_formatter:
 
 field.widget.settings.icon_linkit_widget:
   type: field.widget.settings.linkit
-  label: 'icon widget link with Linkit settings'
+  label: 'Icon widget Linkit settings'
   constraints:
     FullyValidatable: ~
   mapping:
     allowed_icon_pack:
       type: sequence
-      label: 'Icon Pack limitation for selection'
+      label: 'Icon pack limitation for selection'
       sequence:
         type: string
-        label: 'Icon Pack id'
+        label: 'Icon pack id'
     show_settings:
       type: boolean
       label: 'Show extractor settings'
