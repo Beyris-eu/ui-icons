@@ -19,10 +19,10 @@ field.field_settings.ui_icon:
   mapping:
     allowed_icon_pack:
       type: sequence
-      label: 'Icon Pack limitation for selection'
+      label: 'Icon pack limitation for selection'
       sequence:
         type: string
-        label: 'Icon Pack id'
+        label: 'Icon pack id'
 
 field.formatter.settings.icon_formatter:
   type: mapping
@@ -69,13 +69,13 @@ field.widget.settings.icon_link_widget:
   mapping:
     allowed_icon_pack:
       type: sequence
-      label: 'Icon Pack limitation for selection'
+      label: 'Icon pack limitation for selection'
       sequence:
         type: string
-        label: 'Icon Pack id'
+        label: 'Icon pack id'
     show_settings:
       type: boolean
-      label: 'Show extractor settings'
+      label: 'Show icon extractor settings'
     icon_required:
       type: boolean
       label: 'Set icon required'

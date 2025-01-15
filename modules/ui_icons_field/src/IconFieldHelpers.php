@@ -72,7 +72,7 @@ class IconFieldHelpers {
     }
 
     // Clean some icon values.
-    unset($filtered_values['icon_display']);
+    unset($filtered_values['icon_display'], $filtered_values['fields']['icon_display']);
 
     return reset($filtered_values);
   }
