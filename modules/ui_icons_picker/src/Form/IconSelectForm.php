@@ -74,6 +74,8 @@ final class IconSelectForm extends FormBase {
     $request = $this->getRequest();
 
     if (!$request->query->has('dialogOptions')) {
+      $redirect = $this->redirect('<front>');
+      $redirect->send();
       return [];
     }
 
@@ -81,6 +83,8 @@ final class IconSelectForm extends FormBase {
     $wrapper_id = $options['query']['wrapper_id'] ?? NULL;
 
     if (NULL === $wrapper_id) {
+      $redirect = $this->redirect('<front>');
+      $redirect->send();
       return [];
     }
 

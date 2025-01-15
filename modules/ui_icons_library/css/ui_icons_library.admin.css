@@ -11,16 +11,12 @@
   margin: 0 1rem 0 0;
 }
 
-.content {
-  width: 80%;
+.card-page .content {
+  width: 95%;
 }
 
 @media (max-width: 768px) {
-  .sidebar {
-    width: 100%;
-  }
-
-  .content {
+  .card-page .sidebar {
     width: 100%;
   }
 }
@@ -69,8 +65,12 @@
 .card .content i,
 .card .content span {
   display: inline-block;
-  margin-right: 0.7rem;
-  margin-bottom: 0.7rem;
+  max-height: 50px;
+  margin-right: 0.3rem;
+  margin-bottom: 0.3rem;
+  padding: 0.3rem;
+  border-radius: 0.3rem;
+  background-color: rgba(245, 245, 245, 0.507);
 }
 
 .card .title {
