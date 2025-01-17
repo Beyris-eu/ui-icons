@@ -1,17 +1,35 @@
 site_name: UI Icons for Drupal
-site_author: Jean Valverde
 site_description: >-
-  UI Icons module documentation to provide generic Icon packs integration for
-  Drupal.
+  UI Icons module documentation to provide generic Icon packs integration for Drupal.
 
 repo_name: project/ui_icons
 repo_url: https://git.drupalcode.org/project/ui_icons
+edit_uri: /-/edit/main/docs/
 
 theme:
   name: material
   language: en
   palette:
-    primary: blue
+    # Palette toggle for automatic mode
+    - media: '(prefers-color-scheme)'
+      primary: blue
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - media: '(prefers-color-scheme: light)'
+      primary: blue
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: '(prefers-color-scheme: dark)'
+      primary: blue
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
 
 extra:
   social:
@@ -22,14 +40,15 @@ extra:
     - icon: fontawesome/solid/blog
       link: https://developpeur-drupal.com/en
 
-markdown_extensions:
-  - markdown.extensions.admonition
-  - markdown.extensions.codehilite:
-      linenums: true
-      guess_lang: false
-  - markdown.extensions.footnotes
-  - pymdownx.extra
-
 nav:
   - Documentation: 'docs/index.md'
   - Drupal.org project: 'https://www.drupal.org/project/ui_icons'
+
+plugins:
+  - search
+  - privacy:
+      enabled: !ENV [CI, false]
+
+markdown_extensions:
+  - markdown.extensions.admonition
+  - pymdownx.extra
