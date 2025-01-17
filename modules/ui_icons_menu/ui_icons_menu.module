@@ -129,8 +129,14 @@ function ui_icons_menu_link_alter(array &$variables): void {
     return;
   }
 
+  // Do not handle link if no position found, possible if we have an icon but
+  // the display is not set.
+  if (!$icon_display = $variables['url']->getOption('icon_display') ?? NULL) {
+    return;
+  }
+
   $variables['url']->setOption('ui_icons_processed', TRUE);
-  ui_icons_menu_generate_markup($variables['text'], $icon['target_id'], $icon['settings'] ?? [], $variables['url']->getOption('icon_display') ?? 'before');
+  ui_icons_menu_generate_markup($variables['text'], $icon['target_id'], $icon['settings'] ?? [], $icon_display);
 }
 
 /**
@@ -152,14 +158,14 @@ function ui_icons_menu_generate_markup(mixed &$text, string $icon_full_id, array
 
   switch ($icon_display) {
     case 'before':
-      $text = new FormattableMarkup('@icon<span class="ui-icons-menu-text">@title</span>', [
+      $text = new FormattableMarkup('@icon <span class="ui-icons-menu-text">@title</span>', [
         '@title' => $text,
         '@icon' => $icon,
       ]);
       break;
 
     case 'after':
-      $text = new FormattableMarkup('<span class="ui-icons-menu-text">@title</span>@icon', [
+      $text = new FormattableMarkup('<span class="ui-icons-menu-text">@title</span> @icon', [
         '@title' => $text,
         '@icon' => $icon,
       ]);
