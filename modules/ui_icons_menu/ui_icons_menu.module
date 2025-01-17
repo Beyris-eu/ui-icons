@@ -129,6 +129,12 @@ function ui_icons_menu_link_alter(array &$variables): void {
     return;
   }
 
+  // Do not handle link if no position found, possible if we have an icon but
+  // the display is not set.
+  if (NULL === $variables['url']->getOption('icon_display')) {
+    return;
+  }
+
   $variables['url']->setOption('ui_icons_processed', TRUE);
   ui_icons_menu_generate_markup($variables['text'], $icon['target_id'], $icon['settings'] ?? [], $variables['url']->getOption('icon_display') ?? 'before');
 }
