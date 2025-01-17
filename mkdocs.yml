@@ -1,4 +1,4 @@
-site_name: UI Icons for Drupal
+site_name: UI Icons
 site_description: >-
   UI Icons module documentation to provide generic Icon packs integration for Drupal.
 
@@ -41,7 +41,7 @@ extra:
       link: https://developpeur-drupal.com/en
 
 nav:
-  - Documentation: 'docs/index.md'
+  - Home: 'index.md'
   - Drupal.org project: 'https://www.drupal.org/project/ui_icons'
 
 plugins:
