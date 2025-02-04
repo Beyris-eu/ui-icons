@@ -9,6 +9,7 @@ use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Theme\Icon\IconDefinition;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_help().
@@ -89,6 +90,16 @@ function ui_icons_menu__preprocess_menu(array &$items): void {
  *   The menu item.
  */
 function ui_icons_menu__preprocess_menu_item(array &$item): void {
+  // Being extra defensive on the menu as other themes/modules can alter in
+  // unknown ways.
+  if (!isset($item['url'])) {
+    return;
+  }
+
+  if (!$item['url'] instanceof Url) {
+    return;
+  }
+
   /** @var \Drupal\Core\Url $url */
   $url = &$item['url'];
 
