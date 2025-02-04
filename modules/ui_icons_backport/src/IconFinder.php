@@ -308,7 +308,7 @@ class IconFinder implements ContainerInjectionInterface, IconFinderInterface {
       // Icon ID is used as index to avoid duplicates.
       $result[$icon_id] = [
         'icon_id' => $icon_id,
-        'source' => $this->fileUrlGenerator->generateString(str_replace($this->appRoot, '', $file_absolute_path)),
+        'source' => $this->fileUrlGenerator->generateString(str_replace("{$this->appRoot}/", '', $file_absolute_path)),
         'absolute_path' => $file_absolute_path,
         'group' => self::extractGroupFromPath($file->getPath(), $group_position),
       ];
