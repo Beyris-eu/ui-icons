@@ -9,6 +9,7 @@ use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Theme\Icon\IconDefinition;
+use Drupal\Core\Url;
 
 /**
  * Implements hook_help().
