@@ -306,7 +306,8 @@ class IconFinder implements ContainerInjectionInterface, IconFinderInterface {
       }
 
       // Ensure source is relative to the installation.
-      $source = ltrim(str_replace($this->appRoot, '', $file_absolute_path), '/');
+      $source = str_replace($this->appRoot, '', $file_absolute_path);
+
       // Icon ID is used as index to avoid duplicates.
       $result[$icon_id] = [
         'icon_id' => $icon_id,
