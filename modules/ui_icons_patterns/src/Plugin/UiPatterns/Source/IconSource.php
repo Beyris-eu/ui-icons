@@ -17,7 +17,8 @@ use Drupal\ui_patterns\SourcePluginBase;
   id: 'icon',
   label: new TranslatableMarkup('Icon'),
   description: new TranslatableMarkup('Get an icon from UI Icons module.'),
-  prop_types: ['icon']
+  prop_types: ['icon'],
+  tags: ['widget', 'widget:dismissible']
 )]
 class IconSource extends SourcePluginBase {
 
