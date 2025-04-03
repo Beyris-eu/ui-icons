@@ -6,6 +6,7 @@
  */
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Theme\Icon\IconDefinition;
@@ -57,7 +58,10 @@ function ui_icons_menu_entity_base_field_info_alter(array &$fields, EntityTypeIn
  * Implements hook_preprocess_menu().
  */
 function ui_icons_menu_preprocess_menu(array &$variables): void {
-  if (empty($variables['items'])) {
+  // Ignore preprocess if there are no items or the menu is a navigation one.
+  if (empty($variables['items']) ||
+    str_starts_with($variables['theme_hook_original'], 'navigation_menu__')
+  ) {
     return;
   }
   ui_icons_menu__preprocess_menu($variables['items']);
@@ -188,4 +192,22 @@ function ui_icons_menu_generate_markup(mixed &$text, string $icon_full_id, array
       ]);
       break;
   }
+}
+
+/**
+ * Implements hook_navigation_menu_link_tree_alter().
+ */
+function ui_icons_menu_navigation_menu_link_tree_alter(&$tree): void {
+  foreach ($tree as $item) {
+    $definition = $item->link->getPluginDefinition()['options']['icon'] ?? NULL;
+    if (!isset($definition['target_id'])) {
+      continue;
+    }
+
+    [$icon_pack, $icon] = explode(':', $definition['target_id']);
+    $definition['settings'] = NestedArray::mergeDeep($definition['settings'][$icon_pack] ?? [], ['class' => 'toolbar-button__icon']);
+
+    $item->options['icon'] = $definition + ['pack_id' => $icon_pack, 'icon_id' => $icon];
+  }
+
 }
