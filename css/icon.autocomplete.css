@@ -70,3 +70,20 @@ body[class*="gin"] .ui-icons-preview-icon > b,
 body[class*="gin"] .ui-icons-preview-icon > span {
   max-height: 2.2rem;
 }
+
+/* Autocomplete results */
+.ui-icons-result {
+  display: flex;
+  align-items: center;
+}
+
+.ui-icons-result img.icon.icon-preview {
+  height: 35px;
+  padding-right: 15px;
+}
+
+.ui-icons-result .ui-icons-result-collection {
+  margin-left: auto;
+  color: #849fdc;
+  font-size: .8rem;
+}
