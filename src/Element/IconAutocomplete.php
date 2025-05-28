@@ -192,7 +192,7 @@ class IconAutocomplete extends FormElementBase {
     $element['icon_id'] = [
       '#type' => 'textfield',
       '#title' => new TranslatableMarkup('Icon'),
-      '#placeholder' => $element['#placeholder'] ?? new TranslatableMarkup('Start typing icon name'),
+      '#placeholder' => $element['#placeholder'] ?? '',
       '#title_display' => 'invisible',
       '#autocomplete_route_name' => 'ui_icons.autocomplete',
       '#required' => $element['#required'] ?? FALSE,
@@ -202,6 +202,7 @@ class IconAutocomplete extends FormElementBase {
       '#error_no_message' => TRUE,
       // Ensure the ::validateIcon run.
       '#limit_validation_errors' => [$element['#parents']],
+      '#description' => $element['#description'] ?? new TranslatableMarkup('Start typing the icon name. Icon availability depends on the collection.'),
     ];
 
     // Clean unwanted values on parent.
