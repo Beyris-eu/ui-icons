@@ -202,7 +202,7 @@ class IconAutocomplete extends FormElementBase {
       '#error_no_message' => TRUE,
       // Ensure the ::validateIcon run.
       '#limit_validation_errors' => [$element['#parents']],
-      '#description' => $element['#description'] ?? new TranslatableMarkup('Start typing the icon name. Icon availability depends on the collection.'),
+      '#description' => $element['#description'] ?? new TranslatableMarkup('Start typing the icon name. Icon availability depends on the selected icon packs.'),
     ];
 
     // Clean unwanted values on parent.
