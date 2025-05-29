@@ -58,6 +58,6 @@
 
 /* Hide the modal 'Select' button, JavaScript trigger on click select. */
 .ui-icons-picker-search .hidden,
-.ui-dialog-buttonpane {
+.icon-library-widget-modal .ui-dialog-buttonpane {
   display: none;
 }
