@@ -81,6 +81,12 @@ body[class*="gin"] .ui-icons-preview-icon > span {
   font-size: .8rem;
 }
 
+.ui-autocomplete:has(.ui-icons-result) {
+  z-index: 1000;
+  max-height: 18.5rem;
+  overflow-y: auto;
+}
+
 @media (max-width: 650px) {
   .ui-icons-preview-icon img,
   .ui-icons-preview-icon svg,
