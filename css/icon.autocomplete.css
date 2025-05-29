@@ -1,15 +1,7 @@
 .ui-icons-input-wrapper {
   position: relative;
   display: flex;
-}
-
-.ui-icons-select {
-  margin-left: .5rem;
-}
-
-.ui-icons-input-wrapper .ui-icons-select input {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+  padding-bottom: 1.7rem;
 }
 
 /* Claro and default */
@@ -39,6 +31,7 @@
   justify-content: center;
   width: 2.9rem;
   height: 2.9rem;
+  margin-right: .5rem;
   border: 1px solid #d3d4d987;
   border-radius: 0.3rem;
   background-color: var(--color-gray-050);
