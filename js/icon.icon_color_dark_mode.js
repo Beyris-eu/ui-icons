@@ -22,9 +22,9 @@
       .map((v) =>
         Math.min(255, Math.max(0, Number(v)))
           .toString(16)
-          .padStart(2, "0"),
+          .padStart(2, '0'),
       )
-      .join("")}`;
+      .join('')}`;
   };
 
   // Drupal behavior to modify icon preview colors in Gin dark mode.
@@ -41,46 +41,46 @@
     attach(context) {
       requestAnimationFrame(() => {
         // Only proceed if dark mode is active
-        if (!document.documentElement.classList.contains("gin--dark-mode"))
+        if (!document.documentElement.classList.contains('gin--dark-mode'))
           return;
 
-        const accentEl = document.querySelector("[data-gin-accent]");
+        const accentEl = document.querySelector('[data-gin-accent]');
         if (!accentEl) return;
 
         // Get primary accent color and convert to hex
         const hex = rgbToHex(
           getComputedStyle(accentEl)
-            .getPropertyValue("--gin-color-primary")
+            .getPropertyValue('--gin-color-primary')
             .trim(),
         );
         if (!hex) return;
 
         // Update existing icon-preview images in the current context
-        once("modifyIconPreviewColor", ".icon-preview", context).forEach(
+        once('modifyIconPreviewColor', '.icon-preview', context).forEach(
           (img) => {
             try {
               const url = new URL(img.src);
-              url.searchParams.set("color", hex);
+              url.searchParams.set('color', hex);
               img.src = url.toString();
             } catch {
-              console.warn("IconColorModifier: invalid icon src URL");
+              console.warn('IconColorModifier: invalid icon src URL');
             }
           },
         );
 
         // Setup observer for dynamically added autocomplete icon-preview images
-        once("observeAutocompleteIcons", "body", context).forEach(() => {
+        once('observeAutocompleteIcons', 'body', context).forEach(() => {
           new MutationObserver(() => {
             document
-              .querySelectorAll("ul.ui-autocomplete li img.icon-preview")
+              .querySelectorAll('ul.ui-autocomplete li img.icon-preview')
               .forEach((img) => {
                 try {
                   const url = new URL(img.src);
-                  url.searchParams.set("color", hex);
+                  url.searchParams.set('color', hex);
                   img.src = url.toString();
                 } catch {
                   console.warn(
-                    "IconColorModifier (autocomplete): invalid image src URL",
+                    'IconColorModifier (autocomplete): invalid image src URL',
                   );
                 }
               });
