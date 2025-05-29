@@ -1,6 +1,7 @@
 /**
  * @file
- * JavaScript behavior for UI Icons autocomplete selector in Drupal.
+ * JavaScript behavior to update UI Icons autocomplete previews with the correct
+ * accent color in Drupal Gin dark mode.
  */
 (($, Drupal, once) => {
   /**
@@ -22,6 +23,7 @@
     );
   };
 
+  // Drupal behavior to modify icon preview colors in Gin dark mode.
   Drupal.behaviors.IconColorModifier = {
     /**
      * Attach behavior to modify icon preview colors based on accent color in dark mode.

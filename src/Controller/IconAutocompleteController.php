@@ -19,7 +19,10 @@ use Symfony\Component\HttpFoundation\Request;
 class IconAutocompleteController extends ControllerBase {
 
   /**
+   * IconAutocompleteController constructor.
    *
+   * @param \Drupal\ui_icons\IconSearch $iconSearch
+   *   The icon search service.
    */
   public function __construct(
     private readonly IconSearch $iconSearch,
