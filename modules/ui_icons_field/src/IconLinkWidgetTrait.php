@@ -132,7 +132,6 @@ trait IconLinkWidgetTrait {
     $element['icon'] = [
       '#type' => $icon_selector,
       '#title' => $this->t('@name icon', ['@name' => $label]),
-      '#description' => $this->t('Pick an Icon for this link.'),
       '#return_id' => TRUE,
       '#default_value' => $icon_full_id,
       '#allowed_icon_pack' => $allowed_icon_pack,
