@@ -31,7 +31,7 @@
   justify-content: center;
   width: 2.89rem;
   height: 2.89rem;
-  margin-right: .5rem;
+  margin-right: 0.5rem;
   border: 1px solid #d3d4d987;
   border-radius: 0.3rem;
   background-color: var(--color-gray-050);
@@ -77,12 +77,12 @@ body[class*="gin"] .ui-icons-preview-icon > span {
   width: 1.8rem;
 }
 
-body[class*="gin"]  .ui-icons-result .ui-icons-result-collection {
+body[class*="gin"] .ui-icons-result .ui-icons-result-collection {
   color: var(--gin-color-primary);
 }
 
 html[class*="gin--dark-mode"] .ui-icons-preview.form-item {
-  background-color: rgb(59 59 63);
+  background-color: rgb(59, 59, 63);
 }
 
 /* Autocomplete results */
@@ -99,13 +99,13 @@ html[class*="gin--dark-mode"] .ui-icons-preview.form-item {
 .ui-icons-result .ui-icons-result-collection {
   margin-left: auto;
   color: #849fdc;
-  font-size: .8rem;
+  font-size: 0.8rem;
 }
 
 .ui-autocomplete:has(.ui-icons-result) {
   z-index: 1000;
-  max-height: 18.5rem;
   overflow-y: auto;
+  max-height: 18.5rem;
 }
 
 @media (max-width: 650px) {

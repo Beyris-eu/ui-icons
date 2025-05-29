@@ -151,7 +151,7 @@ class IconSearch implements ContainerInjectionInterface {
     $any_part_pattern = '/' . implode('.*', array_map('preg_quote', $search_terms)) . '/i';
 
     $any_part_any_order_pattern = '/\b(?:' . implode('|', array_map(function ($word) {
-      return preg_quote($word, '/') . '\b.*\b|' . '\b.*\b' . preg_quote($word, '/');
+        return preg_quote($word, '/') . '\b.*\b|\b.*\b' . preg_quote($word, '/');
     }, $search_terms)) . ')/i';
 
     // Search with a priority.
