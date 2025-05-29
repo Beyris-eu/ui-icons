@@ -11,6 +11,16 @@ ui_icons.autocomplete:
     - core/once
     - core/drupal.autocomplete
 
+ui_icons.icon_color_dark_mode:
+  version: VERSION
+  js:
+    js/icon.icon_color_dark_mode.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal
+    - core/once
+    - core/drupal.autocomplete
+
 ui_icons.preview:
   version: VERSION
   js:

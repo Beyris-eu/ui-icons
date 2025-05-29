@@ -56,6 +56,17 @@ function ui_icons_theme(array $existing, string $type, string $theme, string $pa
 }
 
 /**
+ * Determines whether the active theme is Gin, or a sub-theme of Gin.
+ *
+ * @internal
+ */
+function _ui_icons_is_gin_theme_active(): bool {
+  $theme = Drupal::getContainer()->get('theme.manager')->getActiveTheme();
+  return $theme->getName() === 'gin' ||
+    isset($theme->getBaseThemeExtensions()['gin']);
+}
+
+/**
  * Prepares variables for input icon template.
  *
  * @param array $variables
@@ -66,6 +77,7 @@ function ui_icons_theme(array $existing, string $type, string $theme, string $pa
  */
 function template_preprocess_icon_selector(array &$variables): void {
   $variables['has_settings'] = $variables['element']['#show_settings'] ?? FALSE;
+  $variables['is_gin_theme'] = _ui_icons_is_gin_theme_active();
   $variables['icon_form'] = $variables['element']['icon_id'] ?? '';
 
   if (isset($variables['element']['icon_id']['#value'])) {

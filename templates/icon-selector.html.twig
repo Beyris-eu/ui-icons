@@ -11,6 +11,9 @@
  * - settings_form: The icon settings form.
 #}
 {{ attach_library('ui_icons/ui_icons.autocomplete') }}
+{% if is_gin_theme %}
+  {{ attach_library('ui_icons/ui_icons.icon_color_dark_mode') }}
+{% endif %}
 
 <div class="ui-icons-wrapper">
   <div class="ui-icons-input-wrapper">
