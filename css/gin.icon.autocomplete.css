@@ -1,0 +1,32 @@
+/* Gin theme support */
+body[class*="gin"] .ui-icons-preview-icon {
+  height: 2.3rem;
+}
+body[class*="gin"] .ui-icons-preview-icon img,
+body[class*="gin"] .ui-icons-preview-icon svg,
+body[class*="gin"] .ui-icons-preview-icon > i,
+body[class*="gin"] .ui-icons-preview-icon > b,
+body[class*="gin"] .ui-icons-preview-icon > span {
+  max-height: 2.2rem;
+}
+
+body[class*="gin"] .ui-icons-preview.form-item {
+  width: 2.3rem;
+  height: 2.3rem;
+}
+
+body[class*="gin"] .ui-icons-preview-icon img,
+body[class*="gin"] .ui-icons-preview-icon svg,
+body[class*="gin"] .ui-icons-preview-icon > i,
+body[class*="gin"] .ui-icons-preview-icon > b,
+body[class*="gin"] .ui-icons-preview-icon > span {
+  width: 1.8rem;
+}
+
+body[class*="gin"] .ui-icons-result .ui-icons-result-collection {
+  color: var(--gin-color-primary);
+}
+
+html[class*="gin--dark-mode"] .ui-icons-preview.form-item {
+  background-color: rgb(59, 59, 63);
+}

@@ -11,10 +11,13 @@ ui_icons.autocomplete:
     - core/once
     - core/drupal.autocomplete
 
-ui_icons.icon_color_dark_mode:
+ui_icons.gin_autocomplete:
   version: VERSION
   js:
-    js/icon.icon_color_dark_mode.js: {}
+    js/gin.icon.autocomplete.js: {}
+  css:
+    component:
+      css/gin.icon.autocomplete.css: { }
   dependencies:
     - core/jquery
     - core/drupal
