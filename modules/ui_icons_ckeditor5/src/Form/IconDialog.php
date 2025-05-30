@@ -50,7 +50,7 @@ final class IconDialog extends FormBase {
     $form['icon'] = [
       '#type' => 'icon_autocomplete',
       '#title' => $this->t('Icon Name'),
-      '#size' => 35,
+      '#size' => 50,
       '#required' => TRUE,
       '#allowed_icon_pack' => $allowed_icon_pack,
       '#show_settings' => TRUE,
