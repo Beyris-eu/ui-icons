@@ -6,7 +6,6 @@
  */
 
 use Drupal\Component\Render\FormattableMarkup;
-use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Theme\Icon\IconDefinition;
@@ -58,13 +57,12 @@ function ui_icons_menu_entity_base_field_info_alter(array &$fields, EntityTypeIn
  * Implements hook_preprocess_menu().
  */
 function ui_icons_menu_preprocess_menu(array &$variables): void {
-  // Ignore preprocess if there are no items or the menu is a navigation one.
-  if (empty($variables['items']) ||
-    str_starts_with($variables['theme_hook_original'], 'navigation_menu__')
-  ) {
+  // Ignore preprocess if there are no items.
+  if (empty($variables['items'])) {
     return;
   }
-  ui_icons_menu__preprocess_menu($variables['items']);
+
+  ui_icons_menu__preprocess_menu($variables['items'], str_starts_with($variables['theme_hook_original'], 'navigation_menu__'));
 }
 
 /**
@@ -72,17 +70,19 @@ function ui_icons_menu_preprocess_menu(array &$variables): void {
  *
  * @param array $items
  *   The menu items.
+ * @param bool $isNavigation
+ *   The menu items ara used n navigation.
  */
-function ui_icons_menu__preprocess_menu(array &$items): void {
+function ui_icons_menu__preprocess_menu(array &$items, bool $isNavigation = FALSE): void {
   foreach ($items as &$item) {
     if (empty($item['url'])) {
       continue;
     }
 
-    ui_icons_menu__preprocess_menu_item($item);
+    ui_icons_menu__preprocess_menu_item($item, $isNavigation);
 
     if (!empty($item['below'])) {
-      ui_icons_menu__preprocess_menu($item['below']);
+      ui_icons_menu__preprocess_menu($item['below'], $isNavigation);
     }
   }
 }
@@ -92,8 +92,10 @@ function ui_icons_menu__preprocess_menu(array &$items): void {
  *
  * @param array $item
  *   The menu item.
+ * @param bool $isNavigation
+ *   The menu items ara used n navigation.
  */
-function ui_icons_menu__preprocess_menu_item(array &$item): void {
+function ui_icons_menu__preprocess_menu_item(array &$item, bool $isNavigation = FALSE): void {
   // Being extra defensive on the menu as other themes/modules can alter in
   // unknown ways.
   if (!isset($item['url'])) {
@@ -116,7 +118,7 @@ function ui_icons_menu__preprocess_menu_item(array &$item): void {
   }
 
   $url->setOption('ui_icons_processed', TRUE);
-  ui_icons_menu_generate_markup($item['title'], $icon['target_id'], $icon['settings'] ?? [], $url->getOption('icon_display') ?? 'before');
+  ui_icons_menu_generate_markup($item['title'], $icon['target_id'], $icon['settings'] ?? [], $url->getOption('icon_display') ?? 'before', $isNavigation ? 'toolbar-button__icon' : '');
 }
 
 /**
@@ -165,49 +167,36 @@ function ui_icons_menu_link_alter(array &$variables): void {
  *   The icon settings.
  * @param string $icon_display
  *   The icon position, `icon_only`, `after` or default `before`.
+ * @param string $class
+ *   (Optional) Class to wrap the text with icon.
  */
-function ui_icons_menu_generate_markup(mixed &$text, string $icon_full_id, array $icon_settings, string $icon_display = 'before'): void {
+function ui_icons_menu_generate_markup(mixed &$text, string $icon_full_id, array $icon_settings, string $icon_display = 'before', string $class = ''): void {
 
   $icon_renderable = IconDefinition::getRenderable($icon_full_id, $icon_settings);
   $icon = \Drupal::service('renderer')->renderInIsolation($icon_renderable);
 
   switch ($icon_display) {
     case 'before':
-      $text = new FormattableMarkup('@icon <span class="ui-icons-menu-text">@title</span>', [
+      $text = new FormattableMarkup('@icon <span class="ui-icons-menu-text @class">@title</span>', [
+        '@class' => $class,
         '@title' => $text,
         '@icon' => $icon,
       ]);
       break;
 
     case 'after':
-      $text = new FormattableMarkup('<span class="ui-icons-menu-text">@title</span> @icon', [
+      $text = new FormattableMarkup('<span class="ui-icons-menu-text @class">@title</span> @icon', [
+        '@class' => $class,
         '@title' => $text,
         '@icon' => $icon,
       ]);
       break;
 
     default:
-      $text = new FormattableMarkup('@icon', [
+      $text = new FormattableMarkup('<span class="@class">@icon</span>', [
+        '@class' => $class,
         '@icon' => $icon,
       ]);
       break;
   }
-}
-
-/**
- * Implements hook_navigation_menu_link_tree_alter().
- */
-function ui_icons_menu_navigation_menu_link_tree_alter(&$tree): void {
-  foreach ($tree as $item) {
-    $definition = $item->link->getPluginDefinition()['options']['icon'] ?? NULL;
-    if (!isset($definition['target_id'])) {
-      continue;
-    }
-
-    [$icon_pack, $icon] = explode(':', $definition['target_id']);
-    $definition['settings'] = NestedArray::mergeDeep($definition['settings'][$icon_pack] ?? [], ['class' => 'toolbar-button__icon']);
-
-    $item->options['icon'] = $definition + ['pack_id' => $icon_pack, 'icon_id' => $icon];
-  }
-
 }
