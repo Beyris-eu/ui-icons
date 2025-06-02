@@ -84,6 +84,19 @@ Enable the `UI Icons for Menu` module to be able to add an Icon to a menu item.
 Note
 After enabling the module, edit a menu item to access the Icon selection.
 
+Compatibility with Drupal core Navigation module require your icon pack to
+include a `class` as settings in `*.icons.yml`, ie:
+
+```yaml
+    my_icon_pack:
+    settings:
+        class:
+        title: "Class"
+        type: "string"
+```
+
+And this class must be in the icon template.
+
 There is no implementation from the Node edit form yet.
 
 ### CKEditor5
