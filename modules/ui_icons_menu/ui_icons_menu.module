@@ -60,7 +60,7 @@ function ui_icons_menu_entity_base_field_info_alter(array &$fields, EntityTypeIn
 function ui_icons_menu_preprocess_menu(array &$variables): void {
   // Ignore preprocess if there are no items or the menu is a navigation one.
   if (empty($variables['items']) ||
-    str_starts_with($variables['theme_hook_original'], 'navigation_menu__')
+    str_starts_with($variables['theme_hook_original'] ?? '', 'navigation_menu__')
   ) {
     return;
   }
