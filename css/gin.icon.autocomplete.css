@@ -1,32 +1,31 @@
-/* Gin theme support */
-body[class*="gin"] .ui-icons-preview-icon {
-  height: 2.3rem;
-}
-body[class*="gin"] .ui-icons-preview-icon img,
-body[class*="gin"] .ui-icons-preview-icon svg,
-body[class*="gin"] .ui-icons-preview-icon > i,
-body[class*="gin"] .ui-icons-preview-icon > b,
-body[class*="gin"] .ui-icons-preview-icon > span {
-  max-height: 2.2rem;
-}
-
-body[class*="gin"] .ui-icons-preview.form-item {
-  width: 2.3rem;
-  height: 2.3rem;
-}
-
-body[class*="gin"] .ui-icons-preview-icon img,
-body[class*="gin"] .ui-icons-preview-icon svg,
-body[class*="gin"] .ui-icons-preview-icon > i,
-body[class*="gin"] .ui-icons-preview-icon > b,
-body[class*="gin"] .ui-icons-preview-icon > span {
-  width: 1.8rem;
-}
-
-body[class*="gin"] .ui-icons-result .ui-icons-result-collection {
-  color: var(--gin-color-primary);
+/* Gin theme support, try to use gin variables */
+body[class*="gin"] {
+  .ui-icons-preview.form-item {
+    width: calc(
+      var(--input-padding-vertical) * 2 + var(--input-line-height) - 2px
+    );
+    height: calc(
+      var(--input-padding-vertical) * 2 + var(--input-line-height) - 2px
+    );
+    border-radius: var(--gin-border-m);
+  }
+  .ui-icons-preview-icon {
+    height: 2.3rem;
+    img,
+    svg,
+    > i,
+    > b,
+    > span {
+      width: 1.8rem;
+      max-height: 2.2rem;
+    }
+  }
+  .ui-icons-result .ui-icons-result-collection {
+    color: var(--gin-color-primary);
+  }
 }
 
 html[class*="gin--dark-mode"] .ui-icons-preview.form-item {
-  background-color: rgb(59, 59, 63);
+  border-color: var(--gin-border-color-form-element, #d3d4d9);
+  background-color: var(--gin-bg-layer3);
 }

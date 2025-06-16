@@ -3,6 +3,7 @@
  * JavaScript behavior to update UI Icons autocomplete previews with the correct
  * accent color in Drupal Gin dark mode.
  */
+// cspell:ignore rrggbb
 (($, Drupal, once) => {
   /**
    * Convert a "rgb(r, g, b)" or "rgba(r, g, b, a)" string to a hex color string.

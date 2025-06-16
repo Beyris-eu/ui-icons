@@ -47,7 +47,7 @@
 }
 
 .card.disabled {
-  background-color: rgba(255, 72, 0, 0.507);
+  background-color: rgb(255, 72, 0, 0.507);
 }
 
 .card .link {
@@ -70,7 +70,7 @@
   margin-bottom: 0.3rem;
   padding: 0.3rem;
   border-radius: 0.3rem;
-  background-color: rgba(245, 245, 245, 0.507);
+  background-color: rgb(245, 245, 245, 0.507);
 }
 
 .card .title {
