@@ -197,7 +197,7 @@ function ui_icons_menu_generate_markup(mixed &$text, string $icon_full_id, array
 /**
  * Implements hook_navigation_menu_link_tree_alter().
  */
-function ui_icons_menu_navigation_menu_link_tree_alter(&$tree): void {
+function ui_icons_menu_navigation_menu_link_tree_alter(array &$tree): void {
   foreach ($tree as $item) {
     $definition = $item->link->getPluginDefinition()['options']['icon'] ?? NULL;
     if (!isset($definition['target_id'])) {

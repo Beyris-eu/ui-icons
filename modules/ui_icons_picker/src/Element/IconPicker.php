@@ -67,7 +67,8 @@ class IconPicker extends IconAutocomplete {
   public static function processIcon(array &$element, FormStateInterface $form_state, array &$complete_form): array {
     $element = parent::processIcon($element, $form_state, $complete_form);
 
-    $element['icon_id']['#placeholder'] = $element['#placeholder'] ?? new TranslatableMarkup('Click to select an Icon');
+    $element['icon_id']['#placeholder'] = $element['#placeholder'] ?? '';
+    $element['icon_id']['#description'] = $element['#description'] ?? new TranslatableMarkup('Click to select an Icon. Icon availability depends on the selected icon packs.');
     $element['icon_id']['#attached'] = [
       'library' => [
         'ui_icons_picker/picker',

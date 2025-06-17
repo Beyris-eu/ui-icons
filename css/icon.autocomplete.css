@@ -1,65 +1,158 @@
+/*
+Try to handle most used themes, admin first, based on drupal.org search and UI
+Suite ecosystem.
+Only actively maintained, D11+, with stable release and security are tested.
+Feel free to propose a MR or offer sponsoring for a specific theme support.
+
+Full support:
+ - Claro
+ - Gin, thanks to @gxleano
+ - Olivero, non admin but default
+ - UI Suite Bootstrap
+
+Partial support:
+ - UI Suite Dsfr
+ - UI Suite Daisy UI (no dark mode yet)
+ - Bootstrap
+ - bootstrap_barrio
+*/
+/* cspell:ignore gxleano */
+
+/* Variables, when available are Claro first, Olivero and fallback */
+:root {
+  /* Claro .form-element without borders */
+  --ui-icons-claro-size: calc(
+    (var(--input-padding-vertical) * 2) + var(--input-line-height)
+  );
+  --ui-icons--wrapper-size: var(--ui-icons-claro-size, var(--sp3, 2.89rem));
+  --ui-icons--preview-size: calc(var(--ui-icons--wrapper-size) * 0.95);
+  --ui-icons--result-size: calc(var(--ui-icons--preview-size) * 0.7);
+  --ui-icons--border-radius: var(
+    --input-border-radius-size,
+    var(--border-radius, 0.3rem)
+  );
+  --ui-icons--border-color: var(
+    --input-border-color,
+    var(--color--gray-60, #d3d4d9)
+  );
+  --ui-icons--preview-bg-color: var(
+    --color-gray-050,
+    var(--color--gray-100, var(--background-contrast-grey, #f3f4f9))
+  );
+  --ui-icons-preview-margin: var(--space-xs, 0.5rem);
+  --ui-icons-autocomplete-height: 40rem;
+  --ui-icons-picker-size: var(--ui-icons--wrapper-size);
+  --ui-icons-picker-preview-size: var(--ui-icons--preview-size);
+}
+
 .ui-icons-input-wrapper {
+  position: relative;
   display: flex;
+  padding-bottom: var(--space-l, 1.5rem);
+
+  .form-item {
+    margin-block: 0;
+    width: 98%;
+  }
+
+  .form-item__description {
+    position: absolute;
+    left: 0;
+  }
 }
 
-.ui-icons-input-wrapper .ui-icons-select input {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+.ui-icons-select {
+  display: flex;
+  flex: auto;
 }
 
-/* Claro and default */
-.ui-icons-input-wrapper .form-item {
-  margin-block: 0;
+.ui-icons-preview.form-item {
+  display: flex;
+  justify-content: center;
+  width: var(--ui-icons--wrapper-size);
+  height: var(--ui-icons--wrapper-size);
+  margin-right: var(--ui-icons-preview-margin);
+  border: 1px solid var(--ui-icons--border-color);
+  border-radius: var(--ui-icons--border-radius);
+  background-color: var(--ui-icons--preview-bg-color);
+  /* Avoid double holders */
+  .form-item {
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
 }
 
-/* Keep the settings size close to textfield. */
-.ui-icons-settings-wrapper {
-  max-width: 39rem;
+/* Media library fix */
+.media-library-content .ui-icons-preview.form-item {
+  margin-right: 0;
 }
 
 .ui-icons-preview-icon {
   display: flex;
   justify-content: center;
-  height: 2.85rem;
   text-align: center;
+
+  img,
+  svg,
+  > i,
+  > b,
+  > span {
+    display: block;
+    width: var(--ui-icons--preview-size);
+    margin: auto;
+  }
 }
 
-.ui-icons-preview.form-item {
-  min-width: 3rem;
-  max-width: 3rem;
-  /* Olivero fallback */
-  border: var(--input-border-size, 1px) solid
-    var(--color--gray-60, var(--input-border-color, #ccced1));
-  border-right: 0 none;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  /* Olivero fallback */
-  background-color: var(--color-gray-050, var(--color--gray-95, #eaeef0));
+@media (max-width: 650px) {
+  .ui-icons-preview-icon {
+    img,
+    svg,
+    > i,
+    > b,
+    > span {
+      width: calc(var(--ui-icons--wrapper-size) / 2);
+    }
+  }
 }
 
-.media-library-content .ui-icons-preview.form-item {
-  margin-right: 0;
+/* Autocomplete results */
+.ui-icons-result {
+  display: flex;
+  align-items: center;
+
+  .icon.icon-preview {
+    width: var(--ui-icons--result-size);
+    max-width: max-content;
+    height: var(--ui-icons--result-size);
+    max-height: min-content;
+    padding-right: 0.8rem;
+  }
+
+  .ui-icons-result-collection {
+    margin-left: auto;
+    color: #849fdc;
+    font-size: 0.8rem;
+  }
 }
 
-.ui-icons-preview-icon img,
-.ui-icons-preview-icon svg,
-.ui-icons-preview-icon > i,
-.ui-icons-preview-icon > b,
-.ui-icons-preview-icon > span {
-  display: block;
-  width: 2.6rem;
-  max-height: 2.8rem;
-  margin: auto;
+.ui-autocomplete:has(.ui-icons-result) {
+  z-index: 1000;
+  /* Some packs can enable the x overflow */
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: var(--ui-icons-autocomplete-height);
+  a.ui-menu-item-wrapper {
+    /* Force display for Olivero fix */
+    display: block;
+    /* Dsfr add not-allowed cursor (?) */
+    cursor: pointer;
+    /* Bootstrap theme add underline */
+    text-decoration: none;
+  }
 }
 
-/* Gin theme support */
-body[class*="gin"] .ui-icons-preview-icon {
-  height: 2.3rem;
-}
-body[class*="gin"] .ui-icons-preview-icon img,
-body[class*="gin"] .ui-icons-preview-icon svg,
-body[class*="gin"] .ui-icons-preview-icon > i,
-body[class*="gin"] .ui-icons-preview-icon > b,
-body[class*="gin"] .ui-icons-preview-icon > span {
-  max-height: 2.2rem;
+/* jQuery UI Dialog in narrow display */
+.ui-icons-widget-modal.ui-dialog--narrow {
+  max-width: 575px;
 }

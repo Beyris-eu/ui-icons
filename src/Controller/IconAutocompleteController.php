@@ -18,6 +18,12 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class IconAutocompleteController extends ControllerBase {
 
+  /**
+   * IconAutocompleteController constructor.
+   *
+   * @param \Drupal\ui_icons\IconSearch $iconSearch
+   *   The icon search service.
+   */
   public function __construct(
     private readonly IconSearch $iconSearch,
   ) {}
@@ -78,9 +84,12 @@ class IconAutocompleteController extends ControllerBase {
    *   The icon result with keys 'value' and 'label' for autocomplete.
    */
   public static function createResultEntry(IconDefinitionInterface $icon, Markup $renderable): ?array {
-    $label = sprintf('%s (%s)', $icon->getLabel(), $icon->getPackLabel() ?? $icon->getPackId());
-    $param = ['@icon' => $renderable, '@name' => $label];
-    $label = new FormattableMarkup('<span class="ui-menu-icon">@icon</span> @name', $param);
+    $label = new FormattableMarkup('<div class="ui-icons-result">' . $renderable . '<span class="ui-icons-result-icon-name">:name</span><strong class="ui-icons-result-collection">:pack_label</strong></div>',
+      [
+        ':name' => $icon->getLabel(),
+        ':pack_label' => $icon->getPackLabel() ?: $icon->getPackId(),
+      ],
+    );
 
     return ['value' => $icon->getId(), 'label' => $label];
   }

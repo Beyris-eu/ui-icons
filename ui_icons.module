@@ -68,6 +68,18 @@ function template_preprocess_icon_selector(array &$variables): void {
   $variables['has_settings'] = $variables['element']['#show_settings'] ?? FALSE;
   $variables['icon_form'] = $variables['element']['icon_id'] ?? '';
 
+  if (_ui_icons_is_theme_active('gin')) {
+    $variables['icon_form']['#attached']['library'][] = 'ui_icons/ui_icons.gin_autocomplete';
+  }
+
+  if (_ui_icons_is_theme_active('ui_suite_daisyui')) {
+    $variables['icon_form']['#attached']['library'][] = 'ui_icons/ui_icons.daisyui_autocomplete';
+  }
+
+  if (_ui_icons_is_theme_active('ui_suite_dsfr')) {
+    $variables['icon_form']['#attached']['library'][] = 'ui_icons/ui_icons.dsfr_autocomplete';
+  }
+
   if (isset($variables['element']['icon_id']['#value'])) {
     if (!$icon_data = IconDefinition::getIconDataFromId($variables['element']['icon_id']['#value'])) {
       return;
@@ -91,4 +103,18 @@ function template_preprocess_icon_selector(array &$variables): void {
     $variables['settings_form'] = $variables['element']['icon_settings'];
   }
 
+}
+
+/**
+ * Determines whether the active theme or sub-theme of a specific theme name.
+ *
+ * @param string $name
+ *   Name of the theme or sub theme.
+ *
+ * @internal
+ */
+function _ui_icons_is_theme_active(string $name): bool {
+  $theme = Drupal::getContainer()->get('theme.manager')->getActiveTheme();
+  return $theme->getName() === $name ||
+    isset($theme->getBaseThemeExtensions()[$name]);
 }
