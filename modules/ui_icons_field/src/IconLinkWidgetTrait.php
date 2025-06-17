@@ -6,6 +6,7 @@ namespace Drupal\ui_icons_field;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\ui_icons\IconSearch;
 
 /**
  * Provides a trait for icon link widgets.
@@ -22,6 +23,8 @@ trait IconLinkWidgetTrait {
     return [
       'allowed_icon_pack' => [],
       'icon_selector' => 'icon_autocomplete',
+      'result_format' => 'list',
+      'max_result' => IconSearch::SEARCH_MAX_RESULT,
       'icon_required' => TRUE,
       'icon_position' => FALSE,
       // Show settings is used by menu link implementation.
@@ -41,6 +44,26 @@ trait IconLinkWidgetTrait {
       '#title' => $this->t('Icon selector'),
       '#options' => $this->getPickerOptions(),
       '#default_value' => $this->getSetting('icon_selector'),
+    ];
+
+    $elements['result_format'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Result format'),
+      '#options' => $this->getAutocompleteFormat(),
+      '#default_value' => $this->getSetting('result_format'),
+      '#states' => [
+        'visible' => [
+          ':input[name="fields[' . $this->fieldDefinition->getName() . '][settings_edit_form][settings][icon_selector]"]' => ['value' => 'icon_autocomplete'],
+        ],
+      ],
+    ];
+
+    $elements['max_result'] = [
+      '#type' => 'number',
+      '#min' => 2,
+      '#max' => 112,
+      '#title' => $this->t('Maximum results'),
+      '#default_value' => $this->getSetting('max_result'),
     ];
 
     $elements['icon_required'] = [
@@ -95,7 +118,13 @@ trait IconLinkWidgetTrait {
     }
 
     $icon_selector = $this->getSetting('icon_selector');
-    $summary[] = $this->t('Selector: @type', ['@type' => $this->getPickerOptions()[$icon_selector]]);
+    $summary[] = $this->t('Selector: @type', ['@type' => $this->getPickerOptions()[$icon_selector] ?? '']);
+
+    $result_format = $this->getSetting('result_format');
+    if ($icon_selector === 'icon_autocomplete') {
+      $summary[] = $this->t('Result format: @format', ['@format' => $this->getAutocompleteFormat()[$result_format] ?? 'list']);
+    }
+    $summary[] = $this->t('Max results: @results', ['@results' => $this->getSetting('max_result')]);
 
     if (TRUE === (bool) $settings['icon_required']) {
       $summary[] = $this->t('Icon is required');
@@ -134,6 +163,7 @@ trait IconLinkWidgetTrait {
       '#title' => $this->t('@name icon', ['@name' => $label]),
       '#return_id' => TRUE,
       '#default_value' => $icon_full_id,
+      '#max_result' => $this->getSetting('max_result'),
       '#allowed_icon_pack' => $allowed_icon_pack,
       // Show settings is used by menu link implementation.
       '#show_settings' => $settings['show_settings'] ?? FALSE,
@@ -146,6 +176,10 @@ trait IconLinkWidgetTrait {
         'icon',
       ]),
     ];
+
+    if ($icon_selector === 'icon_autocomplete') {
+      $element['icon']['#result_format'] = $this->getSetting('result_format');
+    }
 
     if (isset($options['icon']['settings'])) {
       $element['icon']['#default_settings'] = $options['icon']['settings'];

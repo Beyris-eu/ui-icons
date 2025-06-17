@@ -60,6 +60,12 @@ field.widget.settings.icon_widget:
     icon_selector:
       type: string
       label: 'Icon FormElement name'
+    result_format:
+      type: string
+      label: 'Autocomplete format'
+    max_result:
+      type: integer
+      label: 'Maximum result'
 
 field.widget.settings.icon_link_widget:
   type: field.widget.settings.link_default
@@ -85,3 +91,9 @@ field.widget.settings.icon_link_widget:
     icon_selector:
       type: string
       label: 'Icon FormElement name'
+    result_format:
+      type: string
+      label: 'Autocomplete format'
+    max_result:
+      type: integer
+      label: 'Maximum result'

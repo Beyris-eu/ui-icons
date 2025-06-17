@@ -100,6 +100,7 @@ Partial support:
   > span {
     display: block;
     width: var(--ui-icons--preview-size);
+    max-height: var(--ui-icons--preview-size);
     margin: auto;
   }
 }
@@ -112,6 +113,7 @@ Partial support:
     > b,
     > span {
       width: calc(var(--ui-icons--wrapper-size) / 2);
+      max-height: calc(var(--ui-icons--wrapper-size) / 2);
     }
   }
 }
@@ -149,6 +151,55 @@ Partial support:
     cursor: pointer;
     /* Bootstrap theme add underline */
     text-decoration: none;
+  }
+}
+
+.ui-autocomplete:has(.ui-icons-result-grid) {
+  z-index: 1000;
+  display: grid;
+  /* Some packs can enable the x overflow */
+  overflow-x: hidden;
+  overflow-y: auto;
+  grid-template-columns: repeat(auto-fit, minmax(38px, 1fr));
+  max-height: var(--ui-icons-autocomplete-height);
+  max-height: calc(var(--ui-icons-autocomplete-height) * 2);
+  padding: 4px;
+  gap: 6px;
+
+  .ui-icons-result-grid {
+    display: flex;
+    margin: 0.1rem;
+  }
+
+  .ui-icons-result-icon-name {
+    display: none;
+  }
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+    border: 1px solid var(--ui-icons--border-color);
+    border-radius: 3px;
+
+    a {
+      display: block;
+      padding: 0;
+      text-decoration: none;
+      &.ui-state-active {
+        color: initial;
+        background-color: var(--ui-icons--preview-bg-color);
+      }
+    }
+  }
+
+  li:hover,
+  li:focus-within {
+    border-color: var(--input--focus-border-color, #1976d2);
+    background-color: var(--ui-icons--preview-bg-color);
+    box-shadow: 0 2px 8px rgb(0, 0, 0, 0.08);
   }
 }
 

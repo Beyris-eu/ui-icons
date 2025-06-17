@@ -61,12 +61,18 @@ class IconAutocompleteController extends ControllerBase {
       $allowed_icon_pack = explode('+', (string) $request->query->get('allowed_icon_pack', ''));
     }
 
+    $format_entry = 'createResultEntry';
+    $result_format = (string) $request->query->get('result_format', 'list');
+    if ($result_format === 'grid') {
+      $format_entry = 'createResultEntryGrid';
+    }
+
     $max_result = (int) $request->query->get('max_result', IconSearch::SEARCH_MAX_RESULT);
     $result = $this->iconSearch->search(
       $query,
       $allowed_icon_pack,
       $max_result,
-     [$this::class, 'createResultEntry']
+     [$this::class, $format_entry]
     );
 
     return new JsonResponse($result);
@@ -85,6 +91,28 @@ class IconAutocompleteController extends ControllerBase {
    */
   public static function createResultEntry(IconDefinitionInterface $icon, Markup $renderable): ?array {
     $label = new FormattableMarkup('<div class="ui-icons-result">' . $renderable . '<span class="ui-icons-result-icon-name">:name</span><strong class="ui-icons-result-collection">:pack_label</strong></div>',
+      [
+        ':name' => $icon->getLabel(),
+        ':pack_label' => $icon->getPackLabel() ?: $icon->getPackId(),
+      ],
+    );
+
+    return ['value' => $icon->getId(), 'label' => $label];
+  }
+
+  /**
+   * Create icon result for grid.
+   *
+   * @param \Drupal\Core\Theme\Icon\IconDefinitionInterface $icon
+   *   The icon to process.
+   * @param \Drupal\Core\Render\Markup $renderable
+   *   The icon preview renderable.
+   *
+   * @return array|null
+   *   The icon result with keys 'value' and 'label' for autocomplete.
+   */
+  public static function createResultEntryGrid(IconDefinitionInterface $icon, Markup $renderable): ?array {
+    $label = new FormattableMarkup('<span class="ui-icons-result-grid">' . $renderable . '<span class="ui-icons-result-icon-name">:name (:pack_label)</span></span>',
       [
         ':name' => $icon->getLabel(),
         ':pack_label' => $icon->getPackLabel() ?: $icon->getPackId(),

@@ -29,6 +29,9 @@ use Symfony\Component\HttpFoundation\Request;
  * - #default_settings: (array) Settings for the extractor settings.
  * - #settings_title: (string) Extractor settings details title.
  * - #allowed_icon_pack: (array) Icon pack to limit the selection.
+ * - #result_format: (string) autocomplete search format, can be 'grid' or
+ *   anything else for list.
+ * - #max_result: (int) search results.
  * - #return_id: (bool) Form return icon id instead of icon object as default.
  *
  * Some base properties from FormElementBase.
@@ -54,6 +57,7 @@ use Symfony\Component\HttpFoundation\Request;
  *     'other_icon_pack',
  *   ],
  *   '#show_settings' => TRUE,
+ *   '#result_format' => 'grid',
  * ];
  * @endcode
  */
@@ -82,6 +86,8 @@ class IconAutocomplete extends FormElementBase {
       '#theme' => 'icon_selector',
       '#theme_wrappers' => ['form_element'],
       '#allowed_icon_pack' => [],
+      '#result_format' => 'list',
+      '#max_result' => 20,
       '#show_settings' => FALSE,
       '#default_settings' => [],
       '#settings_title' => new TranslatableMarkup('Settings'),
@@ -210,6 +216,12 @@ class IconAutocomplete extends FormElementBase {
 
     if (!empty($element['#allowed_icon_pack'])) {
       $element['icon_id']['#autocomplete_query_parameters']['allowed_icon_pack'] = implode('+', $element['#allowed_icon_pack']);
+    }
+    if (!empty($element['#max_result'])) {
+      $element['icon_id']['#autocomplete_query_parameters']['max_result'] = $element['#max_result'];
+    }
+    if (!empty($element['#result_format'])) {
+      $element['icon_id']['#autocomplete_query_parameters']['result_format'] = $element['#result_format'];
     }
 
     return $element;

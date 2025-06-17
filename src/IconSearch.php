@@ -20,7 +20,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class IconSearch implements ContainerInjectionInterface {
 
   public const SEARCH_MIN_LENGTH = 2;
-  public const SEARCH_MAX_RESULT = 20;
+  public const SEARCH_MAX_RESULT = 24;
 
   public function __construct(
     private readonly IconPackManagerInterface $pluginManagerIconPack,
@@ -212,7 +212,7 @@ class IconSearch implements ContainerInjectionInterface {
       return NULL;
     }
 
-    $icon_renderable = IconPreview::getPreview($icon, ['size' => 24]);
+    $icon_renderable = IconPreview::getPreview($icon, ['size' => 36]);
     $rendered = $this->renderer->renderInIsolation($icon_renderable);
 
     return call_user_func($callback, $icon, $rendered);

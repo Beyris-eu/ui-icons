@@ -45,9 +45,7 @@ class IconWidgetUnitTest extends UnitTestCase {
     $this->container->set('string_translation', $this->createMock(TranslationInterface::class));
     \Drupal::setContainer($this->container);
 
-    $fieldDefinition = $this->getMockBuilder('Drupal\Core\Field\FieldDefinition')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $fieldDefinition = $this->createMock('Drupal\Core\Field\FieldDefinition');
 
     $this->widget = new IconWidget(
       'icon_widget',
@@ -62,9 +60,8 @@ class IconWidgetUnitTest extends UnitTestCase {
    * Tests the massageFormValues method.
    */
   public function testMassageFormValues(): void {
-    $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $form_state = $this->createMock('Drupal\Core\Form\FormState');
+
     $values = [];
 
     // Invalid icon.

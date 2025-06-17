@@ -36,4 +36,17 @@ trait IconFieldTrait {
     ];
   }
 
+  /**
+   * Get the icon selector autocomplete format.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup[]
+   *   An array of format for selectors options.
+   */
+  private function getAutocompleteFormat(): array {
+    return [
+      'list' => $this->t('List'),
+      'grid' => $this->t('Grid'),
+    ];
+  }
+
 }

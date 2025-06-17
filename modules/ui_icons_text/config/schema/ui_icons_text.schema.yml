@@ -9,4 +9,9 @@ filter_settings.icon_embed:
       label: 'Icon pack allowed for selection'
       sequence:
         type: string
-        label: 'Icon pack id'
+    result_format:
+      type: string
+      label: 'Autocomplete format'
+    max_result:
+      type: integer
+      label: 'Maximum result'

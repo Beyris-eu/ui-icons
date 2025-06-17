@@ -42,6 +42,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
 
     $this->container = new ContainerBuilder();
     $this->container->set('plugin.manager.icon_pack', $this->createMock(IconPackManagerInterface::class));
+    $this->container->set('string_translation', $this->getStringTranslationStub());
     \Drupal::setContainer($this->container);
   }
 
@@ -70,6 +71,8 @@ class IconAutocompleteUnitTest extends UnitTestCase {
       '#theme' => 'icon_selector',
       '#theme_wrappers' => ['form_element'],
       '#allowed_icon_pack' => [],
+      '#result_format' => 'list',
+      '#max_result' => 20,
       '#show_settings' => FALSE,
       '#default_settings' => [],
     ];
@@ -84,9 +87,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
    * Test the processIcon method.
    */
   public function testProcessIcon(): void {
-    $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $form_state = $this->createMock('Drupal\Core\Form\FormState');
     $complete_form = [];
 
     // phpcs:disable
@@ -112,7 +113,8 @@ class IconAutocompleteUnitTest extends UnitTestCase {
       'icon_id' => [
         '#type' => 'textfield',
         '#title' => new TranslatableMarkup('Icon'),
-        '#placeholder' => new TranslatableMarkup('Start typing icon name'),
+        '#description' => new TranslatableMarkup('Start typing the icon name. Icon availability depends on the selected icon packs.'),
+        '#placeholder' => '',
         '#title_display' => 'invisible',
         '#autocomplete_route_name' => 'ui_icons.autocomplete',
         '#required' => FALSE,
@@ -131,7 +133,6 @@ class IconAutocompleteUnitTest extends UnitTestCase {
     // Test basic values and #default_value.
     $values = [
       '#size' => 22,
-      '#description' => new TranslatableMarkup('Foo'),
       '#placeholder' => new TranslatableMarkup('Qux'),
       '#required' => TRUE,
       '#default_value' => 'foo:bar',
@@ -140,7 +141,6 @@ class IconAutocompleteUnitTest extends UnitTestCase {
 
     IconAutocomplete::processIcon($element, $form_state, $complete_form);
 
-    $expected['#description'] = $values['#description'];
     $expected['#required'] = $values['#required'];
     $expected['#default_value'] = $values['#default_value'];
     $expected['icon_id']['#size'] = $values['#size'];
@@ -169,6 +169,16 @@ class IconAutocompleteUnitTest extends UnitTestCase {
     $this->assertArrayHasKey('allowed_icon_pack', $element['icon_id']['#autocomplete_query_parameters']);
     $this->assertSame('corge+quux', $element['icon_id']['#autocomplete_query_parameters']['allowed_icon_pack']);
 
+    // Test search format and result.
+    $element['#max_result'] = 666;
+    $element['#result_format'] = 'grid';
+    IconAutocomplete::processIcon($element, $form_state, $complete_form);
+
+    $this->assertArrayHasKey('max_result', $element['icon_id']['#autocomplete_query_parameters']);
+    $this->assertSame(666, $element['icon_id']['#autocomplete_query_parameters']['max_result']);
+    $this->assertArrayHasKey('result_format', $element['icon_id']['#autocomplete_query_parameters']);
+    $this->assertSame('grid', $element['icon_id']['#autocomplete_query_parameters']['result_format']);
+
     // Test values are cleaned on the parent element.
     $this->assertArrayNotHasKey('#size', $element);
     $this->assertArrayNotHasKey('#placeholder', $element);
@@ -181,9 +191,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
    * Test the processIconAjaxForm method.
    */
   public function testProcessIconAjaxForm(): void {
-    $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $form_state = $this->createMock('Drupal\Core\Form\FormState');
     $complete_form = [];
 
     $base_element = [
@@ -237,9 +245,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
    * Test the processIconAjaxForm method for #show_settings = FALSE.
    */
   public function testProcessIconAjaxFormNoSettings(): void {
-    $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $form_state = $this->createMock('Drupal\Core\Form\FormState');
     $complete_form = [];
 
     $icon_id = 'foo:bar';
@@ -277,9 +283,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
    * Test the processIconAjaxForm #allowed_icon_pack and no extractor form.
    */
   public function testProcessIconAjaxFormAllowedIconPack(): void {
-    $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $form_state = $this->createMock('Drupal\Core\Form\FormState');
     $complete_form = [];
 
     $icon_id = 'foo:bar';
@@ -383,9 +387,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
       ->willReturn($icon);
     $this->container->set('plugin.manager.icon_pack', $ui_icon_pack_plugin_manager);
 
-    $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $form_state = $this->createMock('Drupal\Core\Form\FormState');
     $form_state->method('getValues')
       ->willReturn($values);
 
@@ -399,9 +401,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
     // Test #return_id property.
     $element['#return_id'] = TRUE;
 
-    $form_state = $this->getMockBuilder('Drupal\Core\Form\FormState')
-      ->disableOriginalConstructor()
-      ->getMock();
+    $form_state = $this->createMock('Drupal\Core\Form\FormState');
     $form_state->method('getValues')
       ->willReturn($values);
 

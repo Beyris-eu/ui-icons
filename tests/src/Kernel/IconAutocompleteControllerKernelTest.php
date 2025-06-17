@@ -54,7 +54,7 @@ class IconAutocompleteControllerKernelTest extends KernelTestBase {
   /**
    * Tests the handleSearchIcons method of the IconAutocompleteController.
    */
-  public function testHandleSearchIconsResultLabel(): void {
+  public function testHandleSearchIconsResultList(): void {
     $icon_full_id = 'test_minimal:foo';
     $search = $this->iconAutocompleteController->handleSearchIcons(new Request(['q' => $icon_full_id]));
     $result = json_decode($search->getContent(), TRUE);
@@ -63,19 +63,55 @@ class IconAutocompleteControllerKernelTest extends KernelTestBase {
     // based on physical path than can be specific for example in CI.
     $result_dom = new \DOMDocument();
     $result_dom->loadHTML($result[0]['label']);
+    $this->assertSame('Footest_minimal', trim($result_dom->lastChild->textContent));
 
+    $result_xpath = new \DOMXpath($result_dom);
+
+    $div = $result_xpath->query("//div");
+    $this->assertSame('ui-icons-result', $div->item(0)->getAttribute('class'));
+    $span = $result_xpath->query("//div/span");
+    $this->assertSame('ui-icons-result-icon-name', $span->item(0)->getAttribute('class'));
+
+    $img = $result_xpath->query("//div/img");
+    $this->assertSame('icon icon-preview', $img->item(0)->getAttribute('class'));
+    $this->assertSame($icon_full_id, $img->item(0)->getAttribute('title'));
+    $this->assertSame('36', $img->item(0)->getAttribute('width'));
+    $this->assertSame('36', $img->item(0)->getAttribute('height'));
+
+    $src = $img->item(0)->getAttribute('src');
+    $this->assertStringEndsWith('tests/modules/ui_icons_test/icons/flat/foo.png', $src);
+  }
+
+  /**
+   * Tests the handleSearchIcons method of the IconAutocompleteController.
+   */
+  public function testHandleSearchIconsResultGrid(): void {
+    $icon_full_id = 'test_minimal:foo';
+    $req = [
+      'q' => $icon_full_id,
+      'result_format' => 'grid',
+    ];
+    $search = $this->iconAutocompleteController->handleSearchIcons(new Request($req));
+    $result = json_decode($search->getContent(), TRUE);
+
+    // Load the response to test, cannot simply compare string as `src` path is
+    // based on physical path than can be specific for example in CI.
+    $result_dom = new \DOMDocument();
+    $result_dom->loadHTML($result[0]['label']);
     $this->assertSame('Foo (test_minimal)', trim($result_dom->lastChild->textContent));
 
     $result_xpath = new \DOMXpath($result_dom);
 
     $span = $result_xpath->query("//span");
-    $this->assertSame('ui-menu-icon', $span->item(0)->getAttribute('class'));
+    $this->assertSame('ui-icons-result-grid', $span->item(0)->getAttribute('class'));
+    $spanName = $result_xpath->query("//span/span");
+    $this->assertSame('ui-icons-result-icon-name', $spanName->item(0)->getAttribute('class'));
 
     $img = $result_xpath->query("//span/img");
     $this->assertSame('icon icon-preview', $img->item(0)->getAttribute('class'));
     $this->assertSame($icon_full_id, $img->item(0)->getAttribute('title'));
-    $this->assertSame('24', $img->item(0)->getAttribute('width'));
-    $this->assertSame('24', $img->item(0)->getAttribute('height'));
+    $this->assertSame('36', $img->item(0)->getAttribute('width'));
+    $this->assertSame('36', $img->item(0)->getAttribute('height'));
 
     $src = $img->item(0)->getAttribute('src');
     $this->assertStringEndsWith('tests/modules/ui_icons_test/icons/flat/foo.png', $src);

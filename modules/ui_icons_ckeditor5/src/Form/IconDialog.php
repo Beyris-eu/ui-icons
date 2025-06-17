@@ -45,15 +45,20 @@ final class IconDialog extends FormBase {
     $form['#prefix'] = '<div id="editor-icon-dialog-form">';
     $form['#suffix'] = '</div>';
 
-    $allowed_icon_pack = $filter_format->filters('icon_embed')->getConfiguration()['settings']['allowed_icon_pack'];
+    $settings = $filter_format->filters('icon_embed')->getConfiguration()['settings'] ?? [];
+    $allowed_icon_pack = $settings['allowed_icon_pack'] ?? [];
+    $result_format = $settings['result_format'] ?? 'list';
+    $max_result = $settings['max_result'] ?? 24;
 
     $form['icon'] = [
       '#type' => 'icon_autocomplete',
       '#title' => $this->t('Icon Name'),
-      '#size' => 50,
+      '#size' => 35,
       '#required' => TRUE,
       '#allowed_icon_pack' => $allowed_icon_pack,
       '#show_settings' => TRUE,
+      '#result_format' => $result_format,
+      '#max_result' => $max_result,
     ];
 
     $form['actions'] = [

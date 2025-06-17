@@ -11,6 +11,8 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\Icon\IconDefinitionInterface;
+use Drupal\ui_icons_field\IconFieldTrait;
+use Drupal\ui_icons\IconSearch;
 
 /**
  * Plugin implementation of the 'icon_widget' widget.
@@ -22,12 +24,16 @@ use Drupal\Core\Theme\Icon\IconDefinitionInterface;
 )]
 class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
 
+  use IconFieldTrait;
+
   /**
    * {@inheritdoc}
    */
   public static function defaultSettings(): array {
     return [
       'icon_selector' => 'icon_autocomplete',
+      'result_format' => 'list',
+      'max_result' => IconSearch::SEARCH_MAX_RESULT,
     ] + parent::defaultSettings();
   }
 
@@ -44,6 +50,26 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       '#default_value' => $this->getSetting('icon_selector'),
     ];
 
+    $element['result_format'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Result format'),
+      '#options' => $this->getAutocompleteFormat(),
+      '#default_value' => $this->getSetting('result_format'),
+      '#states' => [
+        'visible' => [
+          ':input[name="fields[' . $this->fieldDefinition->getName() . '][settings_edit_form][settings][icon_selector]"]' => ['value' => 'icon_autocomplete'],
+        ],
+      ],
+    ];
+
+    $element['max_result'] = [
+      '#type' => 'number',
+      '#min' => 2,
+      '#max' => 112,
+      '#title' => $this->t('Maximum results'),
+      '#default_value' => $this->getSetting('max_result'),
+    ];
+
     return $element;
   }
 
@@ -54,7 +80,12 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $summary = [];
 
     $icon_selector = $this->getSetting('icon_selector');
-    $summary[] = $this->t('Selector: @type', ['@type' => $this->getPickerOptions()[$icon_selector]]);
+    $result_format = $this->getSetting('result_format');
+    $summary[] = $this->t('Selector: @type', ['@type' => $this->getPickerOptions()[$icon_selector] ?? '']);
+    if ($icon_selector === 'icon_autocomplete') {
+      $summary[] = $this->t('Result format: @format', ['@format' => $this->getAutocompleteFormat()[$result_format] ?? 'list']);
+    }
+    $summary[] = $this->t('Max results: @results', ['@results' => $this->getSetting('max_result')]);
 
     return $summary;
   }
@@ -77,7 +108,12 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       '#required' => $element['#required'] ?? FALSE,
       '#show_settings' => FALSE,
       '#default_value' => NULL,
+      '#max_result' => $this->getSetting('max_result'),
     ];
+
+    if ($icon_selector === 'icon_autocomplete') {
+      $element['value']['#result_format'] = $this->getSetting('result_format');
+    }
 
     if ($item && $item->target_id) {
       $element['value']['#default_value'] = $item->target_id;
@@ -104,19 +140,6 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     }
 
     return $values;
-  }
-
-  /**
-   * Get the icon selector options.
-   *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup[]
-   *   An array of options for selectors options.
-   */
-  private function getPickerOptions(): array {
-    return [
-      'icon_autocomplete' => $this->t('Autocomplete'),
-      'icon_picker' => $this->t('Picker'),
-    ];
   }
 
 }

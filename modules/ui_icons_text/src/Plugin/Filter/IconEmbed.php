@@ -20,6 +20,7 @@ use Drupal\filter\FilterProcessResult;
 use Drupal\filter\Plugin\FilterBase;
 use Drupal\filter\Plugin\FilterInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\ui_icons\IconSearch;
 
 /**
  * Provides a filter to embed icon items using a custom tag.
@@ -34,6 +35,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   weight: 100,
   settings: [
     'allowed_icon_pack' => [],
+    'result_format' => 'list',
+    'max_result' => 24,
   ],
 )]
 class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
@@ -114,6 +117,21 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       '#default_value' => $this->settings['allowed_icon_pack'],
       '#description' => $this->t('If none are selected, all will be allowed.'),
       '#element_validate' => [[static::class, 'validateOptions']],
+    ];
+
+    $form['result_format'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Result format'),
+      '#options' => $this->getAutocompleteFormat(),
+      '#default_value' => $this->settings['result_format'] ?? 'list',
+    ];
+
+    $form['max_result'] = [
+      '#type' => 'number',
+      '#min' => 2,
+      '#max' => 112,
+      '#title' => $this->t('Maximum results'),
+      '#default_value' => $this->settings['max_result'] ?? IconSearch::SEARCH_MAX_RESULT,
     ];
 
     return $form;
@@ -318,6 +336,19 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       $node_parent->insertBefore($replacement_node, $node);
     }
     $node_parent->removeChild($node);
+  }
+
+  /**
+   * Get the icon selector autocomplete format.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup[]
+   *   An array of format for selectors options.
+   */
+  private function getAutocompleteFormat(): array {
+    return [
+      'list' => $this->t('List'),
+      'grid' => $this->t('Grid'),
+    ];
   }
 
 }
