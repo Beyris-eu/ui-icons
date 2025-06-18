@@ -24,7 +24,7 @@ class IconPreviewTwigExtension extends AbstractExtension {
    */
   public function getFunctions(): array {
     return [
-      new TwigFunction('icon_preview', [$this, 'getIconPreview']),
+      new TwigFunction('icon_preview', $this->getIconPreview(...)),
     ];
   }
 
