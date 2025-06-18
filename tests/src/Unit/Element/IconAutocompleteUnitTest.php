@@ -122,7 +122,6 @@ class IconAutocompleteUnitTest extends UnitTestCase {
         '#size' => 55,
         '#maxlength' => 128,
         '#value' => '',
-        '#error_no_message' => TRUE,
         '#limit_validation_errors' => [$element['#parents']],
       ],
     ];
