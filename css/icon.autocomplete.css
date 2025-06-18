@@ -7,14 +7,13 @@ Feel free to propose a MR or offer sponsoring for a specific theme support.
 Full support:
  - Claro
  - Gin, thanks to @gxleano
- - Olivero, non admin but default
+ - Olivero, non admin but default with Drupal
  - UI Suite Bootstrap
 
 Partial support:
  - UI Suite Dsfr
  - UI Suite Daisy UI (no dark mode yet)
  - Bootstrap
- - bootstrap_barrio
 */
 /* cspell:ignore gxleano */
 
@@ -26,7 +25,10 @@ Partial support:
   );
   --ui-icons--wrapper-size: var(--ui-icons-claro-size, var(--sp3, 2.89rem));
   --ui-icons--preview-size: calc(var(--ui-icons--wrapper-size) * 0.95);
-  --ui-icons--result-size: calc(var(--ui-icons--preview-size) * 0.7);
+  --ui-icons--result-size: var(
+    --sp3,
+    calc(var(--ui-icons--preview-size, 2.89rem) * 0.8)
+  );
   --ui-icons--border-radius: var(
     --input-border-radius-size,
     var(--border-radius, 0.3rem)
@@ -50,11 +52,13 @@ Partial support:
   display: flex;
   padding-bottom: var(--space-l, 1.5rem);
 
-  .form-item {
+  /* Make size of input same as textfield */
+  .form-search {
     margin-block: 0;
     width: 98%;
   }
 
+  /* Move description on the left under the preview icon */
   .form-item__description {
     position: absolute;
     left: 0;
@@ -64,9 +68,13 @@ Partial support:
 .ui-icons-select {
   display: flex;
   flex: auto;
+
+  .form-item {
+    margin-block: 0;
+  }
 }
 
-.ui-icons-preview.form-item {
+.ui-icons-preview {
   display: flex;
   justify-content: center;
   width: var(--ui-icons--wrapper-size);
@@ -75,12 +83,6 @@ Partial support:
   border: 1px solid var(--ui-icons--border-color);
   border-radius: var(--ui-icons--border-radius);
   background-color: var(--ui-icons--preview-bg-color);
-  /* Avoid double holders */
-  .form-item {
-    margin: 0;
-    padding: 0;
-    border: none;
-  }
 }
 
 /* Media library fix */
@@ -144,6 +146,7 @@ Partial support:
   overflow-x: hidden;
   overflow-y: auto;
   max-height: var(--ui-icons-autocomplete-height);
+
   a.ui-menu-item-wrapper {
     /* Force display for Olivero fix */
     display: block;
@@ -160,6 +163,7 @@ Partial support:
   /* Some packs can enable the x overflow */
   overflow-x: hidden;
   overflow-y: auto;
+  /* Must match the preview size + 2px for borders */
   grid-template-columns: repeat(auto-fit, minmax(38px, 1fr));
   max-height: var(--ui-icons-autocomplete-height);
   max-height: calc(var(--ui-icons-autocomplete-height) * 2);
@@ -188,6 +192,7 @@ Partial support:
       display: block;
       padding: 0;
       text-decoration: none;
+
       &.ui-state-active {
         color: initial;
         background-color: var(--ui-icons--preview-bg-color);

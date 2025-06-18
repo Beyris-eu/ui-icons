@@ -19,8 +19,8 @@ use Drupal\filter\Attribute\Filter;
 use Drupal\filter\FilterProcessResult;
 use Drupal\filter\Plugin\FilterBase;
 use Drupal\filter\Plugin\FilterInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\ui_icons\IconSearch;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a filter to embed icon items using a custom tag.
@@ -36,6 +36,7 @@ use Drupal\ui_icons\IconSearch;
   settings: [
     'allowed_icon_pack' => [],
     'result_format' => 'list',
+    // Default autocomplete result length. Multiple of 12 to match grid format.
     'max_result' => 24,
   ],
 )]
@@ -129,9 +130,9 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
     $form['max_result'] = [
       '#type' => 'number',
       '#min' => 2,
-      '#max' => 112,
+      '#max' => IconSearch::SEARCH_RESULT_MAX,
       '#title' => $this->t('Maximum results'),
-      '#default_value' => $this->settings['max_result'] ?? IconSearch::SEARCH_MAX_RESULT,
+      '#default_value' => $this->settings['max_result'] ?? IconSearch::SEARCH_RESULT,
     ];
 
     return $form;

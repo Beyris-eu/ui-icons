@@ -19,8 +19,15 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class IconSearch implements ContainerInjectionInterface {
 
+  // Minimum trigger for search, must match with js/icon.autocomplete.js
+  // setting.
   public const SEARCH_MIN_LENGTH = 2;
-  public const SEARCH_MAX_RESULT = 24;
+  // Default autocomplete result length. Multiple of 12 to match grid format.
+  // @see css/icon.autocomplete.css
+  public const SEARCH_RESULT = 24;
+  // Maximum autocomplete result length.
+  public const SEARCH_RESULT_MAX = 132;
+  public const ICON_PREVIEW_SIZE = 32;
 
   public function __construct(
     private readonly IconPackManagerInterface $pluginManagerIconPack,
@@ -57,7 +64,7 @@ class IconSearch implements ContainerInjectionInterface {
   public function search(
     string $query,
     array $allowed_icon_pack = [],
-    int $max_result = self::SEARCH_MAX_RESULT,
+    int $max_result = self::SEARCH_RESULT,
     ?callable $result_callback = NULL,
   ): array {
     if (empty($query) || mb_strlen($query) < self::SEARCH_MIN_LENGTH) {
@@ -212,7 +219,7 @@ class IconSearch implements ContainerInjectionInterface {
       return NULL;
     }
 
-    $icon_renderable = IconPreview::getPreview($icon, ['size' => 36]);
+    $icon_renderable = IconPreview::getPreview($icon, ['size' => self::ICON_PREVIEW_SIZE]);
     $rendered = $this->renderer->renderInIsolation($icon_renderable);
 
     return call_user_func($callback, $icon, $rendered);

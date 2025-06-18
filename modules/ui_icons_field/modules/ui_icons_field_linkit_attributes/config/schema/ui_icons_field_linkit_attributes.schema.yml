@@ -36,3 +36,10 @@ field.widget.settings.icon_linkit_attributes_widget:
     icon_selector:
       type: string
       label: 'Icon FormElement name'
+    result_format:
+      type: string
+      label: 'Autocomplete format'
+    max_result:
+      # Because of linkit settings this become a string.
+      type: string
+      label: 'Maximum result'

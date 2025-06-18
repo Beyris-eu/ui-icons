@@ -18,6 +18,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\Core\Theme\Icon\IconDefinitionInterface;
 use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
+use Drupal\ui_icons\IconSearch;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -87,7 +88,7 @@ class IconAutocomplete extends FormElementBase {
       '#theme_wrappers' => ['form_element'],
       '#allowed_icon_pack' => [],
       '#result_format' => 'list',
-      '#max_result' => 20,
+      '#max_result' => IconSearch::SEARCH_RESULT,
       '#show_settings' => FALSE,
       '#default_settings' => [],
       '#settings_title' => new TranslatableMarkup('Settings'),
@@ -196,16 +197,18 @@ class IconAutocomplete extends FormElementBase {
     }
 
     $element['icon_id'] = [
-      '#type' => 'textfield',
+      // Search type allow clear feature on some browser.
+      '#type' => 'search',
+      // This #title will not actually be used. Instead the parent element's
+      // #title is used as the label (see below).
       '#title' => new TranslatableMarkup('Icon'),
-      '#placeholder' => $element['#placeholder'] ?? '',
       '#title_display' => 'invisible',
+      '#placeholder' => $element['#placeholder'] ?? '',
       '#autocomplete_route_name' => 'ui_icons.autocomplete',
       '#required' => $element['#required'] ?? FALSE,
       '#size' => $element['#size'] ?? 55,
       '#maxlength' => 128,
       '#value' => $element['#value']['icon_id'] ?? $element['#default_value'] ?? '',
-      '#error_no_message' => TRUE,
       // Ensure the ::validateIcon run.
       '#limit_validation_errors' => [$element['#parents']],
       '#description' => $element['#description'] ?? new TranslatableMarkup('Start typing the icon name. Icon availability depends on the selected icon packs.'),

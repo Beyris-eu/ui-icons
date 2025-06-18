@@ -15,6 +15,7 @@ use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\Tests\Core\Theme\Icon\IconTestTrait;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons\Element\IconAutocomplete;
+use Drupal\ui_icons\IconSearch;
 use Prophecy\Argument;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -72,7 +73,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
       '#theme_wrappers' => ['form_element'],
       '#allowed_icon_pack' => [],
       '#result_format' => 'list',
-      '#max_result' => 20,
+      '#max_result' => IconSearch::SEARCH_RESULT,
       '#show_settings' => FALSE,
       '#default_settings' => [],
     ];
@@ -111,7 +112,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
       '#tree' => TRUE,
       '#value' => [],
       'icon_id' => [
-        '#type' => 'textfield',
+        '#type' => 'search',
         '#title' => new TranslatableMarkup('Icon'),
         '#description' => new TranslatableMarkup('Start typing the icon name. Icon availability depends on the selected icon packs.'),
         '#placeholder' => '',
@@ -121,7 +122,6 @@ class IconAutocompleteUnitTest extends UnitTestCase {
         '#size' => 55,
         '#maxlength' => 128,
         '#value' => '',
-        '#error_no_message' => TRUE,
         '#limit_validation_errors' => [$element['#parents']],
       ],
     ];

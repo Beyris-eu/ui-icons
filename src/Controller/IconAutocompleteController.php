@@ -67,7 +67,7 @@ class IconAutocompleteController extends ControllerBase {
       $format_entry = 'createResultEntryGrid';
     }
 
-    $max_result = (int) $request->query->get('max_result', IconSearch::SEARCH_MAX_RESULT);
+    $max_result = (int) $request->query->get('max_result', IconSearch::SEARCH_RESULT);
     $result = $this->iconSearch->search(
       $query,
       $allowed_icon_pack,
