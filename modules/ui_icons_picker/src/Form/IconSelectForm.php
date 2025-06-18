@@ -147,7 +147,7 @@ final class IconSelectForm extends FormBase {
     ];
 
     $form['filters']['filter'] = [
-      '#type' => 'textfield',
+      '#type' => 'search',
       '#title' => $this->t('Filter'),
       '#placeholder' => $this->t('Filter by name'),
       '#title_display' => 'invisible',

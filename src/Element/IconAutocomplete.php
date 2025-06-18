@@ -79,11 +79,9 @@ class IconAutocomplete extends FormElementBase {
         [$class, 'processIcon'],
         [$class, 'processIconAjaxForm'],
         [$class, 'processAjaxForm'],
-        // [$class, 'processPattern'],
         [$class, 'processGroup'],
       ],
       '#pre_render' => [
-        [$class, 'preRenderIconField'],
         [$class, 'preRenderGroup'],
       ],
       '#theme' => 'icon_selector',
@@ -199,19 +197,18 @@ class IconAutocomplete extends FormElementBase {
     }
 
     $element['icon_id'] = [
-      // '#type' => 'textfield',
+      // Search type allow clear feature on some browser.
       '#type' => 'search',
-      // '#attributes' => ['type' => 'search'],
-      // '#pattern' => "^[a-z0-9_.-]+:[a-z0-9_.-]+$",
+      // This #title will not actually be used. Instead the parent element's
+      // #title is used as the label (see below).
       '#title' => new TranslatableMarkup('Icon'),
-      '#placeholder' => $element['#placeholder'] ?? '',
       '#title_display' => 'invisible',
+      '#placeholder' => $element['#placeholder'] ?? '',
       '#autocomplete_route_name' => 'ui_icons.autocomplete',
       '#required' => $element['#required'] ?? FALSE,
       '#size' => $element['#size'] ?? 55,
       '#maxlength' => 128,
       '#value' => $element['#value']['icon_id'] ?? $element['#default_value'] ?? '',
-      '#error_no_message' => TRUE,
       // Ensure the ::validateIcon run.
       '#limit_validation_errors' => [$element['#parents']],
       '#description' => $element['#description'] ?? new TranslatableMarkup('Start typing the icon name. Icon availability depends on the selected icon packs.'),
@@ -384,25 +381,6 @@ class IconAutocomplete extends FormElementBase {
     }
 
     $form_state->setValueForElement($element, ['icon' => $icon, 'settings' => $settings]);
-  }
-
-  /**
-   * Prepares a #type 'icon_autocomplete' render element for input.html.twig.
-   *
-   * @param array $element
-   *   An associative array containing the properties of the element.
-   *   Properties used: #title, #value, #description, #size, #maxlength,
-   *   #placeholder, #required, #attributes.
-   *
-   * @return array
-   *   The $element with prepared variables ready for input.html.twig.
-   */
-  public static function preRenderIconField($element) {
-    // $element['icon_id']['#attributes']['type'] = 'search';
-    // Element::setAttributes($element['icon_id'], ['id', 'name', 'value', 'size', 'maxlength', 'placeholder']);
-    // static::setAttributes($element['icon_id'], ['form-search']);
-dpr($element);
-    return $element;
   }
 
   /**

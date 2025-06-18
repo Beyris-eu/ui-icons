@@ -19,8 +19,8 @@ use Drupal\filter\Attribute\Filter;
 use Drupal\filter\FilterProcessResult;
 use Drupal\filter\Plugin\FilterBase;
 use Drupal\filter\Plugin\FilterInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\ui_icons\IconSearch;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a filter to embed icon items using a custom tag.

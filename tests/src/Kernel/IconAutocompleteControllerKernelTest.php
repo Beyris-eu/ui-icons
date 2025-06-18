@@ -6,6 +6,7 @@ namespace Drupal\Tests\ui_icons\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_icons\Controller\IconAutocompleteController;
+use Drupal\ui_icons\IconSearch;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -75,8 +76,8 @@ class IconAutocompleteControllerKernelTest extends KernelTestBase {
     $img = $result_xpath->query("//div/img");
     $this->assertSame('icon icon-preview', $img->item(0)->getAttribute('class'));
     $this->assertSame($icon_full_id, $img->item(0)->getAttribute('title'));
-    $this->assertSame('36', $img->item(0)->getAttribute('width'));
-    $this->assertSame('36', $img->item(0)->getAttribute('height'));
+    $this->assertSame(IconSearch::ICON_PREVIEW_SIZE, (int) $img->item(0)->getAttribute('width'));
+    $this->assertSame(IconSearch::ICON_PREVIEW_SIZE, (int) $img->item(0)->getAttribute('height'));
 
     $src = $img->item(0)->getAttribute('src');
     $this->assertStringEndsWith('tests/modules/ui_icons_test/icons/flat/foo.png', $src);
@@ -110,8 +111,8 @@ class IconAutocompleteControllerKernelTest extends KernelTestBase {
     $img = $result_xpath->query("//span/img");
     $this->assertSame('icon icon-preview', $img->item(0)->getAttribute('class'));
     $this->assertSame($icon_full_id, $img->item(0)->getAttribute('title'));
-    $this->assertSame('36', $img->item(0)->getAttribute('width'));
-    $this->assertSame('36', $img->item(0)->getAttribute('height'));
+    $this->assertSame(IconSearch::ICON_PREVIEW_SIZE, (int) $img->item(0)->getAttribute('width'));
+    $this->assertSame(IconSearch::ICON_PREVIEW_SIZE, (int) $img->item(0)->getAttribute('height'));
 
     $src = $img->item(0)->getAttribute('src');
     $this->assertStringEndsWith('tests/modules/ui_icons_test/icons/flat/foo.png', $src);
