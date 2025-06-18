@@ -18,6 +18,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\Core\Theme\Icon\IconDefinitionInterface;
 use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
+use Drupal\ui_icons\IconSearch;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -78,16 +79,18 @@ class IconAutocomplete extends FormElementBase {
         [$class, 'processIcon'],
         [$class, 'processIconAjaxForm'],
         [$class, 'processAjaxForm'],
+        // [$class, 'processPattern'],
         [$class, 'processGroup'],
       ],
       '#pre_render' => [
+        [$class, 'preRenderIconField'],
         [$class, 'preRenderGroup'],
       ],
       '#theme' => 'icon_selector',
       '#theme_wrappers' => ['form_element'],
       '#allowed_icon_pack' => [],
       '#result_format' => 'list',
-      '#max_result' => 20,
+      '#max_result' => IconSearch::SEARCH_RESULT,
       '#show_settings' => FALSE,
       '#default_settings' => [],
       '#settings_title' => new TranslatableMarkup('Settings'),
@@ -196,7 +199,10 @@ class IconAutocomplete extends FormElementBase {
     }
 
     $element['icon_id'] = [
-      '#type' => 'textfield',
+      // '#type' => 'textfield',
+      '#type' => 'search',
+      // '#attributes' => ['type' => 'search'],
+      // '#pattern' => "^[a-z0-9_.-]+:[a-z0-9_.-]+$",
       '#title' => new TranslatableMarkup('Icon'),
       '#placeholder' => $element['#placeholder'] ?? '',
       '#title_display' => 'invisible',
@@ -378,6 +384,25 @@ class IconAutocomplete extends FormElementBase {
     }
 
     $form_state->setValueForElement($element, ['icon' => $icon, 'settings' => $settings]);
+  }
+
+  /**
+   * Prepares a #type 'icon_autocomplete' render element for input.html.twig.
+   *
+   * @param array $element
+   *   An associative array containing the properties of the element.
+   *   Properties used: #title, #value, #description, #size, #maxlength,
+   *   #placeholder, #required, #attributes.
+   *
+   * @return array
+   *   The $element with prepared variables ready for input.html.twig.
+   */
+  public static function preRenderIconField($element) {
+    // $element['icon_id']['#attributes']['type'] = 'search';
+    // Element::setAttributes($element['icon_id'], ['id', 'name', 'value', 'size', 'maxlength', 'placeholder']);
+    // static::setAttributes($element['icon_id'], ['form-search']);
+dpr($element);
+    return $element;
   }
 
   /**

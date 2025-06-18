@@ -50,11 +50,13 @@ Partial support:
   display: flex;
   padding-bottom: var(--space-l, 1.5rem);
 
-  .form-item {
+  /* Make size of input same as textfield */
+  .form-search {
     margin-block: 0;
     width: 98%;
   }
 
+  /* Move description on the left under the preview icon */
   .form-item__description {
     position: absolute;
     left: 0;
@@ -160,6 +162,7 @@ Partial support:
   /* Some packs can enable the x overflow */
   overflow-x: hidden;
   overflow-y: auto;
+  /* Must match  */
   grid-template-columns: repeat(auto-fit, minmax(38px, 1fr));
   max-height: var(--ui-icons-autocomplete-height);
   max-height: calc(var(--ui-icons-autocomplete-height) * 2);

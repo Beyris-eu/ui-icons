@@ -33,7 +33,7 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     return [
       'icon_selector' => 'icon_autocomplete',
       'result_format' => 'list',
-      'max_result' => IconSearch::SEARCH_MAX_RESULT,
+      'max_result' => IconSearch::SEARCH_RESULT,
     ] + parent::defaultSettings();
   }
 
@@ -65,7 +65,7 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $element['max_result'] = [
       '#type' => 'number',
       '#min' => 2,
-      '#max' => 112,
+      '#max' => IconSearch::SEARCH_RESULT_MAX,
       '#title' => $this->t('Maximum results'),
       '#default_value' => $this->getSetting('max_result'),
     ];

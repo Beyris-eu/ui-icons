@@ -1,3 +1,6 @@
+/* When tested and stable, open issue on ui_suite_daisyui to integrate in
+the theme */
+/* cspell:ignore daisyui */
 :root {
   --ui-icons--wrapper-size: 3rem;
   --ui-icons--preview-size: 2.89rem;
