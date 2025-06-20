@@ -3,10 +3,10 @@
  * toolbar button is pressed.
  */
 /* eslint-disable import/no-extraneous-dependencies, import/no-unresolved */
-import { Command } from "ckeditor5/src/core";
+import { Command } from 'ckeditor5/src/core';
 
 function createDrupalIcon(writer, attributes) {
-  const drupalIcon = writer.createElement("drupalIcon", attributes);
+  const drupalIcon = writer.createElement('drupalIcon', attributes);
   return drupalIcon;
 }
 
@@ -47,7 +47,7 @@ export default class InsertIconCommand extends Command {
     const { selection } = model.document;
     const allowedIn = model.schema.findAllowedParent(
       selection.getFirstPosition(),
-      "drupalIcon",
+      'drupalIcon',
     );
     this.isEnabled = allowedIn !== null;
   }

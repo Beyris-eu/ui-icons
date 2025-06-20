@@ -15,35 +15,35 @@
       const typingInterval = 600;
 
       // Auto submit filter by name.
-      once("setIconPickerSearch", ".icon-filter-input", context).forEach(
+      once('setIconPickerSearch', '.icon-filter-input', context).forEach(
         (element) => {
-          element.addEventListener("keypress", function (event) {
+          element.addEventListener('keypress', function (event) {
             if (event.keyCode === 13) {
               document
-                .querySelector(".icon-ajax-search-submit")
-                .dispatchEvent(new MouseEvent("mousedown"));
+                .querySelector('.icon-ajax-search-submit')
+                .dispatchEvent(new MouseEvent('mousedown'));
             }
           });
 
-          element.addEventListener("keyup", function () {
+          element.addEventListener('keyup', function () {
             clearTimeout(typingTimer);
             typingTimer = setTimeout(function () {
               document
-                .querySelector(".icon-ajax-search-submit")
-                .dispatchEvent(new MouseEvent("mousedown"));
+                .querySelector('.icon-ajax-search-submit')
+                .dispatchEvent(new MouseEvent('mousedown'));
             }, typingInterval);
           });
 
-          element.addEventListener("keydown", function () {
+          element.addEventListener('keydown', function () {
             clearTimeout(typingTimer);
           });
         },
       );
 
       // Submit the form when clicked any icon.
-      once("setIconPick", ".icon-preview-load", context).forEach((element) => {
-        element.addEventListener("click", function (event) {
-          document.querySelector(".icon-ajax-select-submit").click();
+      once('setIconPick', '.icon-preview-load', context).forEach((element) => {
+        element.addEventListener('click', function (event) {
+          document.querySelector('.icon-ajax-select-submit').click();
         });
       });
     },
@@ -56,7 +56,7 @@
    */
   Drupal.behaviors.IconPickerLibraryPreview = {
     attach(context, settings) {
-      once("loadIconPreview", ".icon-picker-modal__content", context).forEach(
+      once('loadIconPreview', '.icon-picker-modal__content', context).forEach(
         () => {
           if (!settings.ui_icons_preview_data) {
             return;

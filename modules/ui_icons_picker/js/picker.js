@@ -11,20 +11,20 @@
 
     const ajaxSettings = {
       element,
-      progress: { type: "none" },
-      url: element.getAttribute("data-dialog-url"),
-      dialogType: "modal",
-      httpMethod: "GET",
+      progress: { type: 'none' },
+      url: element.getAttribute('data-dialog-url'),
+      dialogType: 'modal',
+      httpMethod: 'GET',
       dialog: {
         classes: {
-          "ui-dialog": "icon-library-widget-modal",
+          'ui-dialog': 'icon-library-widget-modal',
         },
-        title: Drupal.t("Select icon"),
-        height: "95%",
-        width: "95%",
+        title: Drupal.t('Select icon'),
+        height: '95%',
+        width: '95%',
         query: {
-          wrapper_id: element.getAttribute("data-wrapper-id"),
-          allowed_icon_pack: element.getAttribute("data-allowed-icon-pack"),
+          wrapper_id: element.getAttribute('data-wrapper-id'),
+          allowed_icon_pack: element.getAttribute('data-allowed-icon-pack'),
         },
       },
     };
@@ -43,8 +43,8 @@
    */
   Drupal.behaviors.icon_dialog = {
     attach(context) {
-      once("dialog", "input.form-icon-dialog", context).forEach((element) => {
-        element.addEventListener("click", openDialog);
+      once('dialog', 'input.form-icon-dialog', context).forEach((element) => {
+        element.addEventListener('click', openDialog);
       });
     },
   };
@@ -72,6 +72,6 @@
       `#${response.wrapper_id} input[name$='icon_id]']`,
     );
     elem.value = response.icon_full_id;
-    jQuery(elem).trigger("change");
+    jQuery(elem).trigger('change');
   };
 })(jQuery, Drupal, once);

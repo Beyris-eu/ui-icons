@@ -163,8 +163,8 @@ Partial support:
 
   .ui-autocomplete:has(.ui-icons-result) {
     .ui-icons-result-collection {
-      font-size: 0.8rem;
       margin-left: 0.2rem;
+      font-size: 0.8rem;
       font-style: italic;
     }
   }
