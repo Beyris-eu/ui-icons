@@ -1,13 +1,13 @@
-const path = require("path");
-const fs = require("fs");
-const TerserPlugin = require("terser-webpack-plugin");
-const webpack = require("webpack");
+const path = require('path');
+const fs = require('fs');
+const TerserPlugin = require('terser-webpack-plugin');
+const webpack = require('webpack');
 
-const SRC_PATH = "./js/ckeditor5_plugins";
+const SRC_PATH = './js/ckeditor5_plugins';
 
 function createConfig(dir) {
   return {
-    mode: "production",
+    mode: 'production',
     optimization: {
       minimize: true,
       minimizer: [
@@ -21,33 +21,33 @@ function createConfig(dir) {
           extractComments: false,
         }),
       ],
-      moduleIds: "named",
+      moduleIds: 'named',
     },
     entry: {
       path: path.resolve(
         __dirname,
-        "js/ckeditor5_plugins",
+        'js/ckeditor5_plugins',
         dir,
-        "src/index.js",
+        'src/index.js',
       ),
     },
     output: {
-      path: path.resolve(__dirname, "./js/build"),
+      path: path.resolve(__dirname, './js/build'),
       filename: `${dir}.js`,
-      library: ["CKEditor5", dir],
-      libraryTarget: "umd",
-      libraryExport: "default",
+      library: ['CKEditor5', dir],
+      libraryTarget: 'umd',
+      libraryExport: 'default',
     },
     plugins: [
       new webpack.DllReferencePlugin({
         // eslint-disable-next-line global-require
-        manifest: require("./node_modules/ckeditor5/build/ckeditor5-dll.manifest.json"),
-        scope: "ckeditor5/src",
-        name: "CKEditor5.dll",
+        manifest: require('./node_modules/ckeditor5/build/ckeditor5-dll.manifest.json'),
+        scope: 'ckeditor5/src',
+        name: 'CKEditor5.dll',
       }),
     ],
     module: {
-      rules: [{ test: /\.svg$/, use: "raw-loader" }],
+      rules: [{ test: /\.svg$/, use: 'raw-loader' }],
     },
   };
 }

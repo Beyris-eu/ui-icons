@@ -77,7 +77,7 @@ Partial support:
 .ui-icons-preview {
   display: flex;
   justify-content: center;
-  width: var(--ui-icons--wrapper-size);
+  min-width: var(--ui-icons--wrapper-size);
   height: var(--ui-icons--wrapper-size);
   margin-right: var(--ui-icons-preview-margin);
   border: 1px solid var(--ui-icons--border-color);

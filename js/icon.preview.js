@@ -1,9 +1,8 @@
-/* eslint-disable no-restricted-syntax */
 /**
  * @file
  * JavaScript behavior for UI Icons preview in Drupal.
  */
-// eslint-disable-next-line func-names
+/* eslint-disable no-restricted-syntax, func-names, no-continue */
 ((Drupal, drupalSettings, once) => {
   /**
    * @namespace
