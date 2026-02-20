@@ -7,12 +7,17 @@ namespace Drupal\Tests\ui_icons_menu\Kernel;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * Tests the ui_icons_menu module.
+ * Test the ui_icons_menu module.
  *
- * @group ui_icons
+ * @internal
  */
+#[RunTestsInSeparateProcesses]
+#[Group('ui_icons')]
 class UiIconsMenuTest extends KernelTestBase {
 
   /**
@@ -68,13 +73,11 @@ class UiIconsMenuTest extends KernelTestBase {
 
   /**
    * Tests ui_icons_menu_preprocess_menu().
-   *
-   * @dataProvider iconDisplayDataProvider
    */
+  #[DataProvider('iconDisplayDataProvider')]
   public function testPreprocessMenu(?string $iconDisplay, array $expectedOrder): void {
     // Create a mock menu item.
     $title = 'Test Item';
-    $markup = 'foo: <img src="/modules/custom/ui_icons/tests/modules/ui_icons_test/icons/flat/foo.png" width="32" height="32">';
 
     $menu_link = MenuLinkContent::create([
       'title' => $title,

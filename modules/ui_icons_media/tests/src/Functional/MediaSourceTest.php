@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons_media\Functional;
 
-use Drupal\Tests\media\Functional\MediaFunctionalTestBase;
 use Drupal\field\FieldConfigInterface;
 use Drupal\field\FieldConfigStorage;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\field\FieldStorageConfigStorage;
+use Drupal\Tests\media\Functional\MediaFunctionalTestBase;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Tests the custom media source plugin.
  *
- * @group ui_icons
- * @group ui_icons_media
+ * @internal
  */
+#[Group('ui_icons')]
 class MediaSourceTest extends MediaFunctionalTestBase {
 
   /**

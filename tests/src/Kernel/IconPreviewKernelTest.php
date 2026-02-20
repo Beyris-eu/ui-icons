@@ -7,12 +7,18 @@ namespace Drupal\Tests\ui_icons\Kernel;
 use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_icons\IconPreview;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @coversDefaultClass \Drupal\ui_icons\IconPreview
+ * Test the IconPreview class.
  *
- * @group icon
+ * @internal
  */
+#[RunTestsInSeparateProcesses]
+#[CoversClass(IconPreview::class)]
+#[Group('ui_icons')]
 class IconPreviewKernelTest extends KernelTestBase {
 
   private const TEST_MODULE_PATH = __DIR__ . '/../../tests/modules/ui_icons_test';

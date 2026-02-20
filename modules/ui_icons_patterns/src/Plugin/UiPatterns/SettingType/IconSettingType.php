@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Drupal\ui_icons_patterns\Plugin\UIPatterns\SettingType;
 
 use Drupal\Core\Theme\Icon\IconDefinition;

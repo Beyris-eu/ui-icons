@@ -12,12 +12,16 @@ use Drupal\ckeditor5\Plugin\Editor\CKEditor5;
 use Drupal\editor\Entity\Editor;
 use Drupal\filter\Entity\FilterFormat;
 use Symfony\Component\Validator\ConstraintViolation;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the UI icons CKEditor features.
  *
- * @group ui_icons
+ * @internal
  */
+#[RunTestsInSeparateProcesses]
+#[Group('ui_icons')]
 class IconPluginTest extends WebDriverTestBase {
 
   use CKEditor5TestTrait;
@@ -166,9 +170,8 @@ class IconPluginTest extends WebDriverTestBase {
 
   /**
    * Test the CKEditor icon plugin.
-   *
-   * @dataProvider providerIconPlugin
    */
+  #[DataProvider('providerIconPlugin')]
   public function testIconPlugin(string $icon_id, string $icon_class, string $icon_filename, bool $fill_settings, array $settings): void {
     $page = $this->getSession()->getPage();
     $assert_session = $this->assertSession();
@@ -219,7 +222,7 @@ class IconPluginTest extends WebDriverTestBase {
     $assert_session->elementExists('css', '.ui-dialog-buttonpane')->pressButton('Save');
 
     // Check the preview ajax request to display icon in CKEditor.
-    $assert_session->assertExpectedAjaxRequest(3);
+    $assert_session->assertExpectedAjaxRequest(5);
     $icon_ckeditor_preview = $assert_session->waitForElementVisible('css', '.ck-content .drupal-icon span img');
 
     $this->assertNotNull($icon_ckeditor_preview);

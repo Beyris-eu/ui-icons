@@ -1,8 +1,6 @@
 /* Gin theme support, try to use gin variables */
 :root {
-  --ui-icons--wrapper-size: calc(
-    var(--input-padding-vertical) * 2 + var(--input-line-height) - 2px
-  );
+  --ui-icons--wrapper-size: calc(var(--input-padding-vertical) * 2 + var(--input-line-height) - 2px);
   --ui-icons--preview-size: 1.8rem;
   --ui-icons--result-size: 1.8rem;
   --ui-icons--border-radius: var(--gin-border-m);

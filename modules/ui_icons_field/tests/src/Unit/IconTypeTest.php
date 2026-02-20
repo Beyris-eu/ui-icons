@@ -8,12 +8,16 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons_field\Plugin\Field\FieldType\IconType;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\ui_icons_field\Plugin\Field\FieldType\IconType
+ * Test the IconType class.
  *
- * @group ui_icons
+ * @internal
  */
+#[CoversClass(IconType::class)]
+#[Group('ui_icons')]
 class IconTypeTest extends UnitTestCase {
 
   /**

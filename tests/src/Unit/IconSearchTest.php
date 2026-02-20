@@ -15,12 +15,17 @@ use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\Tests\Core\Theme\Icon\IconTestTrait;
 use Drupal\ui_icons\IconSearch;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
- * @coversDefaultClass \Drupal\ui_icons\IconSearch
+ * Test the IconSearch class.
  *
- * @group ui_icons
+ * @internal
  */
+#[CoversClass(IconSearch::class)]
+#[Group('ui_icons')]
 class IconSearchTest extends TestCase {
 
   use IconTestTrait;
@@ -96,7 +101,6 @@ class IconSearchTest extends TestCase {
    *   The test cases.
    */
   public static function searchDataProviderId(): iterable {
-
     yield 'empty' => [
       'query' => '',
     ];
@@ -381,12 +385,10 @@ class IconSearchTest extends TestCase {
    *   The icons returned by IconPackManager::getIcons().
    * @param array|null $expected
    *   The expected result values.
-   *
-   * @dataProvider searchDataProviderId
-   * @dataProvider searchDataProviderWord
    */
+  #[DataProvider('searchDataProviderId')]
+  #[DataProvider('searchDataProviderWord')]
   public function testSearch(string $query, array $allowed_icon_pack = [], array $icons = [], ?array $expected = NULL): void {
-
     $this->preparePackManagerMock($icons, $allowed_icon_pack);
     $result = $this->iconSearch->search(
       $query,
@@ -466,6 +468,7 @@ class ResultCallback {
    * @return array
    *   The icon result with key '_test_callback_'.
    */
+  // @phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
   public static function testCreateResultEntry(IconDefinitionInterface $icon, Markup $renderable): ?array {
     return ['_test_callback_' => $icon->getId()];
   }

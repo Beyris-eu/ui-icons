@@ -9,12 +9,16 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_icons_ckeditor5\Controller\IconFilterController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\ui_icons_ckeditor5\Controller\IconFilterController
+ * Test the IconFilterController class.
  *
- * @group ui_icons
+ * @internal
  */
+#[CoversClass(IconFilterController::class)]
+#[Group('ui_icons')]
 class IconFilterControllerTest extends KernelTestBase {
 
   /**

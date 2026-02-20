@@ -18,12 +18,17 @@ use Drupal\ui_icons\Element\IconAutocomplete;
 use Drupal\ui_icons\IconSearch;
 use Prophecy\Argument;
 use Symfony\Component\HttpFoundation\Request;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
- * @coversDefaultClass \Drupal\ui_icons\Element\IconAutocomplete
+ * Test the IconAutocomplete class.
  *
- * @group ui_icons
+ * @internal
  */
+#[CoversClass(IconAutocomplete::class)]
+#[Group('ui_icons')]
 class IconAutocompleteUnitTest extends UnitTestCase {
 
   use IconTestTrait;
@@ -367,9 +372,8 @@ class IconAutocompleteUnitTest extends UnitTestCase {
    *   The values data.
    * @param \Drupal\Core\StringTranslation\TranslatableMarkup|null $expected_error
    *   The expected error message or no message.
-   *
-   * @dataProvider providerValidateIcon
    */
+  #[DataProvider('providerValidateIcon')]
   public function testValidateIcon(array $element, string $pack_id, array $values, ?TranslatableMarkup $expected_error): void {
     $complete_form = [];
     $settings = $values['icon']['icon_settings'];

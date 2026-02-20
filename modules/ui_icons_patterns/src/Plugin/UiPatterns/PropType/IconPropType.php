@@ -38,7 +38,7 @@ class IconPropType extends PropTypePluginBase {
     $summary = parent::getSummary($definition);
     if (isset($definition['properties']['pack_id']['enum'])) {
       $icon_packs = $definition['properties']['pack_id']['enum'];
-      $summary[] = $this->t("Allowed icon packs: @values", ["@values" => implode(',', $icon_packs)]);
+      $summary[] = $this->t('Allowed icon packs: @values', ['@values' => implode(',', $icon_packs)]);
     }
 
     return $summary;

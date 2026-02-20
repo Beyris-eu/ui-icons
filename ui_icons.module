@@ -3,6 +3,8 @@
 /**
  * @file
  * Drupal UI Icons.
+ *
+ * @phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
  */
 
 declare(strict_types=1);
@@ -10,7 +12,6 @@ declare(strict_types=1);
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\Icon\IconDefinition;
-use Drupal\Core\Theme\Icon\IconDefinitionInterface;
 
 /**
  * Implements hook_help().
@@ -87,7 +88,7 @@ function template_preprocess_icon_selector(array &$variables): void {
     $variables['pack_id'] = $icon_data['pack_id'];
     $variables['icon_id'] = $icon_data['icon_id'];
   }
-  elseif (isset($variables['element']['#value']['object']) && $variables['element']['#value']['object'] instanceof IconDefinitionInterface) {
+  elseif (isset($variables['element']['#value']['object']) && is_object($variables['element']['#value']['object']) && method_exists($variables['element']['#value']['object'], 'getPackId') && method_exists($variables['element']['#value']['object'], 'getId')) {
     $variables['pack_id'] = $variables['element']['#value']['object']->getPackId();
     $variables['icon_id'] = $variables['element']['#value']['object']->getId();
   }

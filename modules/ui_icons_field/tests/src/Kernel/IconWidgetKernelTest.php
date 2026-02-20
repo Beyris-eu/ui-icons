@@ -8,12 +8,16 @@ use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormState;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTest;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\ui_icons_field\Plugin\Field\FieldWidget\IconWidget
+ * Test the IconWidget class.
  *
- * @group ui_icons
+ * @internal
  */
+#[CoversClass(IconWidget::class)]
+#[Group('ui_icons')]
 class IconWidgetKernelTest extends KernelTestBase {
 
   /**

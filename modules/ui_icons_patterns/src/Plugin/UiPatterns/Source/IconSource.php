@@ -55,7 +55,7 @@ class IconSource extends SourcePluginBase {
     if (isset($this->propDefinition['properties']['pack_id']['enum'])) {
       $icon_packs = $this->propDefinition['properties']['pack_id']['enum'];
       $element['value']['#allowed_icon_pack'] = $icon_packs;
-      $element['value']['#description'] = $this->t("Allowed icon packs: @values", ["@values" => implode(',', $icon_packs)]);
+      $element['value']['#description'] = $this->t('Allowed icon packs: @values', ['@values' => implode(',', $icon_packs)]);
     }
 
     return $element;

@@ -6,13 +6,17 @@ namespace Drupal\Tests\ui_icons_media\Kernel;
 
 use Drupal\Tests\media\Kernel\MediaKernelTestBase;
 use Drupal\ui_icons_media\Plugin\media\Source\Icon;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\ui_icons_media\Plugin\media\Source\Icon
+ * Test the Icon class.
  *
- * @group ui_icons
- * @group ui_icons_media
+ * @internal
  */
+#[CoversClass(Icon::class)]
+#[Group('ui_icons')]
+#[Group('ui_icons_media')]
 class IconSourceTest extends MediaKernelTestBase {
 
   /**

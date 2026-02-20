@@ -10,12 +10,16 @@ use Drupal\Tests\Core\Theme\Icon\IconTestTrait;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons\IconPreview;
 use Drupal\ui_icons\Template\IconPreviewTwigExtension;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\ui_icons\Template\IconPreviewTwigExtension
+ * Test the IconPreviewTwigExtension class.
  *
- * @group ui_icons
+ * @internal
  */
+#[CoversClass(IconPreviewTwigExtension::class)]
+#[Group('ui_icons')]
 class IconPreviewTwigExtensionTest extends UnitTestCase {
 
   use IconTestTrait;

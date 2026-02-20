@@ -3,7 +3,11 @@
 /**
  * @file
  * Drupal hooks and global functions for ui_icons_menu module.
+ *
+ * @phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
  */
+
+declare(strict_types=1);
 
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
@@ -109,6 +113,9 @@ function ui_icons_menu__preprocess_menu_item(array &$item): void {
     return;
   }
 
+  if (empty($icon['target_id'])) {
+    return;
+  }
   if ($url->getOption('ui_icons_processed')) {
     return;
   }
@@ -165,7 +172,6 @@ function ui_icons_menu_link_alter(array &$variables): void {
  *   The icon position, `icon_only`, `after` or default `before`.
  */
 function ui_icons_menu_generate_markup(mixed &$text, string $icon_full_id, array $icon_settings, string $icon_display = 'before'): void {
-
   $icon_renderable = IconDefinition::getRenderable($icon_full_id, $icon_settings);
   $icon = \Drupal::service('renderer')->renderInIsolation($icon_renderable);
 

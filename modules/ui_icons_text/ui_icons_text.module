@@ -3,7 +3,11 @@
 /**
  * @file
  * Provides icon items.
+ *
+ * @phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
  */
+
+declare(strict_types=1);
 
 use Drupal\Core\Form\FormStateInterface;
 

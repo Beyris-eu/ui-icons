@@ -10,12 +10,16 @@ use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\Tests\Core\Theme\Icon\IconTestTrait;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons_font\Plugin\IconExtractor\FontExtractor;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
- * @coversDefaultClass \Drupal\ui_icons_font\Plugin\IconExtractor\FontExtractor
+ * Test the FontExtractor class.
  *
- * @group ui_icons
+ * @internal
  */
+#[CoversClass(FontExtractor::class)]
+#[Group('ui_icons')]
 class FontExtractorTest extends UnitTestCase {
 
   use IconTestTrait;
@@ -159,7 +163,7 @@ class FontExtractorTest extends UnitTestCase {
       $messages[] = [$errno, $errstr];
     });
 
-    $result = $fontExtractorPlugin->discoverIcons();
+    $fontExtractorPlugin->discoverIcons();
 
     restore_error_handler();
 

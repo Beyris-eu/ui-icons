@@ -13,6 +13,8 @@ use Drupal\ui_icons\IconSearch;
  *
  * There is voluntarily no parent:: calls as this trait could be used in
  * conjunction with LinkWithAttributesWidgetTrait that already call it.
+ *
+ * @phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
  */
 trait IconLinkWidgetTrait {
 

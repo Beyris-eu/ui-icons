@@ -8,12 +8,18 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_icons\Controller\IconAutocompleteController;
 use Drupal\ui_icons\IconSearch;
 use Symfony\Component\HttpFoundation\Request;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
- * @coversDefaultClass \Drupal\ui_icons\Controller\IconAutocompleteController
+ * Test the IconAutocompleteController class.
  *
- * @group icon
+ * @internal
  */
+#[RunTestsInSeparateProcesses]
+#[CoversClass(IconAutocompleteController::class)]
+#[Group('ui_icons')]
 class IconAutocompleteControllerKernelTest extends KernelTestBase {
 
   /**
@@ -68,12 +74,12 @@ class IconAutocompleteControllerKernelTest extends KernelTestBase {
 
     $result_xpath = new \DOMXpath($result_dom);
 
-    $div = $result_xpath->query("//div");
+    $div = $result_xpath->query('//div');
     $this->assertSame('ui-icons-result', $div->item(0)->getAttribute('class'));
-    $span = $result_xpath->query("//div/span");
+    $span = $result_xpath->query('//div/span');
     $this->assertSame('ui-icons-result-icon-name', $span->item(0)->getAttribute('class'));
 
-    $img = $result_xpath->query("//div/img");
+    $img = $result_xpath->query('//div/img');
     $this->assertSame('icon icon-preview', $img->item(0)->getAttribute('class'));
     $this->assertSame($icon_full_id, $img->item(0)->getAttribute('title'));
     $this->assertSame(IconSearch::ICON_PREVIEW_SIZE, (int) $img->item(0)->getAttribute('width'));
@@ -103,12 +109,12 @@ class IconAutocompleteControllerKernelTest extends KernelTestBase {
 
     $result_xpath = new \DOMXpath($result_dom);
 
-    $span = $result_xpath->query("//span");
+    $span = $result_xpath->query('//span');
     $this->assertSame('ui-icons-result-grid', $span->item(0)->getAttribute('class'));
-    $spanName = $result_xpath->query("//span/span");
+    $spanName = $result_xpath->query('//span/span');
     $this->assertSame('ui-icons-result-icon-name', $spanName->item(0)->getAttribute('class'));
 
-    $img = $result_xpath->query("//span/img");
+    $img = $result_xpath->query('//span/img');
     $this->assertSame('icon icon-preview', $img->item(0)->getAttribute('class'));
     $this->assertSame($icon_full_id, $img->item(0)->getAttribute('title'));
     $this->assertSame(IconSearch::ICON_PREVIEW_SIZE, (int) $img->item(0)->getAttribute('width'));

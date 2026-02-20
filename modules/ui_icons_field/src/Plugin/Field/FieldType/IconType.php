@@ -23,7 +23,7 @@ use Drupal\Core\TypedData\DataDefinition;
   default_widget: 'icon_widget',
   default_formatter: 'icon_formatter',
   list_class: IconFieldItemList::class,
-  category:"icon",
+  category:'icon',
 )]
 class IconType extends FieldItemBase {
 

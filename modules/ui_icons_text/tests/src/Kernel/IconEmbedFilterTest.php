@@ -7,12 +7,17 @@ namespace Drupal\Tests\ui_icons_text\Kernel;
 use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_icons_text\Plugin\Filter\IconEmbed;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
- * @coversDefaultClass \Drupal\ui_icons_text\Plugin\Filter\IconEmbed
+ * Test the IconPreview class.
  *
- * @group ui_icons
+ * @internal
  */
+#[CoversClass(IconPreview::class)]
+#[Group('ui_icons')]
 class IconEmbedFilterTest extends KernelTestBase {
 
   /**
@@ -167,9 +172,8 @@ class IconEmbedFilterTest extends KernelTestBase {
    *   The html text is transformed.
    * @param array $expected_contains
    *   The html text string processed must contain.
-   *
-   * @dataProvider providerTestProcess
    */
+  #[DataProvider('providerTestProcess')]
   public function testProcess(string $html, bool $is_transformed, array $expected_contains = []): void {
     $result = $this->filter->process($html, 'en');
     if (!$is_transformed) {
