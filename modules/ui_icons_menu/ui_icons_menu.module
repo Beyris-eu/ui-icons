@@ -107,6 +107,10 @@ function ui_icons_menu__preprocess_menu_item(array &$item): void {
     return;
   }
 
+  if (empty($icon['target_id'])) {
+    return;
+  }
+
   if ($url->getOption('ui_icons_processed')) {
     return;
   }
