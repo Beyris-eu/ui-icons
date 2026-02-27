@@ -61,7 +61,6 @@ class LinkIconSource extends SourcePluginPropValue {
       ];
     }
 
-
     return [];
   }
 
