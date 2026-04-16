@@ -238,6 +238,7 @@ final class IconSelectForm extends FormBase {
       '#ajax' => [
         'callback' => [$this, 'selectIconAjax'],
         'event' => 'click',
+        'disable-refocus' => TRUE,
       ],
       '#attributes' => [
         'class' => [
