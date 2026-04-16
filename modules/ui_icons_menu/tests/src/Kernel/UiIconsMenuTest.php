@@ -10,6 +10,7 @@ use Drupal\menu_link_content\Entity\MenuLinkContent;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\Attributes\CoversNothing;
 
 /**
  * Test the ui_icons_menu module.
@@ -18,6 +19,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  */
 #[RunTestsInSeparateProcesses]
 #[Group('ui_icons')]
+#[CoversNothing]
 class UiIconsMenuTest extends KernelTestBase {
 
   /**

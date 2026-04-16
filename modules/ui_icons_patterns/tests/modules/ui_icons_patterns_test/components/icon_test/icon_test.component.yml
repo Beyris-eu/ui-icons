@@ -11,10 +11,6 @@ props:
     icon1_allowed:
       title: 'Icon 1 allowed pack, with explicit typing'
       $ref: ui-patterns://icon
-      properties:
-        pack_id:
-          type: 'string'
-          enum: ['test_svg']
     icon2:
       title: 'Icon 2, with implicit typing'
       type: object
@@ -26,6 +22,5 @@ props:
       type: object
       properties:
         pack_id:
-          type: 'string'
-          enum: ['test_svg']
+          type: string
         icon_id: {type: 'string'}
