@@ -104,6 +104,7 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $element['value'] = [
       '#type' => $icon_selector,
       '#title' => $cardinality === 1 ? $this->fieldDefinition->getLabel() : $this->t('Icon'),
+      '#description' => $element['#description'] ?? '',
       '#allowed_icon_pack' => $allowed_icon_pack,
       '#required' => $element['#required'] ?? FALSE,
       '#show_settings' => FALSE,

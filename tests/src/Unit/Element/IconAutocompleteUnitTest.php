@@ -119,7 +119,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
       'icon_id' => [
         '#type' => 'search',
         '#title' => new TranslatableMarkup('Icon'),
-        '#description' => new TranslatableMarkup('Start typing the icon name. Icon availability depends on the selected icon packs.'),
+        '#description' => new TranslatableMarkup('Start typing the name of an icon to select it.'),
         '#placeholder' => '',
         '#title_display' => 'invisible',
         '#autocomplete_route_name' => 'ui_icons.autocomplete',

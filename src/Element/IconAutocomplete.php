@@ -195,7 +195,6 @@ class IconAutocomplete extends FormElementBase {
     if (isset($element['#value']) && $element['#value'] instanceof \Stringable) {
       $element['#value'] = [];
     }
-
     $element['icon_id'] = [
       // Search type allow clear feature on some browser.
       '#type' => 'search',
@@ -211,7 +210,7 @@ class IconAutocomplete extends FormElementBase {
       '#value' => $element['#value']['icon_id'] ?? $element['#default_value'] ?? '',
       // Ensure the ::validateIcon run.
       '#limit_validation_errors' => [$element['#parents']],
-      '#description' => $element['#description'] ?? new TranslatableMarkup('Start typing the icon name. Icon availability depends on the selected icon packs.'),
+      '#description' => new TranslatableMarkup('Start typing the name of an icon to select it.'),
     ];
 
     // Clean unwanted values on parent.
