@@ -121,7 +121,7 @@ function ui_icons_menu__preprocess_menu_item(array &$item): void {
   }
 
   $url->setOption('ui_icons_processed', TRUE);
-  ui_icons_menu_generate_markup($item['title'], $icon['target_id'], $icon['settings'] ?? [], $url->getOption('icon_display') ?? 'before');
+  ui_icons_menu_generate_markup($item['title'], $icon['target_id'] ?? '', $icon['settings'] ?? [], $url->getOption('icon_display') ?? 'before');
 }
 
 /**
