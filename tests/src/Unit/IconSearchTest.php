@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 // cspell:ignore corge quux
-namespace Drupal\Tests\ui_icons\Unit\Controller;
+namespace Drupal\Tests\ui_icons\Unit;
 
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -18,12 +18,14 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the IconSearch class.
  *
  * @internal
  */
+#[RunTestsInSeparateProcesses]
 #[CoversClass(IconSearch::class)]
 #[Group('ui_icons')]
 class IconSearchTest extends TestCase {

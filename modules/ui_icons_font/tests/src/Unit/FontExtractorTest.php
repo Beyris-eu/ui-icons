@@ -12,19 +12,21 @@ use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons_font\Plugin\IconExtractor\FontExtractor;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the FontExtractor class.
  *
  * @internal
  */
+#[RunTestsInSeparateProcesses]
 #[CoversClass(FontExtractor::class)]
 #[Group('ui_icons')]
 class FontExtractorTest extends UnitTestCase {
 
   use IconTestTrait;
 
-  private const TEST_MODULE_PATH = __DIR__ . '/../../../../../tests/modules/ui_icons_font_test';
+  private const TEST_MODULE_PATH = __DIR__ . '/../../../tests/modules/ui_icons_font_test';
 
   /**
    * This test plugin id (icon pack id).

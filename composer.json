@@ -9,7 +9,8 @@
     "require-dev": {
         "drupal/link_attributes": "^2.0",
         "drupal/linkit": "^7.0",
-        "drupal/ui_patterns": "^2"
+        "drupal/ui_patterns": "^2",
+        "weitzman/drupal-test-traits": "^2.6"
     },
     "config": {
         "allow-plugins": {

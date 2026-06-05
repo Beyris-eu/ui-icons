@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\ui_icons\Unit\Element;
+namespace Drupal\Tests\ui_icons\Unit;
 
 // cspell:ignore corge quux
 use Drupal\Core\DependencyInjection\ContainerBuilder;
@@ -21,12 +21,14 @@ use Symfony\Component\HttpFoundation\Request;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
  * Test the IconAutocomplete class.
  *
  * @internal
  */
+#[RunTestsInSeparateProcesses]
 #[CoversClass(IconAutocomplete::class)]
 #[Group('ui_icons')]
 class IconAutocompleteUnitTest extends UnitTestCase {

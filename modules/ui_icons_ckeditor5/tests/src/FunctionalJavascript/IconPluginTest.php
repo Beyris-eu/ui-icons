@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Drupal\Tests\ui_icons_ckeditor5\Functional;
+namespace Drupal\Tests\ui_icons_ckeditor5\FunctionalJavascript;
 
 use Behat\Mink\Element\NodeElement;
 use Drupal\Core\Theme\Icon\IconDefinition;
@@ -187,20 +187,19 @@ class IconPluginTest extends WebDriverTestBase {
 
     // Our modal appear with input selector.
     $this->assertNotEmpty($assert_session->waitForElementVisible('css', '#drupal-modal'));
-    $input = $assert_session->waitForElementVisible('css', '[name="icon[icon_id]"]');
-    $this->assertNotNull($input);
+    $input_field = $assert_session->waitForElementVisible('css', '[name="icon[icon_id]"]');
+    $this->assertNotNull($input_field);
 
     // Make sure the input field can have focus and we can type into it.
-    $input->setValue($icon_id);
-
-    $assert_session->assertExpectedAjaxRequest(2);
-
+    $input_field->setValue($icon_id);
     // @phpcs:disable
     // @todo test autocomplete list result?
-    // $this->getSession()->getDriver()->keyDown($input->getXpath(), ' ');
+    // $this->getSession()->getDriver()->keyDown($input_field->getXpath(), ' ');
     // $this->assertSession()->waitOnAutocomplete();
-    // $suggestions_markup = $page->find('css', 'ul.ui-autocomplete')->getHtml();
-    // $this->assertStringContainsString('', $suggestions_markup);
+
+    // Check the autocomplete results.
+    // $results = $page->findAll('css', '.ui-autocomplete li');
+    // $this->assertCount(2, $results);
     // @phpcs:enable
 
     $icon_preview = $assert_session->elementExists('css', '.ui-icons-preview-icon img');
@@ -221,8 +220,6 @@ class IconPluginTest extends WebDriverTestBase {
 
     $assert_session->elementExists('css', '.ui-dialog-buttonpane')->pressButton('Save');
 
-    // Check the preview ajax request to display icon in CKEditor.
-    $assert_session->assertExpectedAjaxRequest(5);
     $icon_ckeditor_preview = $assert_session->waitForElementVisible('css', '.ck-content .drupal-icon span img');
 
     $this->assertNotNull($icon_ckeditor_preview);

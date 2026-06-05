@@ -65,7 +65,7 @@ function ui_icons_theme(array $existing, string $type, string $theme, string $pa
  *
  * @see src/Element/IconAutocomplete.php
  */
-function template_preprocess_icon_selector(array &$variables): void {
+function ui_icons_preprocess_icon_selector(array &$variables): void {
   $variables['has_settings'] = $variables['element']['#show_settings'] ?? FALSE;
   $variables['icon_form'] = $variables['element']['icon_id'] ?? '';
 
