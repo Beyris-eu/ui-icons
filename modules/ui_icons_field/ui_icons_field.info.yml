@@ -7,4 +7,3 @@ dependencies:
   - drupal:field
   - drupal:link
   - ui_icons:ui_icons
-  - ui_icons:ui_icons_picker
