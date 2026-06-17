@@ -83,6 +83,13 @@ class IconType extends FieldItemBase {
   /**
    * {@inheritdoc}
    */
+  public static function mainPropertyName() {
+    return 'target_id';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public static function defaultFieldSettings(): array {
     return [
       'allowed_icon_pack' => [],

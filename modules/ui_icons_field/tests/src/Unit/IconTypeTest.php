@@ -63,4 +63,11 @@ class IconTypeTest extends UnitTestCase {
     $this->assertSame('string', $properties['target_id']->getDataType());
   }
 
+  /**
+   * Test the mainPropertyName method.
+   */
+  public function testMainPropertyName(): void {
+    $this->assertSame('target_id', $this->iconType::mainPropertyName());
+  }
+
 }
