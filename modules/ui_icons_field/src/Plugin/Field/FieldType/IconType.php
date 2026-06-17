@@ -28,6 +28,19 @@ use Drupal\Core\TypedData\DataDefinition;
 class IconType extends FieldItemBase {
 
   /**
+   * The icon id format (`pack_id:icon_id`), as a PCRE.
+   *
+   * Used both to validate stored values and to let Canvas's shape matcher
+   * suggest `ui_icon` fields for icon-shaped SDC props: the matcher compares
+   * the field property's Regex constraint against the one Canvas derives from
+   * the prop's JSON Schema `pattern` by value, so this MUST stay in sync with
+   * any icon-shaped prop pattern (`^[a-z0-9_]+:.+$`).
+   *
+   * @see ui_icons_canvas_field_widget_info_alter()
+   */
+  public const ICON_ID_PCRE = '/^[a-z0-9_]+:.+$/';
+
+  /**
    * Plugin manager for icons pack discovery and definitions.
    *
    * @var \Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface
@@ -75,7 +88,8 @@ class IconType extends FieldItemBase {
 
     $properties['target_id'] = DataDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Icon ID'))
-      ->setRequired(TRUE);
+      ->setRequired(TRUE)
+      ->addConstraint('Regex', ['pattern' => self::ICON_ID_PCRE]);
 
     return $properties;
   }

@@ -1,0 +1,33 @@
+<?php
+
+/**
+ * @file
+ * Drupal Canvas integration for the UI Icons field widget.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Implements hook_field_widget_info_alter().
+ *
+ * Declares the Canvas client-side transform for ui_icons' native
+ * `icon_widget`, exactly how Canvas integrates its own widgets
+ * (string_textfield, link_default, media_library_widget, …). Canvas refuses
+ * (with a LogicException) to render any widget that lacks this metadata, so
+ * without it the `ui_icon` field type cannot be edited as a component input.
+ *
+ * Both of the widget's selectors (`icon_autocomplete`, and `icon_picker`
+ * which extends it) nest their form output under `value[icon_id]` — too deep
+ * for Canvas's stock `mainProperty` transform — so the custom `uiIcon`
+ * transform extracts the bare `pack_id:icon_id` string. Its library
+ * (canvas.transform.uiIcon) is auto-attached to the builder UI by Canvas.
+ *
+ * @see \Drupal\canvas\Hook\ReduxIntegratedFieldWidgetsHooks::fieldWidgetInfoAlter()
+ */
+function ui_icons_canvas_field_widget_info_alter(array &$info): void {
+  if (isset($info['icon_widget'])) {
+    $info['icon_widget']['canvas']['transforms'] = [
+      'uiIcon' => [],
+    ];
+  }
+}

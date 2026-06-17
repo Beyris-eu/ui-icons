@@ -1,0 +1,23 @@
+# Client-side transform for ui_icons' icon_widget. Canvas auto-attaches any
+# library whose name starts with `canvas.transform.` to the page builder UI,
+# guaranteeing Drupal.canvasTransforms.uiIcon is registered before any icon
+# widget is edited.
+# @see \Drupal\canvas\Controller\CanvasController::getTransformAssetLibraries()
+#
+# The CSS supplies ui_icons' `--ui-icons--*` design tokens, which otherwise
+# depend on Claro/Olivero theme variables absent in Canvas's builder theme, so
+# the icon selector's preview box renders correctly. It rides along here (an
+# auto-attached, builder-only library) because the native widget belongs to
+# ui_icons_field and cannot attach a library of ours. The tokens are scoped to
+# `.ui-icons-*` containers and mirror ui_icons' own literal fallbacks, so
+# loading them page-wide is inert.
+canvas.transform.uiIcon:
+  version: VERSION
+  js:
+    js/ui-icon.transform.js: {}
+  css:
+    component:
+      css/ui-icon.transform.css: {}
+  dependencies:
+    - core/drupal
+    - canvas/canvas-ui
