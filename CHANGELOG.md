@@ -1,16 +1,18 @@
-## [unreleased]
+## [2.0.0] - 2026-08-03
 
 ### 🚀 Features
 
 - [#3591878](https://www.drupal.org/project/ui_icons/issues/3591878) Add Drupal Canvas integration for icon_widget
 - [#3591879](https://www.drupal.org/project/ui_icons/issues/3591879) Make the ui_icon field/widget editable as a Drupal Canvas component input
 - [#3469108](https://www.drupal.org/project/ui_icons/issues/3469108) UI Icons CKEditor 5: update icon
+- Add update function to remove obsolete UI Icons modules
 
 ### 🐛 Bug Fixes
 
 - [#3591875](https://www.drupal.org/project/ui_icons/issues/3591875) Cannot uninstall UI Icons Fields and UI Icon Picker
 - [#3591877](https://www.drupal.org/project/ui_icons/issues/3591877) IconType field type silently breaks main-property consumers: declare target_id as the main property
 - [#3591883](https://www.drupal.org/project/ui_icons/issues/3591883) fix: Icon picker icons are vertically misaligned under Gin admin theme
+- [#3591880](https://www.drupal.org/project/ui_icons/issues/3591880) Drupal 12 compatibility fixes, playwright tests, changelog to prepare release and styles
 
 ### 💼 Other
 
@@ -20,11 +22,7 @@
 
 ### 🚜 Refactor
 
-- Remove IconPluginTest as part of code cleanup, replace with Playwright
-
-### 🎨 Styling
-
-- Update access modifiers for IconPackManagerInterface and IconSearch in multiple classes, fix cspell and js lint
+- Remove deprecated UI Icons modules and related files, bump to v2 as Drupal 11.3+ and 12 targets
 ## [1.1.2] - 2026-04-16
 
 ### 🚀 Features
