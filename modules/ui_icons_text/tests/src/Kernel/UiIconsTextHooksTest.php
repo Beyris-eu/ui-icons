@@ -217,7 +217,7 @@ class UiIconsTextHooksTest extends KernelTestBase {
   /**
    * Tests both precedent filters are listed when both run too late.
    */
-  public function testMultipleFilterOrderErrorsArePluralised(): void {
+  public function testMultipleFilterOrderErrorsArePluralized(): void {
     $errors = $this->validate('<p> <drupal-icon ' . self::REQUIRED_ATTRIBUTES . '>', [
       'filter_html' => ['status' => 1, 'weight' => 10],
       'filter_autop' => ['status' => 1, 'weight' => 10],
