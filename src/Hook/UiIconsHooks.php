@@ -19,6 +19,16 @@ class UiIconsHooks {
 
   use StringTranslationTrait;
 
+  /**
+   * Admin themes with a dedicated autocomplete stylesheet, keyed by theme name.
+   */
+  private const THEME_LIBRARIES = [
+    'default_admin' => 'ui_icons/ui_icons.default_admin_autocomplete',
+    'gin' => 'ui_icons/ui_icons.gin_autocomplete',
+    'ui_suite_daisyui' => 'ui_icons/ui_icons.daisyui_autocomplete',
+    'ui_suite_dsfr' => 'ui_icons/ui_icons.dsfr_autocomplete',
+  ];
+
   public function __construct(
     protected readonly ThemeManagerInterface $themeManager,
   ) {}
@@ -82,44 +92,71 @@ class UiIconsHooks {
     $variables['has_settings'] = $variables['element']['#show_settings'] ?? FALSE;
     $variables['icon_form'] = $variables['element']['icon_id'] ?? '';
 
-    if ($this->isThemeActive('default_admin')) {
-      $variables['icon_form']['#attached']['library'][] = 'ui_icons/ui_icons.default_admin_autocomplete';
-    }
-
-    if ($this->isThemeActive('gin')) {
-      $variables['icon_form']['#attached']['library'][] = 'ui_icons/ui_icons.gin_autocomplete';
-    }
-
-    if ($this->isThemeActive('ui_suite_daisyui')) {
-      $variables['icon_form']['#attached']['library'][] = 'ui_icons/ui_icons.daisyui_autocomplete';
-    }
-
-    if ($this->isThemeActive('ui_suite_dsfr')) {
-      $variables['icon_form']['#attached']['library'][] = 'ui_icons/ui_icons.dsfr_autocomplete';
-    }
-
-    if (isset($variables['element']['icon_id']['#value'])) {
-      if (!$icon_data = IconDefinition::getIconDataFromId($variables['element']['icon_id']['#value'])) {
-        return;
+    foreach (self::THEME_LIBRARIES as $theme => $library) {
+      if ($this->isThemeActive($theme)) {
+        $variables['icon_form']['#attached']['library'][] = $library;
       }
-      $variables['pack_id'] = $icon_data['pack_id'];
-      $variables['icon_id'] = $icon_data['icon_id'];
     }
-    elseif (isset($variables['element']['#value']['object']) && is_object($variables['element']['#value']['object']) && method_exists($variables['element']['#value']['object'], 'getPackId') && method_exists($variables['element']['#value']['object'], 'getId')) {
-      $variables['pack_id'] = $variables['element']['#value']['object']->getPackId();
-      $variables['icon_id'] = $variables['element']['#value']['object']->getId();
-    }
-    elseif (!empty($variables['element']['#default_value'])) {
-      if (!$icon_data = IconDefinition::getIconDataFromId($variables['element']['#default_value'])) {
-        return;
-      }
-      $variables['pack_id'] = $icon_data['pack_id'];
-      $variables['icon_id'] = $icon_data['icon_id'];
+
+    if (!$this->setIconVariables($variables)) {
+      return;
     }
 
     if (isset($variables['element']['icon_settings']) && $variables['has_settings']) {
       $variables['settings_form'] = $variables['element']['icon_settings'];
     }
+  }
+
+  /**
+   * Resolves `pack_id` and `icon_id` from whichever element key carries them.
+   *
+   * @param array $variables
+   *   The template variables, altered in place.
+   *
+   * @return bool
+   *   FALSE when an icon id was found but could not be parsed, in which case
+   *   the caller must stop preprocessing.
+   */
+  protected function setIconVariables(array &$variables): bool {
+    $element = $variables['element'];
+
+    if (isset($element['icon_id']['#value'])) {
+      return $this->setIconVariablesFromId($variables, $element['icon_id']['#value']);
+    }
+
+    $object = $element['#value']['object'] ?? NULL;
+    if (is_object($object) && method_exists($object, 'getPackId') && method_exists($object, 'getId')) {
+      $variables['pack_id'] = $object->getPackId();
+      $variables['icon_id'] = $object->getId();
+      return TRUE;
+    }
+
+    if (!empty($element['#default_value'])) {
+      return $this->setIconVariablesFromId($variables, $element['#default_value']);
+    }
+
+    return TRUE;
+  }
+
+  /**
+   * Sets `pack_id` and `icon_id` from a full icon id.
+   *
+   * @param array $variables
+   *   The template variables, altered in place.
+   * @param string $icon_full_id
+   *   The icon id as `pack_id:icon_id`.
+   *
+   * @return bool
+   *   FALSE when the id could not be parsed.
+   */
+  private function setIconVariablesFromId(array &$variables, string $icon_full_id): bool {
+    if (!$icon_data = IconDefinition::getIconDataFromId($icon_full_id)) {
+      return FALSE;
+    }
+    $variables['pack_id'] = $icon_data['pack_id'];
+    $variables['icon_id'] = $icon_data['icon_id'];
+
+    return TRUE;
   }
 
   /**

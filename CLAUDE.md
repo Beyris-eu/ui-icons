@@ -86,12 +86,26 @@ CKEditor 5 icon coverage is Playwright only (`Tests/ckeditor.spec.ts`), the old
 ## QA
 
 Config is local to the module: `.phpcs.xml` (Drupal + DrupalPractice + strict
-types required), `phpstan.neon` (level 5, with a baseline), `.phpmd.xml`,
-`.cspell.json`. From the project root: `make qa` runs the PHP and lint set,
+types required), `phpstan.neon` (level 5), `.phpmd.xml`. Spelling is configured
+per job in `.gitlab-ci.yml` (`_CSPELL_IGNORE_PATHS`), there is no `.cspell.json`.
+From the project root: `make qa` runs the PHP and lint set,
 `make phpcs F=... S=web/modules/custom/ui_icons`, `make phpstan`.
 
-`phpstan.neon` excludes files depending on contrib that is not always installed
-(ui_patterns, canvas, link_attributes). If you add such a file, add it there too.
+**There is no PHPStan baseline.** Level 5 is clean, and
+`reportUnmatchedIgnoredErrors: true` makes a dead `ignoreErrors` entry an error,
+so keep it that way instead of suppressing new findings. This only holds with
+the module's require-dev installed: without `linkit` and `link_attributes` you
+get ~66 bogus `class.notFound` errors from the field submodules.
+
+`phpstan.neon` excludes files depending on contrib that is *not* in require-dev
+(ui_patterns, canvas). If you add such a file, add it there too.
+
+`.phpmd.baseline.xml` holds exactly two entries, `CouplingBetweenObjects` on
+`IconEmbed` and `IconAutocomplete`. Both are inherent to what those classes are
+(a filter plugin and a form element referencing a lot of core), so they are
+accepted rather than designed around. Everything else must stay under the
+thresholds, do not grow the baseline. Its paths are stored `/builds/project/ui_icons/...`
+and rewritten by CI, so it will not match when run locally.
 
 ## Conventions
 

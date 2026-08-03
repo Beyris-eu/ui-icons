@@ -106,77 +106,99 @@ class UiIconsTextHooks {
       $form_state->setError($form['filters']['settings']['filter_html']['allowed_html'], $this->t('The %icon-embed-filter-label filter requires <code>&lt;drupal-icon data-icon-id data-icon-settings class aria-label aria-hidden role&gt;</code> among the allowed HTML tags.', [
         '%icon-embed-filter-label' => $get_filter_label('icon_embed'),
       ]));
+
+      return;
+    }
+
+    $this->validateAllowedAttributes($form, $form_state, $allowed['drupal-icon']);
+    $this->validateFilterOrder($form_state, $get_filter_label);
+  }
+
+  /**
+   * Errors when `<drupal-icon>` is allowed without the attributes it needs.
+   *
+   * @param array $form
+   *   The filter format form.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param array|false $allowed_attributes
+   *   Allowed attributes for `<drupal-icon>`, FALSE when it allows none.
+   */
+  private function validateAllowedAttributes(array &$form, FormStateInterface $form_state, array|bool $allowed_attributes): void {
+    $required_attributes = [
+      'data-icon-id',
+      'data-icon-settings',
+      'class',
+      'aria-label',
+      'aria-hidden',
+      'role',
+    ];
+
+    // If there are no attributes, the allowed item is set to FALSE,
+    // otherwise, it is set to an array.
+    if ($allowed_attributes === FALSE) {
+      $missing_attributes = $required_attributes;
+    }
+    elseif (isset($allowed_attributes['*'])) {
+      $missing_attributes = [];
     }
     else {
-      $required_attributes = [
-        'data-icon-id',
-        'data-icon-settings',
-        'class',
-        'aria-label',
-        'aria-hidden',
-        'role',
-      ];
+      $missing_attributes = array_diff($required_attributes, array_keys($allowed_attributes));
+    }
 
-      // If there are no attributes, the allowed item is set to FALSE,
-      // otherwise, it is set to an array.
-      if ($allowed['drupal-icon'] === FALSE) {
-        $missing_attributes = $required_attributes;
-      }
-      elseif (isset($allowed['drupal-icon']['*'])) {
-        $missing_attributes = FALSE;
-      }
-      else {
-        $missing_attributes = array_diff($required_attributes, array_keys($allowed['drupal-icon']));
-      }
+    if (!$missing_attributes) {
+      return;
+    }
 
-      if ($missing_attributes) {
-        $form_state->setError($form['filters']['settings']['filter_html']['allowed_html'], $this->t('The <code>&lt;drupal-icon&gt;</code> tag in the allowed HTML tags is missing the following attributes: <code>%list</code>.', [
-          '%list' => implode(' ', $missing_attributes),
-        ]));
-      }
+    $form_state->setError($form['filters']['settings']['filter_html']['allowed_html'], $this->t('The <code>&lt;drupal-icon&gt;</code> tag in the allowed HTML tags is missing the following attributes: <code>%list</code>.', [
+      '%list' => implode(' ', $missing_attributes),
+    ]));
+  }
 
-      $filters = $form_state->getValue('filters');
+  /**
+   * Errors when the icon filter runs too early or is cancelled out.
+   *
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   * @param callable $get_filter_label
+   *   Returns the human readable label of a filter plugin id.
+   */
+  private function validateFilterOrder(FormStateInterface $form_state, callable $get_filter_label): void {
+    $filters = $form_state->getValue('filters');
 
-      // The icon filter must be after "filter_html", "filter_autop" and is
-      // canceled by "filter_html_escape".
-      $precedents = [
-        'filter_html',
-        'filter_autop',
-      ];
+    // The icon filter must be after "filter_html", "filter_autop" and is
+    // canceled by "filter_html_escape".
+    $error_filters = [];
+    foreach (['filter_html', 'filter_autop'] as $filter_name) {
+      // A filter that should run before icon embed filter.
+      $precedent = $filters[$filter_name];
 
-      $error_filters = [];
-      foreach ($precedents as $filter_name) {
-        // A filter that should run before icon embed filter.
-        $precedent = $filters[$filter_name];
-
-        if (empty($precedent['status']) || !isset($precedent['weight'])) {
-          continue;
-        }
-
-        if ($precedent['weight'] >= $filters['icon_embed']['weight']) {
-          $error_filters[$filter_name] = $get_filter_label($filter_name);
-        }
+      if (empty($precedent['status']) || !isset($precedent['weight'])) {
+        continue;
       }
 
-      if (!empty($error_filters)) {
-        $error_message = $this->formatPlural(
-          count($error_filters),
-          'The %icon-embed-filter-label filter needs to be placed after the %filter filter.',
-          'The %icon-embed-filter-label filter needs to be placed after the following filters: %filters.',
-          [
-            '%icon-embed-filter-label' => $get_filter_label('icon_embed'),
-            '%filter' => reset($error_filters),
-            '%filters' => implode(', ', $error_filters),
-          ]
-        );
-
-        $form_state->setErrorByName('filters', $error_message);
+      if ($precedent['weight'] >= $filters['icon_embed']['weight']) {
+        $error_filters[$filter_name] = $get_filter_label($filter_name);
       }
+    }
 
-      if (isset($filters['filter_html_escape']['status']) && $filters['filter_html_escape']['status']) {
-        $error = $this->t('The Embed icon will not work and should be removed if the %filter is enabled', ['%filter' => $get_filter_label('filter_html_escape')]);
-        $form_state->setErrorByName('filters', $error);
-      }
+    if (!empty($error_filters)) {
+      $form_state->setErrorByName('filters', $this->formatPlural(
+        count($error_filters),
+        'The %icon-embed-filter-label filter needs to be placed after the %filter filter.',
+        'The %icon-embed-filter-label filter needs to be placed after the following filters: %filters.',
+        [
+          '%icon-embed-filter-label' => $get_filter_label('icon_embed'),
+          '%filter' => reset($error_filters),
+          '%filters' => implode(', ', $error_filters),
+        ]
+      ));
+    }
+
+    if (isset($filters['filter_html_escape']['status']) && $filters['filter_html_escape']['status']) {
+      $form_state->setErrorByName('filters', $this->t('The Embed icon will not work and should be removed if the %filter is enabled', [
+        '%filter' => $get_filter_label('filter_html_escape'),
+      ]));
     }
   }
 

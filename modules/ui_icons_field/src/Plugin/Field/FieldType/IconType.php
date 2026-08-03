@@ -36,7 +36,7 @@ class IconType extends FieldItemBase {
    * the prop's JSON Schema `pattern` by value, so this MUST stay in sync with
    * any icon-shaped prop pattern (`^[a-z0-9_]+:.+$`).
    *
-   * @see ui_icons_canvas_field_widget_info_alter()
+   * @see \Drupal\ui_icons_canvas\Hook\UiIconsCanvasHooks::fieldWidgetInfoAlter()
    */
   public const ICON_ID_PCRE = '/^[a-z0-9_]+:.+$/';
 
@@ -155,7 +155,7 @@ class IconType extends FieldItemBase {
    * {@inheritdoc}
    */
   public static function generateSampleValue(FieldDefinitionInterface $field_definition): array {
-    $default_value = $field_definition->get('default_value');
+    $default_value = $field_definition->getDefaultValueLiteral();
     if (isset($default_value[0]['target_id'])) {
       return [
         'target_id' => $default_value[0]['target_id'],
