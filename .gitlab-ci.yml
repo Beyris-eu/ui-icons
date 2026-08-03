@@ -14,8 +14,8 @@ variables:
   # DRUPAL_NEXT_MAJOR (12) and are allow_failure in the templates, so a broken
   # core dev snapshot reports without blocking the pipeline.
   # @see https://project.pages.drupalcode.org/gitlab_templates/info/variants/
-  OPT_IN_TEST_NEXT_MAJOR: '1'
-  _AUTORUN_NEXT_MAJOR: 'push-and-mr'
+  # OPT_IN_TEST_NEXT_MAJOR: '1'
+  # _AUTORUN_NEXT_MAJOR: 'push-and-mr'
   SKIP_PHPMD:
     value: '0'
     description: 'Set to 1 to skip the PHPMD CI job'
