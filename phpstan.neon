@@ -15,6 +15,8 @@ parameters:
       # Always fail because of missing ui_patterns module.
       - */ui_icons_patterns/src/Plugin/UiPatterns/*
       - */ui_icons_patterns/src/Plugin/Derivative/FieldIconSourceDeriver.php
+      # Always fail because of missing canvas module.
+      - */ui_icons_canvas/src/Hook/UiIconsCanvasHooks.php
   fileExtensions:
     - php
     - module

@@ -218,7 +218,7 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
    */
   public function tips($long = FALSE) {
     if ($long) {
-      return $this->t('
+      return (string) $this->t('
       <p>You can embed icon:</p>
       <ul>
         <li>Choose which icon item to embed: <code>&lt;drupal-icon data-icon-id="pack_id:icon_id" /&gt;</code></li>
@@ -226,7 +226,7 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       </ul>');
     }
     else {
-      return $this->t('You can embed icon items (using the <code>&lt;drupal-icon&gt;</code> tag).');
+      return (string) $this->t('You can embed icon items (using the <code>&lt;drupal-icon&gt;</code> tag).');
     }
   }
 

@@ -376,8 +376,8 @@ final class IconSelectForm extends FormBase {
       '#weight' => -10,
     ];
 
-    $output = $renderer->renderRoot($form);
-    $messages = $renderer->renderRoot($status_messages);
+    $output = (string) $renderer->renderRoot($form);
+    $messages = (string) $renderer->renderRoot($status_messages);
 
     $message_wrapper_id = '#' . self::MESSAGE_WRAPPER_ID;
 

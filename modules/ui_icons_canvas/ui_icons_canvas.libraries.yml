@@ -13,8 +13,17 @@
 # loading them page-wide is inert.
 canvas.transform.uiIcon:
   version: VERSION
+  # The Canvas builder page renders JS only through a head js-placeholder; it
+  # has no footer placeholder. Library JS defaults to footer scope, so without
+  # `header: true` this file is silently dropped. And canvas/canvas-ui's
+  # index.js (a `type: module`, so deferred) assigns `Drupal.canvasTransforms`
+  # wholesale on init — a classic script registering uiIcon would run first and
+  # be overwritten. Loading as `type: module` too makes this execute after
+  # index.js (dependency order), so it augments the post-init object instead.
+  header: true
   js:
-    js/ui-icon.transform.js: {}
+    js/ui-icon.transform.js:
+      attributes: { type: module }
   css:
     component:
       css/ui-icon.transform.css: {}
