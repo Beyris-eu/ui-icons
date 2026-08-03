@@ -13,16 +13,39 @@
 - [#3591877](https://www.drupal.org/project/ui_icons/issues/3591877) IconType field type silently breaks main-property consumers: declare target_id as the main property
 - [#3591883](https://www.drupal.org/project/ui_icons/issues/3591883) fix: Icon picker icons are vertically misaligned under Gin admin theme
 - [#3591880](https://www.drupal.org/project/ui_icons/issues/3591880) Drupal 12 compatibility fixes, playwright tests, changelog to prepare release and styles
+- Update changelog for release 2.0.0, add new features and bug fixes
+- Update DRUPAL_TEST_SETUP_FILE path and add Playwright tests for icon picker functionality
+- Correct spelling of "pluralised" to "pluralized" in test method name
 
 ### 💼 Other
 
 - D12 compat in info.yml
 - Resolve "Sites breaks if another modules adds an icon without target_id"
 - [#3589768](https://www.drupal.org/project/ui_icons/issues/3589768) Drupal 12 compatibility
+- Enhance UI Icons Module Functionality and Code Quality
+
+- Updated CKEditor 5 icon coverage documentation for clarity on QA configurations.
+- Refactored IconType class to use getDefaultValueLiteral for better default value handling.
+- Improved IconWidget class by specifying item type and optimizing default value assignment.
+- Streamlined IconSelectForm by resolving dialog options and enhancing filter functionality.
+- Added validation methods in UiIconsTextHooks for allowed attributes and filter order.
+- Refactored IconEmbed class to extract settings and attributes from drupal-icon nodes.
+- Updated PHPStan configuration to remove unnecessary baseline and improve error reporting.
+- Enhanced IconAutocomplete class with better validation and value building logic.
+- Introduced UiIconsFontRequirements class to check for Font library dependencies.
 
 ### 🚜 Refactor
 
 - Remove deprecated UI Icons modules and related files, bump to v2 as Drupal 11.3+ and 12 targets
+- Remove obsolete ui_icons_font module and related files
+
+### 🧪 Testing
+
+- Add unit and kernel tests for ui_icons module functionality
+
+### ⚙️ Miscellaneous Tasks
+
+- Comment out unused variables for next major test configuration in CI
 ## [1.1.2] - 2026-04-16
 
 ### 🚀 Features
