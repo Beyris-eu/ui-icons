@@ -69,6 +69,10 @@ function ui_icons_preprocess_icon_selector(array &$variables): void {
   $variables['has_settings'] = $variables['element']['#show_settings'] ?? FALSE;
   $variables['icon_form'] = $variables['element']['icon_id'] ?? '';
 
+  if (_ui_icons_is_theme_active('default_admin')) {
+    $variables['icon_form']['#attached']['library'][] = 'ui_icons/ui_icons.default_admin_autocomplete';
+  }
+
   if (_ui_icons_is_theme_active('gin')) {
     $variables['icon_form']['#attached']['library'][] = 'ui_icons/ui_icons.gin_autocomplete';
   }
@@ -115,7 +119,7 @@ function ui_icons_preprocess_icon_selector(array &$variables): void {
  * @internal
  */
 function _ui_icons_is_theme_active(string $name): bool {
-  $theme = Drupal::getContainer()->get('theme.manager')->getActiveTheme();
+  $theme = \Drupal::getContainer()->get('theme.manager')->getActiveTheme();
   return $theme->getName() === $name ||
     isset($theme->getBaseThemeExtensions()[$name]);
 }
