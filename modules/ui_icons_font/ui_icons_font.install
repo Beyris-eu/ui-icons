@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+use Drupal\Core\Extension\Requirement\RequirementSeverity;
+
 /**
  * Implements hook_requirements().
  */
@@ -21,7 +23,7 @@ function ui_icons_font_requirements(string $phase): array {
     'title' => t('UI Icons Font'),
     'value' => $library_exists ? t('Font library detected') : t('Missing Font library!'),
     'description' => $library_exists ? '' : t('Install with: composer require dompdf/php-font-lib'),
-    'severity' => $library_exists ? REQUIREMENT_OK : REQUIREMENT_WARNING,
+    'severity' => $library_exists ? RequirementSeverity::OK : RequirementSeverity::Warning,
   ];
 
   return $requirements;

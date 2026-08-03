@@ -1,7 +1,0 @@
-name: 'UI Icons API backport'
-type: module
-description: 'API backport for Drupal before 11.1, empty placeholder to remove.'
-package: User interface
-core_version_requirement: ^11.1 || ^12.0
-lifecycle: deprecated
-lifecycle_link: https://www.drupal.org/project/drupal/issues/3471494

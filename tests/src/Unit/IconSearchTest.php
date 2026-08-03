@@ -73,13 +73,13 @@ class IconSearchTest extends TestCase {
     $this->renderer = $this->createMock(RendererInterface::class);
     $this->renderer
       ->method('renderInIsolation')
-      ->willReturn(new Markup('_rendered_'));
+      ->willReturn(Markup::create('_rendered_'));
 
     $this->iconSearch = new IconSearch(
       $this->iconPackManager,
       $this->renderer,
       // @todo test the cache.
-      $this->createMock(CacheBackendInterface::class),
+      $this->createStub(CacheBackendInterface::class),
     );
   }
 
@@ -88,9 +88,9 @@ class IconSearchTest extends TestCase {
    */
   public function testConstructor(): void {
     $iconSearch = new IconSearch(
-      $this->createMock(IconPackManagerInterface::class),
-      $this->createMock(RendererInterface::class),
-      $this->createMock(CacheBackendInterface::class)
+      $this->createStub(IconPackManagerInterface::class),
+      $this->createStub(RendererInterface::class),
+      $this->createStub(CacheBackendInterface::class)
     );
 
     $this->assertInstanceOf(IconSearch::class, $iconSearch);

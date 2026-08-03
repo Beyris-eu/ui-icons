@@ -10,9 +10,16 @@ manager `plugin.manager.icon_pack`). This module adds the UI on top: a form
 element to search and configure an icon, plus integrations (field, media, menu,
 CKEditor 5, text filter, UI Patterns, Canvas).
 
-Current branch line is **1.1.x**, Drupal 11.1+. The 1.0.x line shipped an API
-backport, here `ui_icons_backport` and `ui_icons_iconify_api` are empty
-placeholders kept only for upgrade paths. Do not add code to them.
+Current branch line is **1.1.x**, Drupal 11.3+ and Drupal 12. The 1.0.x line
+shipped an API backport through `ui_icons_backport` and `ui_icons_iconify_api`,
+both removed here.
+
+`core_version_requirement: ^11.3 || ^12.0` in every `*.info.yml`, kept in sync.
+The floor is the core support policy, not an API need: the Icon API this module
+builds on landed in 11.1, but 11.1 and 11.2 lost security coverage in June 2026.
+`composer.json` declares no `drupal/core` requirement on purpose: the
+drupal.org packaging facade derives it from the info file, so a constraint here
+would only be a second place to drift.
 
 Icon packs are declared by any extension in `*.icons.yml`. An icon id is
 `pack_id:icon_id`, built with `IconDefinition::createIconId()`. Extractors
@@ -30,7 +37,8 @@ submodule.
 | `src/IconPreview.php`, `src/Template/IconPreviewTwigExtension.php` | Preview rendering, exposed to Twig as `icon_preview()`. |
 | `src/Controller/` | Ajax endpoints, see `ui_icons.routing.yml` (`/ui-icons/ajax/autocomplete/icons`, `/ui-icons/ajax/preview/icons`). |
 | `templates/icon-selector.html.twig` | Markup of the element. Provides the `.ui-icons-preview-icon` and `.ui-icons-settings-wrapper` hooks used by tests and themes. |
-| `css/*.icon.autocomplete.css` | Per admin theme overrides (gin, dsfr, daisyui), picked by `ui_icons_preprocess_icon_selector()` via `_ui_icons_is_theme_active()`. |
+| `src/Hook/UiIconsHooks.php` | `help`, `theme` and `preprocess_icon_selector`. |
+| `css/*.icon.autocomplete.css` | Per admin theme overrides (gin, dsfr, daisyui), picked by `UiIconsHooks::preprocessIconSelector()` via its `isThemeActive()` helper. |
 
 Submodules worth knowing:
 
@@ -38,7 +46,8 @@ Submodules worth knowing:
 - `ui_icons_picker`: `icon_picker` element, a modal grid picker alternative to the autocomplete.
 - `ui_icons_text`: `icon_embed` filter, turns `<drupal-icon data-icon-id data-icon-settings>` into rendered markup.
 - `ui_icons_ckeditor5`: toolbar button and widget producing that `<drupal-icon>` tag. JS source in `js/ckeditor5_plugins/icon/src/`, bundle committed in `js/build/icon.js` (webpack, rebuild after editing source).
-- `ui_icons_canvas`, `ui_icons_media`, `ui_icons_menu`, `ui_icons_patterns`, `ui_icons_font`, `ui_icons_library`: integrations, one concern each.
+- `ui_icons_patterns`: UI Patterns **2.x only**. An `icon` prop type (`IconPropType`) plus source plugins (`IconSource`, `IconRenderableSource`, `FieldIconSource`, `LinkIconSource`). UI Patterns 1.x support is gone: `ui_patterns_settings` 3.x dropped the whole `SettingType` plugin system, so the old `IconSettingType` was deleted. Never reintroduce a `Plugin/UiPatterns/SettingType/` plugin.
+- `ui_icons_canvas`, `ui_icons_media`, `ui_icons_menu`, `ui_icons_font`, `ui_icons_library`: integrations, one concern each.
 
 ## Tests
 
@@ -87,8 +96,9 @@ types required), `phpstan.neon` (level 5, with a baseline), `.phpmd.xml`,
 ## Conventions
 
 - `declare(strict_types=1);` everywhere, enforced by phpcs.
-- Root module uses procedural hooks in `ui_icons.module`, newer submodules use
-  `#[Hook]` classes in `src/Hook/`. Follow whatever the submodule already does.
+- All hooks are `#[Hook]` classes in `src/Hook/<CamelCaseModule>Hooks.php`, one
+  per module, autowired. There is no `.module` file left in the project and
+  none should come back.
 - Icon settings are always keyed by pack id (`[$pack_id => $settings]`) when
   passed as `#default_settings`. Flattening them silently empties the extractor
   sub-form.

@@ -49,7 +49,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
     parent::setUp();
 
     $this->container = new ContainerBuilder();
-    $this->container->set('plugin.manager.icon_pack', $this->createMock(IconPackManagerInterface::class));
+    $this->container->set('plugin.manager.icon_pack', $this->createStub(IconPackManagerInterface::class));
     $this->container->set('string_translation', $this->getStringTranslationStub());
     \Drupal::setContainer($this->container);
   }
@@ -95,7 +95,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
    * Test the processIcon method.
    */
   public function testProcessIcon(): void {
-    $form_state = $this->createMock('Drupal\Core\Form\FormState');
+    $form_state = $this->createStub('Drupal\Core\Form\FormState');
     $complete_form = [];
 
     // phpcs:disable
@@ -198,7 +198,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
    * Test the processIconAjaxForm method.
    */
   public function testProcessIconAjaxForm(): void {
-    $form_state = $this->createMock('Drupal\Core\Form\FormState');
+    $form_state = $this->createStub('Drupal\Core\Form\FormState');
     $complete_form = [];
 
     $base_element = [
@@ -252,7 +252,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
    * Test the processIconAjaxForm method for #show_settings = FALSE.
    */
   public function testProcessIconAjaxFormNoSettings(): void {
-    $form_state = $this->createMock('Drupal\Core\Form\FormState');
+    $form_state = $this->createStub('Drupal\Core\Form\FormState');
     $complete_form = [];
 
     $icon_id = 'foo:bar';
@@ -290,7 +290,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
    * Test the processIconAjaxForm #allowed_icon_pack and no extractor form.
    */
   public function testProcessIconAjaxFormAllowedIconPack(): void {
-    $form_state = $this->createMock('Drupal\Core\Form\FormState');
+    $form_state = $this->createStub('Drupal\Core\Form\FormState');
     $complete_form = [];
 
     $icon_id = 'foo:bar';
@@ -525,7 +525,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
    * Test the validateIcon method.
    */
   public function testValidateIconEmpty(): void {
-    $form_state = $this->createMock(FormStateInterface::class);
+    $form_state = $this->createStub(FormStateInterface::class);
     $complete_form = [];
     $element = ['#parents' => ['foo']];
     IconAutocomplete::validateIcon($element, $form_state, $complete_form);
@@ -554,7 +554,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
       'pack_label' => 'Baz',
     ]);
 
-    $form_state = $this->createMock(FormStateInterface::class);
+    $form_state = $this->createStub(FormStateInterface::class);
 
     $ui_icon_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
     $ui_icon_pack_plugin_manager->method('getIcon')
@@ -601,7 +601,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
       'icon_settings' => ['foo' => 'bar'],
     ];
 
-    $form_state = $this->createMock(FormStateInterface::class);
+    $form_state = $this->createStub(FormStateInterface::class);
 
     $ui_icon_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
     $ui_icon_pack_plugin_manager->method('getIcon')
@@ -620,7 +620,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
 
     $input = FALSE;
 
-    $form_state = $this->createMock(FormStateInterface::class);
+    $form_state = $this->createStub(FormStateInterface::class);
 
     $ui_icon_pack_plugin_manager = $this->createMock(IconPackManagerInterface::class);
     $ui_icon_pack_plugin_manager->method('getIcon')
@@ -641,7 +641,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
         '#attached' => ['foo/bar'],
       ],
     ];
-    $form_state = $this->createMock(FormStateInterface::class);
+    $form_state = $this->createStub(FormStateInterface::class);
 
     $request = new Request(['element_parents' => 'foo']);
 

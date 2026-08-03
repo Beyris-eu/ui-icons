@@ -41,4 +41,3 @@ parameters:
     - "#^Plugin definitions cannot be altered.#"
     - "#^Class .* extends @internal class#"
     - "#^Call to an undefined method .*::t\\(\\)#"
-    - "#^Call to internal function _ui_icons_is_theme_active#"

@@ -6,6 +6,7 @@ namespace Drupal\Tests\ui_icons_text\Kernel;
 
 use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\ui_icons\IconPreview;
 use Drupal\ui_icons_text\Plugin\Filter\IconEmbed;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;

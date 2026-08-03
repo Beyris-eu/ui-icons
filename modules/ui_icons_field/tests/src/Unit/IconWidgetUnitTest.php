@@ -48,15 +48,13 @@ class IconWidgetUnitTest extends UnitTestCase {
     parent::setUp();
 
     $this->container = new ContainerBuilder();
-    $this->container->set('string_translation', $this->createMock(TranslationInterface::class));
+    $this->container->set('string_translation', $this->createStub(TranslationInterface::class));
     \Drupal::setContainer($this->container);
-
-    $fieldDefinition = $this->createMock('Drupal\Core\Field\FieldDefinition');
 
     $this->widget = new IconWidget(
       'icon_widget',
       [],
-      $fieldDefinition,
+      $this->createStub('Drupal\Core\Field\FieldDefinition'),
       [],
       []
     );
@@ -66,7 +64,7 @@ class IconWidgetUnitTest extends UnitTestCase {
    * Tests the massageFormValues method.
    */
   public function testMassageFormValues(): void {
-    $form_state = $this->createMock('Drupal\Core\Form\FormState');
+    $form_state = $this->createStub('Drupal\Core\Form\FormState');
 
     $values = [];
 
