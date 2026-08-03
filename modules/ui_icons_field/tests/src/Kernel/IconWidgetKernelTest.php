@@ -6,8 +6,9 @@ namespace Drupal\Tests\ui_icons_field\Kernel;
 
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormState;
-use Drupal\KernelTests\KernelTestBase;
 use Drupal\entity_test\Entity\EntityTest;
+use Drupal\KernelTests\KernelTestBase;
+use Drupal\ui_icons_field\Plugin\Field\FieldWidget\IconWidget;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
