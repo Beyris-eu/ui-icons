@@ -249,6 +249,109 @@ class IconPluginTest extends WebDriverTestBase {
   }
 
   /**
+   * Test editing an existing icon in place from the widget toolbar.
+   */
+  public function testIconPluginEdit(): void {
+    $page = $this->getSession()->getPage();
+    $assert_session = $this->assertSession();
+
+    $icon_id_1 = IconDefinition::createIconId(self::TEST_ICON_PACK_ID, self::TEST_ICON_ID_1);
+    $icon_id_2 = IconDefinition::createIconId(self::TEST_ICON_PACK_ID, self::TEST_ICON_ID_2);
+
+    $initial_settings = ['width' => 40, 'height' => 41, 'title' => 'Initial title'];
+    $updated_settings = ['width' => 80, 'height' => 81, 'title' => 'Updated title'];
+
+    $this->drupalGet('node/add/page');
+    $this->waitForEditor();
+    $this->click('.ck-content');
+
+    // Insert an icon with custom settings.
+    $this->pressEditorButton('Insert Icon');
+    $this->assertNotEmpty($assert_session->waitForElementVisible('css', '#drupal-modal'));
+    $this->fillIconDialogAndSave($icon_id_1, self::TEST_ICON_FILENAME_1, $initial_settings);
+
+    // The icon widget is rendered, and there is exactly one icon.
+    $this->assertNotNull($assert_session->waitForElementVisible('css', '.ck-content .drupal-icon span img'));
+    $xpath = new \DOMXPath($this->getEditorDataAsDom());
+    $this->assertSame(1, $xpath->query('//drupal-icon')->length);
+
+    // Select the icon widget and open the edit dialog from its toolbar.
+    $this->click('.ck-widget.drupal-icon');
+    $this->assertVisibleBalloon('[aria-label="Icon toolbar"]');
+    $this->getBalloonButton('Edit')->click();
+
+    // The dialog opens pre-filled with the existing icon.
+    $this->assertNotEmpty($assert_session->waitForElementVisible('css', '#drupal-modal'));
+    $icon_input = $assert_session->waitForElementVisible('css', '[name="icon[icon_id]"]');
+    $this->assertNotNull($icon_input);
+    $this->assertSame($icon_id_1, $icon_input->getValue());
+
+    // The settings are pre-filled too. This is the regression guard for the
+    // #default_settings keying: they must be keyed by pack id, otherwise the
+    // extractor sub-form comes back empty. The fields live inside a collapsed
+    // <details>, so read the values directly rather than toggling it open.
+    $assert_session->waitForElement('css', sprintf('[name="icon[icon_settings][%s][width]"]', self::TEST_ICON_PACK_ID));
+    foreach ($initial_settings as $key => $value) {
+      $field = $assert_session->elementExists('css', sprintf('[name="icon[icon_settings][%s][%s]"]', self::TEST_ICON_PACK_ID, $key));
+      $this->assertSame((string) $value, $field->getValue());
+    }
+
+    // Change the icon and its settings, then save.
+    $this->fillIconDialogAndSave($icon_id_2, self::TEST_ICON_FILENAME_2, $updated_settings);
+
+    // The widget is updated in place: it now renders the new icon and there is
+    // still exactly one icon (editing replaces, it does not insert a second).
+    $this->assertNotNull($assert_session->waitForElementVisible('css', sprintf('.ck-content .drupal-icon span img[src$="%s"]', self::TEST_ICON_FILENAME_2)));
+
+    $xpath = new \DOMXPath($this->getEditorDataAsDom());
+    $icons = $xpath->query('//drupal-icon');
+    $this->assertSame(1, $icons->length, 'Editing replaces the icon instead of inserting a new one.');
+
+    $drupal_icon = $icons[0];
+    $this->assertSame($icon_id_2, $drupal_icon->getAttribute('data-icon-id'));
+    $data_icon_settings = json_decode($drupal_icon->getAttribute('data-icon-settings'), TRUE);
+    foreach ($updated_settings as $key => $value) {
+      // Because of json we lost types.
+      $this->assertSame((string) $value, (string) $data_icon_settings[$key]);
+    }
+  }
+
+  /**
+   * Fills the (already open) icon dialog and saves it.
+   *
+   * Works for both the insert and the edit dialog, since they share the same
+   * form.
+   *
+   * @param string $icon_id
+   *   The full icon id (pack_id:icon_id) to select.
+   * @param string $icon_filename
+   *   The expected preview filename, used to wait for the ajax refresh.
+   * @param array $settings
+   *   Extractor settings to fill, keyed by setting name.
+   */
+  private function fillIconDialogAndSave(string $icon_id, string $icon_filename, array $settings): void {
+    $page = $this->getSession()->getPage();
+    $assert_session = $this->assertSession();
+
+    $input = $assert_session->waitForElementVisible('css', '[name="icon[icon_id]"]');
+    $this->assertNotNull($input);
+    $input->setValue($icon_id);
+
+    // Wait until the autocomplete preview reflects the chosen icon, which means
+    // the settings sub-form has been (re)built.
+    $this->assertNotNull($assert_session->waitForElementVisible('css', sprintf('.ui-icons-preview-icon img[src$="%s"]', $icon_filename)));
+
+    if (!empty($settings)) {
+      $page->find('css', '.ui-icons-settings-wrapper details summary')->click();
+      foreach ($settings as $key => $value) {
+        $assert_session->elementExists('css', sprintf('[name="icon[icon_settings][%s][%s]"]', self::TEST_ICON_PACK_ID, $key))->setValue($value);
+      }
+    }
+
+    $assert_session->elementExists('css', '.ui-dialog-buttonpane')->pressButton('Save');
+  }
+
+  /**
    * Test icon values.
    *
    * @param \Behat\Mink\Element\NodeElement $element
