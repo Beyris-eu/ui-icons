@@ -45,7 +45,7 @@ class IconType extends FieldItemBase {
    *
    * @var \Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface
    */
-  private ?IconPackManagerInterface $pluginManagerIconPack = NULL;
+  protected ?IconPackManagerInterface $pluginManagerIconPack = NULL;
 
   /**
    * Get the Icon pack plugin manager.

@@ -16,3 +16,6 @@ linkit
 csvg
 footest
 weitzman
+daisyui
+corge
+quux

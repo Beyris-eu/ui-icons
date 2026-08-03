@@ -52,7 +52,8 @@ export default class IconToolbar extends Plugin {
 
         if (selectedElement && selectedElement.is('element', 'drupalIcon')) {
           const iconId = selectedElement.getAttribute('drupalIconId');
-          const iconSettings = selectedElement.getAttribute('drupalIconSettings');
+          const iconSettings =
+            selectedElement.getAttribute('drupalIconSettings');
           existingValues = {
             iconId,
             iconSettings: iconSettings ? JSON.parse(iconSettings) : {},
@@ -66,7 +67,7 @@ export default class IconToolbar extends Plugin {
             editor.execute('insertIcon', settings);
             editor.editing.view.focus();
           },
-          dialogSettings
+          dialogSettings,
         );
       });
 
@@ -87,6 +88,7 @@ export default class IconToolbar extends Plugin {
    * @param {object} dialogSettings
    *   An object containing settings to be passed to the jQuery UI.
    */
+  /* eslint-disable class-methods-use-this */
   _openDialog(url, existingValues, saveCallback, dialogSettings) {
     // Add a consistent dialog class.
     dialogSettings.classes = dialogSettings.classes || {};
@@ -95,16 +97,15 @@ export default class IconToolbar extends Plugin {
       : [];
     classes.push('ui-dialog--narrow');
     dialogSettings.classes['ui-dialog'] = classes.join(' ');
-    dialogSettings.autoResize =
-      window.matchMedia('(min-width: 600px)').matches;
+    dialogSettings.autoResize = window.matchMedia('(min-width: 600px)').matches;
     dialogSettings.width = 'auto';
 
     const ckeditorAjaxDialog = Drupal.ajax({
       dialog: dialogSettings,
-      dialogType: "modal",
-      selector: ".ckeditor5-dialog-loading-link",
+      dialogType: 'modal',
+      selector: '.ckeditor5-dialog-loading-link',
       url,
-      progress: { type: "fullscreen" },
+      progress: { type: 'fullscreen' },
       submit: {
         editor_object: existingValues,
       },
@@ -115,7 +116,10 @@ export default class IconToolbar extends Plugin {
     // We already take into account the possibility of supporting multiple modals.
     // @see https://www.drupal.org/project/drupal/issues/2741877
     if (Drupal.ckeditor5.saveCallback instanceof Map) {
-      Drupal.ckeditor5.saveCallback.set(dialogSettings.selector || '#drupal-modal', saveCallback);
+      Drupal.ckeditor5.saveCallback.set(
+        dialogSettings.selector || '#drupal-modal',
+        saveCallback,
+      );
     } else {
       Drupal.ckeditor5.saveCallback = saveCallback;
     }
@@ -140,12 +144,11 @@ export default class IconToolbar extends Plugin {
           return null;
         }
         if (!viewElement.getCustomProperty('drupalIcon')) {
-          return null
+          return null;
         }
 
         return viewElement;
       },
     });
   }
-
 }

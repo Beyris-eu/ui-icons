@@ -33,14 +33,14 @@ final class IconSelectForm extends FormBase {
    *
    * @var \Drupal\ui_icons\IconSearch
    */
-  private IconSearch $iconSearch;
+  protected IconSearch $iconSearch;
 
   /**
    * Plugin manager for icons pack discovery and definitions.
    *
    * @var \Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface
    */
-  private ?IconPackManagerInterface $pluginManagerIconPack = NULL;
+  protected ?IconPackManagerInterface $pluginManagerIconPack = NULL;
 
   public function __construct(
     IconPackManagerInterface $pluginManagerIconPack,
