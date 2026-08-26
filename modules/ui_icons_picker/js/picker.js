@@ -4,18 +4,42 @@
  */
 /* eslint-disable no-unused-vars, func-names */
 (($, Drupal, once) => {
-  function openDialog(event) {
-    event.preventDefault();
+  /**
+   * @namespace
+   */
+  Drupal.IconPicker = Drupal.IconPicker || {};
 
-    const element = event.target || event.srcElement;
+  /**
+   * Id of the element holding the library dialog.
+   *
+   * Kept out of #drupal-modal so a dialog opened from inside another dialog
+   * does not close its opener. IconSelectForm reads it back from the dialog
+   * options to know which dialog to close on selection.
+   */
+  Drupal.IconPicker.dialogTarget = 'ui-icons-picker-dialog';
 
+  /**
+   * Opens the icon library dialog.
+   *
+   * @param {HTMLElement} element
+   *   The element carrying the dialog data attributes, that is the icon_id
+   *   input of an icon_picker or icon_autocomplete element.
+   */
+  Drupal.IconPicker.openDialog = function (element) {
     const ajaxSettings = {
       element,
       progress: { type: 'none' },
       url: element.getAttribute('data-dialog-url'),
-      dialogType: 'modal',
+      // A dialog with an own target rather than dialogType 'modal'. All modals
+      // share the single #drupal-modal element, so opening the library from a
+      // form that is itself in a modal, CKEditor embedded content or Layout
+      // Builder for instance, would replace the very form the picked icon has
+      // to be written back to. The modal option keeps the overlay behaviour.
+      dialogType: 'dialog',
       httpMethod: 'GET',
       dialog: {
+        target: Drupal.IconPicker.dialogTarget,
+        modal: true,
         classes: {
           'ui-dialog': 'icon-library-widget-modal',
         },
@@ -31,6 +55,11 @@
 
     const myAjaxObject = Drupal.ajax(ajaxSettings);
     myAjaxObject.execute();
+  };
+
+  function openDialog(event) {
+    event.preventDefault();
+    Drupal.IconPicker.openDialog(event.currentTarget);
   }
 
   /**
@@ -71,6 +100,10 @@
     const elem = document.querySelector(
       `#${response.wrapper_id} input[name$='icon_id]']`,
     );
+    if (!elem) {
+      // The form that opened the library is gone, nothing to write back to.
+      return;
+    }
     elem.value = response.icon_full_id;
     jQuery(elem).trigger('change');
   };
