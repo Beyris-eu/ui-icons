@@ -69,6 +69,10 @@ class IconSource extends SourcePluginBase {
     if (empty($value)) {
       return [];
     }
+
+    if (!is_string($value['target_id'])) {
+      return [];
+    }
     [$pack, $icon] = explode(':', $value['target_id']);
     return [
       $icon . ' (' . $pack . ')',
