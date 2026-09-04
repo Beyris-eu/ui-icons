@@ -208,7 +208,7 @@ class UiIconsMenuHooks {
    */
   protected function generateMarkup(mixed &$text, string $icon_full_id, array $icon_settings, string $icon_display = 'before'): void {
     $icon_renderable = IconDefinition::getRenderable($icon_full_id, $icon_settings);
-    $icon = $this->renderer->renderInIsolation($icon_renderable);
+    $icon = $this->renderer->render($icon_renderable);
 
     switch ($icon_display) {
       case 'before':
