@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_icons_menu\Kernel;
 
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Render\RenderContext;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\menu_link_content\Entity\MenuLinkContent;
 use Drupal\ui_icons_menu\Hook\UiIconsMenuHooks;
@@ -107,7 +108,13 @@ class UiIconsMenuTest extends KernelTestBase {
     }
     $url->setOptions($options);
 
-    $this->container->get(UiIconsMenuHooks::class)->preprocessMenu($variables);
+    // ::preprocessMenu() renders the icon with the active render context,
+    // which only exists while inside a render pipeline (e.g. renderRoot()).
+    // Provide one here since the hook is invoked directly.
+    $renderer = $this->container->get('renderer');
+    $renderer->executeInRenderContext(new RenderContext(), function () use (&$variables) {
+      $this->container->get(UiIconsMenuHooks::class)->preprocessMenu($variables);
+    });
     $actual = (string) $variables['items'][0]['title'];
 
     // Test the position of the dom element, the icon test is prefix by icon id,
