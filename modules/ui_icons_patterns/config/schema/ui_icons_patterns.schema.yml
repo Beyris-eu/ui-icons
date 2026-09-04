@@ -1,0 +1,17 @@
+ui_patterns_source.icon:
+  type: mapping
+  label: 'Source: Icon'
+  mapping:
+    value:
+      type: mapping
+      nullable: true
+      label: 'Default icon value'
+      mapping:
+        target_id:
+          type: string
+          label: 'Default icon full ID'
+        settings:
+          type: sequence
+          label: 'Default icon settings'
+          sequence:
+            type: ui_icons.icon_pack_options.[%key]
