@@ -3,15 +3,6 @@ ui_patterns_source.icon:
   label: 'Source: Icon'
   mapping:
     value:
-      type: mapping
+      type: ui_icons.icon_value
       nullable: true
       label: 'Default icon value'
-      mapping:
-        target_id:
-          type: string
-          label: 'Default icon full ID'
-        settings:
-          type: sequence
-          label: 'Default icon settings'
-          sequence:
-            type: ui_icons.icon_pack_options.[%key]
