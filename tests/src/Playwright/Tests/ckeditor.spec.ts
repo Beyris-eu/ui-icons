@@ -43,6 +43,27 @@ async function createTextFormat (drupal: Drupal): Promise<void> {
     `}`,
   ].join(' ')
   await drupal.drush(`php:eval "${php}"`)
+  // Outside the guard above: the format survives the whole worker, so the
+  // selector has to be put back for every test or one that switched it
+  // decides what the next one gets.
+  await setSelectorFormat(drupal, 'icon_autocomplete')
+}
+
+/**
+ * Point the icon_embed filter at one of the two icon selectors.
+ *
+ * @param {Drupal} drupal - The Drupal object.
+ * @param {string} selector - 'icon_autocomplete' or 'icon_picker'.
+ * @returns {Promise<void>}
+ */
+async function setSelectorFormat (drupal: Drupal, selector: string): Promise<void> {
+  // No PHP variables: drush runs through a shell and the double quotes would
+  // let it expand them away, which is why every helper here chains instead.
+  const php = [
+    `\\Drupal::configFactory()->getEditable('filter.format.${FORMAT_ID}')`,
+    `->set('filters.icon_embed.settings.selector_format', '${selector}')->save();`,
+  ].join(' ')
+  await drupal.drush(`php:eval "${php}"`)
 }
 
 /**
@@ -339,6 +360,44 @@ test('Pick an icon from the library opened inside the icon dialog', { tag: [ '@b
     // left to hand the values to and inserts nothing.
     const icons = await getEditorIcons(page)
     expect(icons, 'Closing the library must not drop the editor save callback.').toHaveLength(1)
+    expect(icons[0].id).toBe(iconId)
+  })
+})
+
+
+test('Use the icon_picker selector in the icon dialog', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  const iconId = `${PACK_ID}:foo`
+  const modal = page.locator('#drupal-modal')
+
+  await setSelectorFormat(drupal, 'icon_picker')
+
+  await test.step(`The dialog input opens the library instead of autocompleting`, async () => {
+    await openEditor(page)
+    await page.getByRole('button', { name: 'Insert Icon' }).click()
+    await expect(modal).toBeVisible()
+
+    const input = modal.locator('input.form-icon-dialog')
+    await expect(input).toBeVisible()
+    // icon_picker trades the autocomplete away for the grid.
+    await expect(input).not.toHaveAttribute('data-autocomplete-path', /./)
+
+    await input.click()
+    await expect(page.locator('.icon-picker-modal__content')).toBeVisible()
+  })
+
+  await test.step(`Picking writes back to the dialog form`, async () => {
+    await pickIconFromLibrary(page, iconId)
+
+    await expect(modal.locator('[name="icon[icon_id]"]')).toHaveValue(iconId)
+    await expect(modal.locator('.ui-icons-preview-icon img[src$="foo.png"]')).toBeVisible()
+  })
+
+  await test.step(`Saving the dialog inserts the icon in the editor`, async () => {
+    await page.locator('.ui-dialog-buttonpane').getByRole('button', { name: 'Save' }).click()
+    await expect(modal).toBeHidden()
+
+    const icons = await getEditorIcons(page)
+    expect(icons, 'The picker selector must reach the editor like the autocomplete does.').toHaveLength(1)
     expect(icons[0].id).toBe(iconId)
   })
 })
