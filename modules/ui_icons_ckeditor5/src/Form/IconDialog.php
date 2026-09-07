@@ -26,7 +26,10 @@ final class IconDialog extends FormBase {
   private const DEFAULT_SELECTOR = 'icon_autocomplete';
 
   public function __construct(
-    protected readonly ElementInfoManagerInterface $elementInfo,
+    // Not readonly: FormBase brings DependencySerializationTrait, whose
+    // __wakeup() cannot reinitialize a readonly property of a child class
+    // before PHP 8.4.
+    protected ElementInfoManagerInterface $elementInfo,
   ) {}
 
   /**
