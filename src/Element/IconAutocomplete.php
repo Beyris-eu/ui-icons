@@ -369,8 +369,9 @@ class IconAutocomplete extends FormElementBase {
     }
 
     $settings = [];
-    if (isset($input['icon_settings'][$pack_id])) {
-      $settings[$pack_id] = $input['icon_settings'][$pack_id];
+    if (is_array($input['icon_settings'][$pack_id] ?? NULL)) {
+      // Icon settings are scalars only, as defined by the Icon API.
+      $settings[$pack_id] = array_filter($input['icon_settings'][$pack_id], is_scalar(...));
       // @todo validateConfigurationForm from extractor plugin?
     }
 

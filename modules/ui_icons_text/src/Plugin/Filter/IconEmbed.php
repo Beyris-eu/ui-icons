@@ -183,6 +183,8 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       if ($data_settings && json_validate($data_settings)) {
         $settings = json_decode($data_settings, TRUE);
       }
+      // Icon settings are scalars only, as defined by the Icon API.
+      $settings = is_array($settings) ? array_filter($settings, is_scalar(...)) : [];
 
       $attributes = [];
       if ($class = $node->getAttribute('class')) {

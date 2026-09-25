@@ -47,7 +47,8 @@ class IconPreviewController extends ControllerBase {
       return new JsonResponse([]);
     }
 
-    $settings = $parameters['settings'] ?? [];
+    // Icon settings are scalars only, as defined by the Icon API.
+    $settings = is_array($parameters['settings'] ?? NULL) ? array_filter($parameters['settings'], is_scalar(...)) : [];
     $result = [];
     foreach ($parameters['icon_full_ids'] as $icon_full_id) {
       if (empty($icon_full_id)) {
