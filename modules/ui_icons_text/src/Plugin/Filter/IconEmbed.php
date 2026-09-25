@@ -214,7 +214,7 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
    *   The `<drupal-icon>` node.
    *
    * @return array
-   *   The settings, empty when absent or not valid JSON.
+   *   The scalar settings, empty when absent or not valid JSON.
    */
   private function extractSettings(\DOMElement $node): array {
     $data_settings = $node->getAttribute('data-icon-settings');
@@ -222,7 +222,9 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       return [];
     }
 
-    return json_decode($data_settings, TRUE);
+    // Icon settings are scalars only, as defined by the Icon API.
+    $settings = json_decode($data_settings, TRUE);
+    return is_array($settings) ? array_filter($settings, is_scalar(...)) : [];
   }
 
   /**

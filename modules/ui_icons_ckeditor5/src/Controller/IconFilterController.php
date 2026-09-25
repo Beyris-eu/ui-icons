@@ -50,6 +50,8 @@ final class IconFilterController implements ContainerInjectionInterface {
     if ($query_settings !== '' && json_validate($query_settings)) {
       $settings = json_decode($query_settings, TRUE);
     }
+    // Icon settings are scalars only, as defined by the Icon API.
+    $settings = is_array($settings) ? array_filter($settings, is_scalar(...)) : [];
 
     $build = IconDefinition::getRenderable($icon_full_id, $settings);
     $html = $this->renderer->renderInIsolation($build);
