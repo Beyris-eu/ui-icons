@@ -1,3 +1,19 @@
+## [2.0.1] - 2026-09-07
+
+### 🚀 Features
+
+- [#3571394](https://www.drupal.org/project/ui_icons/issues/3571394) Allow using icon picker instead of autocomplete in CKEditor
+
+### 🐛 Bug Fixes
+
+- [#3591888](https://www.drupal.org/project/ui_icons/issues/3591888) settings summary when no target_id
+- [#3591893](https://www.drupal.org/project/ui_icons/issues/3591893) Config schema missing for the ui_patterns `icon` source
+- [#3591886](https://www.drupal.org/project/ui_icons/issues/3591886) Make icon preview clickable like an emoji picker
+- Drop readonly on the IconDialog injected property
+
+### 💼 Other
+
+- [#3591891](https://www.drupal.org/project/ui_icons/issues/3591891) Menu item icons don't load the icon library
 ## [2.0.0] - 2026-08-03
 
 ### 🚀 Features
@@ -16,6 +32,7 @@
 - Update changelog for release 2.0.0, add new features and bug fixes
 - Update DRUPAL_TEST_SETUP_FILE path and add Playwright tests for icon picker functionality
 - Correct spelling of "pluralised" to "pluralized" in test method name
+- Update changelog for release 2.0.0 with new features, bug fixes, and enhancements
 
 ### 💼 Other
 
