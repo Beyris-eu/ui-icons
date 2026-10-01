@@ -26,4 +26,33 @@
         });
     },
   };
+
+  /**
+   * Keeps the dialog usable when the icon settings are toggled.
+   *
+   * A dialog is sized and positioned when it opens, and core only recomputes
+   * that on viewport changes. Expanding the settings grows the content beyond
+   * the viewport, putting the dialog buttons out of reach on a fixed-position
+   * element that cannot be scrolled to.
+   *
+   * The details can exist before the dialog wrapper does, so the dialog cannot
+   * be part of the selector; the namespaced event is a no-op outside a dialog.
+   * The settings wrapper comes from the icon-selector template, shared by the
+   * icon_autocomplete and icon_picker elements.
+   *
+   * @type {Drupal~behavior}
+   */
+  Drupal.behaviors.IconAutocompleteDialogResize = {
+    attach(context) {
+      once(
+        'setIconSettingsDialogResize',
+        '.ui-icons-settings-wrapper details',
+        context,
+      ).forEach((details) => {
+        details.addEventListener('toggle', () => {
+          $(window).trigger('resize.dialogResize');
+        });
+      });
+    },
+  };
 })(jQuery, Drupal, once);

@@ -100,18 +100,14 @@ async function openEditor (page: Page): Promise<void> {
 }
 
 /**
- * Fill the (already open) icon dialog and save it.
- *
- * Works for both the insert and the edit dialog, since they share the same
- * form.
+ * Pick an icon in the autocomplete of the (already open) icon dialog.
  *
  * @param {Page} page - The Playwright page.
  * @param {string} iconId - The full icon id (pack_id:icon_id) to select.
  * @param {string} filename - The expected preview filename, used to wait for the ajax refresh.
- * @param {IconSettings|null} settings - Extractor settings to fill, or null to keep the defaults.
  * @returns {Promise<void>}
  */
-async function fillIconDialogAndSave (page: Page, iconId: string, filename: string, settings: IconSettings | null = null): Promise<void> {
+async function autocompleteIcon (page: Page, iconId: string, filename: string): Promise<void> {
   const modal = page.locator('#drupal-modal')
 
   // The icon has to be picked in the autocomplete results: the element only
@@ -126,6 +122,24 @@ async function fillIconDialogAndSave (page: Page, iconId: string, filename: stri
   // Wait until the autocomplete preview reflects the chosen icon, which means
   // the settings sub-form has been (re)built.
   await expect(modal.locator(`.ui-icons-preview-icon img[src$="${filename}"]`)).toBeVisible()
+}
+
+/**
+ * Fill the (already open) icon dialog and save it.
+ *
+ * Works for both the insert and the edit dialog, since they share the same
+ * form.
+ *
+ * @param {Page} page - The Playwright page.
+ * @param {string} iconId - The full icon id (pack_id:icon_id) to select.
+ * @param {string} filename - The expected preview filename, used to wait for the ajax refresh.
+ * @param {IconSettings|null} settings - Extractor settings to fill, or null to keep the defaults.
+ * @returns {Promise<void>}
+ */
+async function fillIconDialogAndSave (page: Page, iconId: string, filename: string, settings: IconSettings | null = null): Promise<void> {
+  const modal = page.locator('#drupal-modal')
+
+  await autocompleteIcon(page, iconId, filename)
 
   if (settings) {
     await modal.locator('.ui-icons-settings-wrapper details summary').click()
@@ -401,3 +415,37 @@ test('Use the icon_picker selector in the icon dialog', { tag: [ '@base' ] }, as
     expect(icons[0].id).toBe(iconId)
   })
 })
+
+// Core sizes a dialog when it opens and only re-clamps it on viewport changes,
+// so expanding the settings used to push the buttons below the fixed dialog.
+// The test pack settings are short: only a viewport this low overflows.
+// The edit dialog opens with the icon already set, so the library is never
+// opened: closing it would unbind the dialog resize handlers in core.
+for (const selector of [ 'icon_autocomplete', 'icon_picker' ]) {
+  test(`The icon dialog stays in the viewport when the ${selector} settings expand`, { tag: [ '@base' ] }, async ({ page, drupal }) => {
+    const modal = page.locator('#drupal-modal')
+    const save = page.locator('.ui-dialog-buttonpane').getByRole('button', { name: 'Save' })
+
+    await setSelectorFormat(drupal, selector)
+    await page.setViewportSize({ width: 1280, height: 360 })
+
+    await test.step(`Open the edit dialog of an existing icon`, async () => {
+      await openEditor(page)
+      await page.evaluate((iconId) => {
+        const editable = document.querySelector('.ck-editor__editable') as any
+        editable.ckeditorInstance.setData(`<p><drupal-icon data-icon-id="${iconId}"></drupal-icon></p>`)
+      }, `${PACK_ID}:foo`)
+      await page.locator('.ck-widget.drupal-icon').click()
+      await page.locator('[aria-label="Icon toolbar"]').getByRole('button', { name: 'Edit' }).click()
+
+      await expect(modal.locator('.ui-icons-preview-icon img[src$="foo.png"]')).toBeVisible()
+      await expect(save).toBeInViewport({ ratio: 1 })
+    })
+
+    await test.step(`Expanding the settings keeps the buttons reachable`, async () => {
+      await modal.locator('.ui-icons-settings-wrapper details summary').click()
+      await expect(modal.locator(`[name="icon[icon_settings][${PACK_ID}][title]"]`)).toBeVisible()
+      await expect(save).toBeInViewport({ ratio: 1 })
+    })
+  })
+}
