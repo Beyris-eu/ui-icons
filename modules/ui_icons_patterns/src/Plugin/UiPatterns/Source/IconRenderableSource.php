@@ -31,18 +31,4 @@ class IconRenderableSource extends IconSource {
     return IconDefinition::getRenderable($value['target_id'] ?? $value['icon_id'] ?? '', $value['settings'] ?? $value['icon_settings'] ?? []);
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function settingsSummary(): array {
-    $value = $this->getSetting('value');
-    if (!$value) {
-      return [];
-    }
-
-    return [
-      $value['target_id'] ?? $value['icon_id'] ?? '',
-    ];
-  }
-
 }

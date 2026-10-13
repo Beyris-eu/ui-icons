@@ -66,16 +66,13 @@ class IconSource extends SourcePluginBase {
    */
   public function settingsSummary(): array {
     $value = $this->getSetting('value');
-    if (!$value || empty($value)) {
-      return [];
-    }
-    if (!isset($value['target_id']) || !is_string($value['target_id'])) {
+    $icon_full_id = $value['target_id'] ?? $value['icon_id'] ?? NULL;
+    if (!is_string($icon_full_id) || !$icon_data = IconDefinition::getIconDataFromId($icon_full_id)) {
       return [];
     }
 
-    [$pack, $icon] = explode(':', $value['target_id']);
     return [
-      $icon . ' (' . $pack . ')',
+      $icon_data['icon_id'] . ' (' . $icon_data['pack_id'] . ')',
     ];
   }
 
