@@ -13,6 +13,8 @@ ui_icons_library.index:
     _title: 'Icons packs'
   requirements:
     _permission: 'access ui icons library'
+  options:
+    _admin_route: FALSE
 
 ui_icons_library.mode:
   path: '/admin/icons/{mode}'
@@ -29,3 +31,5 @@ ui_icons_library.pack:
     _title_callback: 'Drupal\ui_icons_library\Controller\LibraryIndex::getTitle'
   requirements:
     _permission: 'access ui icons library'
+  options:
+    _admin_route: FALSE
