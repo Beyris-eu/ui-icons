@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons_patterns\Kernel;
 
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Drupal\Core\Entity\Entity\EntityViewDisplay;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\field\Entity\FieldConfig;
@@ -20,6 +21,7 @@ use PHPUnit\Framework\Attributes\Group;
 #[CoversNothing]
 #[Group('ui_icons')]
 #[Group('ui_icons_patterns')]
+#[RunTestsInSeparateProcesses]
 class IconSourceConfigSchemaTest extends KernelTestBase {
 
   /**
