@@ -8,6 +8,8 @@ use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\Tests\BrowserTestBase;
 use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\ui_icons_field\Plugin\Field\FieldFormatter\IconFormatter;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -15,6 +17,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  * Test the UI icons field features.
  */
 #[RunTestsInSeparateProcesses]
+#[CoversClass(IconFormatter::class)]
 #[Group('ui_icons')]
 class IconFieldTest extends BrowserTestBase {
   /**
@@ -159,6 +162,42 @@ class IconFieldTest extends BrowserTestBase {
     $assert_session->pageTextContains('Article Test Article has been created.');
     $assert_session->elementExists('css', self::TEST_ICON_CLASS);
     $assert_session->elementExists('css', sprintf(".icon[src$='%s']", self::TEST_ICON_FILENAME));
+  }
+
+  /**
+   * Tests the formatter settings are saved keyed by icon pack, and only there.
+   */
+  public function testFormatterSettingsSave(): void {
+    FieldStorageConfig::create([
+      'field_name' => $this->fieldName,
+      'entity_type' => 'node',
+      'type' => 'ui_icon',
+    ])->save();
+    FieldConfig::create([
+      'field_name' => $this->fieldName,
+      'entity_type' => 'node',
+      'bundle' => 'article',
+      'label' => 'Icon',
+      'settings' => ['allowed_icon_pack' => ['test_settings' => 'test_settings']],
+    ])->save();
+    /** @var \Drupal\Core\Entity\EntityDisplayRepositoryInterface $display_repository */
+    $display_repository = \Drupal::service('entity_display.repository');
+    $display_repository->getViewDisplay('node', 'article')
+      ->setComponent($this->fieldName, ['type' => 'icon_formatter'])
+      ->save();
+
+    $this->drupalGet('/admin/structure/types/manage/article/display/default');
+    $this->submitForm([], $this->fieldName . '_settings_edit');
+    $this->submitForm([
+      'fields[' . $this->fieldName . '][settings_edit_form][settings][test_settings][width]' => 64,
+    ], 'Update');
+    $this->submitForm([], 'Save');
+    $this->assertSession()->pageTextContains('Your settings have been saved.');
+
+    $settings = $display_repository->getViewDisplay('node', 'article')
+      ->getComponent($this->fieldName)['settings'];
+    $this->assertSame(['icon_settings'], array_keys($settings));
+    $this->assertEquals(64, $settings['icon_settings']['test_settings']['width']);
   }
 
 }

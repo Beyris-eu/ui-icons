@@ -82,9 +82,12 @@ ui_icons.icon_pack_options.test_settings:
     boolean:
       title: "Test boolean"
       type: "boolean"
+    select_string:
+      type: string
+      label: 'Test select string'
     decimal:
       title: "Test decimal"
-      type: "number"
+      type: float
     number:
       title: "Test number min/max/step"
       type: "integer"
