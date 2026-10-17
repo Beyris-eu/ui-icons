@@ -49,6 +49,8 @@ class IconSource extends SourcePluginBase {
         '#default_settings' => $value['settings'] ?? [],
         '#show_settings' => TRUE,
         '#return_id' => TRUE,
+        // Source forms are often narrow, a builder sidebar for instance.
+        '#result_format' => 'grid',
       ],
     ];
 
