@@ -22,6 +22,13 @@
           jQuery(iconSelector).autocomplete('option', {
             delay: 500,
             minLength: 2,
+            // jQuery UI does not keep the suggestions in the window: next to
+            // its right edge, a menu wider than the input was cut off.
+            position: {
+              my: 'left top',
+              at: 'left bottom',
+              collision: 'flipfit',
+            },
           });
         });
     },

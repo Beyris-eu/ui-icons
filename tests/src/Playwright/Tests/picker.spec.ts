@@ -358,3 +358,22 @@ test('Picking hands the focus back to the input', { tag: [ '@base' ] }, async ({
   await expect(pickerInput(page)).toBeFocused()
   expect(await page.evaluate(() => window.scrollY)).toBe(scrollY)
 })
+
+// jQuery UI aligns the suggestions on the left of the input and does not keep
+// them in the window: next to its right edge, as in a builder side panel, a
+// menu wider than the input was cut off.
+test('Suggestions stay inside the window next to its right edge', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  await useAutocompleteWidget(drupal)
+  await page.goto(config.contentTypeAdd.replace('{bundle}', BUNDLE_ID))
+  await autocompleteInput(page).evaluate((input) => {
+    input.style.cssText = 'position: fixed; top: 100px; right: 0; width: 60px;'
+  })
+
+  await autocompleteInput(page).fill(`${PACK_ID}:foo`)
+  const menu = page.locator('ul.ui-autocomplete', { has: page.locator('.ui-icons-result') })
+  await expect(menu.locator('li')).toHaveCount(1)
+
+  const box = await menu.boundingBox()
+  expect(box.width).toBeGreaterThan(100)
+  expect(box.x + box.width).toBeLessThanOrEqual(page.viewportSize().width)
+})
