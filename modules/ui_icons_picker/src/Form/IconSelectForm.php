@@ -83,6 +83,7 @@ final class IconSelectForm extends FormBase {
       'wrapper_id' => $wrapper_id,
       'allowed_icon_pack' => $allowed_icon_pack,
       'dialog_target' => $dialog_target,
+      'required' => $required,
     ] = $dialog_options;
 
     if (!$modal_state = static::getModalState($form_state)) {
@@ -146,7 +147,7 @@ final class IconSelectForm extends FormBase {
       return $form;
     }
 
-    $form['list'] = $this->buildIconList($icons);
+    $form['list'] = $this->buildIconList($icons, $required);
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
@@ -187,7 +188,7 @@ final class IconSelectForm extends FormBase {
   /**
    * Reads the modal dialog options the picker was opened with.
    *
-   * @return array{wrapper_id: string, allowed_icon_pack: array, dialog_target: string}|null
+   * @return array{wrapper_id: string, allowed_icon_pack: array, dialog_target: string, required: bool}|null
    *   The options, or NULL when they are missing, in which case a redirect to
    *   the front page has already been sent.
    */
@@ -221,6 +222,7 @@ final class IconSelectForm extends FormBase {
       'wrapper_id' => $wrapper_id,
       'allowed_icon_pack' => empty($allowed_icon_pack) ? [] : explode('+', $allowed_icon_pack),
       'dialog_target' => $dialog_target,
+      'required' => (bool) ($options['query']['required'] ?? FALSE),
     ];
   }
 
@@ -271,11 +273,13 @@ final class IconSelectForm extends FormBase {
    *
    * @param array $icons
    *   Icon full ids, or `value`/`label` pairs when they come from a search.
+   * @param bool $required
+   *   Whether the field the picker was opened for is required.
    *
    * @return array
    *   The list container render array.
    */
-  private function buildIconList(array $icons): array {
+  private function buildIconList(array $icons, bool $required): array {
     // Add the generic mass preview library.
     // Set a specific key to have the list of icons to load for preview.
     $list = [
@@ -304,10 +308,11 @@ final class IconSelectForm extends FormBase {
       }
     }
 
-    // Empty icon to allow deletion of selection.
-    $options = [
-      '_none_' => '<img src="/core/themes/claro/images/icons/e34f4f/crossout.svg" title="Select none" width="32" height="32">',
-    ];
+    $options = [];
+    // Empty icon to allow deletion of selection, only for optional fields.
+    if (!$required) {
+      $options['_none_'] = '<img src="/core/themes/claro/images/icons/e34f4f/crossout.svg" title="Select none" width="32" height="32">';
+    }
     foreach ($icons as $icon_data) {
       if (is_array($icon_data)) {
         $options[$icon_data['value']] = $icon_data['label'];
