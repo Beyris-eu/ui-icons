@@ -30,6 +30,7 @@ class IconSourceSummaryTest extends KernelTestBase {
     'system',
     'ui_icons',
     'ui_icons_patterns',
+    'ui_icons_test',
     'ui_patterns',
     'user',
   ];
