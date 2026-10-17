@@ -189,10 +189,18 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       return $result;
     }
 
+    $allowed_icon_pack = array_filter($this->settings['allowed_icon_pack'] ?? []);
     foreach ($query as $node) {
       /** @var \DOMElement $node */
+      $icon_full_id = $node->getAttribute('data-icon-id');
+      // The editor source mode lets any icon id through the selector limit.
+      $pack_id = IconDefinition::getIconDataFromId($icon_full_id)['pack_id'] ?? NULL;
+      if ($allowed_icon_pack && !in_array($pack_id, $allowed_icon_pack, TRUE)) {
+        $node->parentNode->removeChild($node);
+        continue;
+      }
       $build = $this->getWrappedRenderable(
-        $node->getAttribute('data-icon-id'),
+        $icon_full_id,
         $this->extractSettings($node),
         $this->extractAttributes($node),
       );

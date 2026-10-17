@@ -187,4 +187,20 @@ class IconEmbedFilterTest extends KernelTestBase {
     }
   }
 
+  /**
+   * Tests an icon from a pack the filter does not allow is not rendered.
+   */
+  public function testProcessAllowedIconPack(): void {
+    $this->filter->setConfiguration([
+      'settings' => ['allowed_icon_pack' => [self::TEST_ICON_PACK_ID => self::TEST_ICON_PACK_ID]],
+    ]);
+
+    $html = '<p><drupal-icon data-icon-id="test_path:foo"></drupal-icon><drupal-icon data-icon-id="test_svg:bar"></drupal-icon></p>';
+    $processed = $this->filter->process($html, 'en')->getProcessedText();
+
+    $this->assertStringContainsString(self::TEST_ICON_FILENAME, $processed);
+    $this->assertStringNotContainsString('test_svg', $processed);
+    $this->assertSame(1, substr_count($processed, 'drupal-icon'));
+  }
+
 }
