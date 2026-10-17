@@ -9,6 +9,8 @@ use Drupal\field\FieldConfigStorage;
 use Drupal\field\FieldStorageConfigInterface;
 use Drupal\field\FieldStorageConfigStorage;
 use Drupal\Tests\media\Functional\MediaFunctionalTestBase;
+use Drupal\ui_icons_media\Plugin\media\Source\Icon;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -18,6 +20,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  * @internal
  */
 #[RunTestsInSeparateProcesses]
+#[CoversClass(Icon::class)]
 #[Group('ui_icons')]
 class MediaSourceTest extends MediaFunctionalTestBase {
 

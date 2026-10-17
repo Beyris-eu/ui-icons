@@ -7,13 +7,18 @@ namespace Drupal\ui_icons_menu\Hook;
 use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Theme\Icon\IconDefinition;
+use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\Core\Url;
+use Drupal\menu_link_content\MenuLinkContentInterface;
+use Drupal\system\MenuInterface;
 
 /**
  * Hook implementations for ui_icons_menu.
@@ -24,9 +29,27 @@ class UiIconsMenuHooks {
 
   use StringTranslationTrait;
 
+  /**
+   * Widgets of the menu link field, set by ::entityBaseFieldInfoAlter().
+   */
+  private const LINK_WIDGETS = ['icon_link_widget', 'icon_link_attributes_widget'];
+
+  /**
+   * Icon settings of a menu that has none of its own.
+   */
+  private const DEFAULT_SETTINGS = [
+    'icon_selector' => 'icon_autocomplete',
+    'result_format' => 'list',
+    'icon_required' => FALSE,
+    'icon_position' => TRUE,
+    'allowed_icon_pack' => [],
+  ];
+
   public function __construct(
     protected readonly ModuleHandlerInterface $moduleHandler,
     protected readonly RendererInterface $renderer,
+    protected readonly EntityTypeManagerInterface $entityTypeManager,
+    protected readonly IconPackManagerInterface $pluginManagerIconPack,
   ) {}
 
   /**
@@ -38,6 +61,7 @@ class UiIconsMenuHooks {
       $output = '';
       $output .= '<h3>' . $this->t('About') . '</h3>';
       $output .= '<p>' . $this->t('The UI Icons Menu module overtakes the core default widget for menu link content entities, allowing you to set icons on menu links.') . '</p>';
+      $output .= '<p>' . $this->t('The icon selector and the allowed icon packs of each menu are set on the menu edit form.') . '</p>';
       return $output;
     }
     return NULL;
@@ -46,8 +70,7 @@ class UiIconsMenuHooks {
   /**
    * Implements hook_entity_base_field_info_alter().
    *
-   * @todo set settings options, position and required as menu setting or global
-   * for all menus.
+   * Each menu can override these settings, see ::formMenuFormAlter().
    */
   #[Hook('entity_base_field_info_alter')]
   public function entityBaseFieldInfoAlter(array &$fields, EntityTypeInterface $entity_type): void {
@@ -63,12 +86,126 @@ class UiIconsMenuHooks {
     $fields['link']->setDisplayOptions('form', [
       'type' => $type,
       // Allow icon position and settings.
-      'settings' => [
-        'icon_required' => FALSE,
-        'icon_position' => TRUE,
-        'show_settings' => TRUE,
-      ],
+      'settings' => ['show_settings' => TRUE] + self::DEFAULT_SETTINGS,
     ]);
+  }
+
+  /**
+   * Implements hook_form_BASE_FORM_ID_alter() for menu_form.
+   *
+   * Each menu sets the icon widget of its own links.
+   */
+  #[Hook('form_menu_form_alter')]
+  public function formMenuFormAlter(array &$form, FormStateInterface $form_state): void {
+    $form_object = $form_state->getFormObject();
+    $menu = method_exists($form_object, 'getEntity') ? $form_object->getEntity() : NULL;
+    if (!$menu instanceof MenuInterface) {
+      return;
+    }
+    $own_settings = $menu->getThirdPartySettings('ui_icons_menu');
+    $settings = $own_settings + self::DEFAULT_SETTINGS;
+
+    $selectors = ['icon_autocomplete' => $this->t('Autocomplete')];
+    if ($this->moduleHandler->moduleExists('ui_icons_picker')) {
+      $selectors['icon_picker'] = $this->t('Picker');
+    }
+
+    // Same fields and labels as IconLinkWidgetTrait::settingsForm().
+    $element = [
+      '#type' => 'details',
+      '#title' => $this->t('Icons'),
+      '#description' => $this->t('How icons are selected on the links of this menu.'),
+      '#open' => $own_settings !== [],
+      '#tree' => TRUE,
+    ];
+    $element['icon_selector'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Icon selector'),
+      '#options' => $selectors,
+      '#default_value' => $settings['icon_selector'],
+    ];
+    $element['result_format'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Result format'),
+      '#options' => ['list' => $this->t('List'), 'grid' => $this->t('Grid')],
+      '#default_value' => $settings['result_format'],
+      '#states' => [
+        'visible' => [
+          ':input[name="ui_icons_menu[icon_selector]"]' => ['value' => 'icon_autocomplete'],
+        ],
+      ],
+    ];
+    $element['icon_required'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Icon required'),
+      '#default_value' => $settings['icon_required'],
+    ];
+    $element['icon_position'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Allow icon display position selection'),
+      '#description' => $this->t('If selected, a "position" select will be made available.'),
+      '#default_value' => $settings['icon_position'],
+    ];
+    $element['allowed_icon_pack'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Allowed icon packs'),
+      '#description' => $this->t('If none are selected, all will be allowed.'),
+      '#options' => $this->pluginManagerIconPack->listIconPackOptions(TRUE),
+      '#default_value' => $settings['allowed_icon_pack'],
+    ];
+
+    // Above the links table of the edit form, not below it.
+    $position = array_search('links', array_keys($form), TRUE);
+    if ($position === FALSE) {
+      $form['ui_icons_menu'] = $element;
+    }
+    else {
+      $form = array_slice($form, 0, $position, TRUE) + ['ui_icons_menu' => $element] + array_slice($form, $position, NULL, TRUE);
+    }
+
+    $form['#entity_builders'][] = [static::class, 'menuEntityBuilder'];
+  }
+
+  /**
+   * Entity builder storing the icon settings on the menu.
+   *
+   * @see ::formMenuFormAlter()
+   */
+  public static function menuEntityBuilder(string $entity_type_id, MenuInterface $menu, array &$form, FormStateInterface $form_state): void {
+    $values = $form_state->getValue('ui_icons_menu');
+    $settings = [
+      'icon_selector' => (string) $values['icon_selector'],
+      'result_format' => (string) $values['result_format'],
+      'icon_required' => (bool) $values['icon_required'],
+      'icon_position' => (bool) $values['icon_position'],
+      'allowed_icon_pack' => array_values(array_filter($values['allowed_icon_pack'])),
+    ];
+    foreach ($settings as $key => $value) {
+      $menu->setThirdPartySetting('ui_icons_menu', $key, $value);
+    }
+  }
+
+  /**
+   * Implements hook_ENTITY_TYPE_prepare_form() for menu_link_content.
+   *
+   * Applies the icon settings of the link's menu to its widget. Core has set
+   * the form display by now. It is cloned, as the loaded one may serve another
+   * form of the request.
+   */
+  #[Hook('menu_link_content_prepare_form')]
+  public function menuLinkContentPrepareForm(MenuLinkContentInterface $menu_link, string $operation, FormStateInterface $form_state): void {
+    $menu = $this->entityTypeManager->getStorage('menu')->load($menu_link->getMenuName());
+    $settings = $menu instanceof MenuInterface ? $menu->getThirdPartySettings('ui_icons_menu') : [];
+    $display = $form_state->get('form_display');
+    $component = $display?->getComponent('link');
+    if ($settings === [] || !in_array($component['type'] ?? NULL, self::LINK_WIDGETS, TRUE)) {
+      return;
+    }
+
+    $component['settings'] = $settings + $component['settings'];
+    $display = clone $display;
+    $display->setComponent('link', $component);
+    $form_state->set('form_display', $display);
   }
 
   /**

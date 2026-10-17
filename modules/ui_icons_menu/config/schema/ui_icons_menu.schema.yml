@@ -1,0 +1,22 @@
+system.menu.*.third_party.ui_icons_menu:
+  type: mapping
+  label: 'UI Icons menu link settings'
+  mapping:
+    icon_selector:
+      type: string
+      label: 'Icon selector'
+    result_format:
+      type: string
+      label: 'Autocomplete result format'
+    icon_required:
+      type: boolean
+      label: 'Icon required'
+    icon_position:
+      type: boolean
+      label: 'Allow icon display position selection'
+    allowed_icon_pack:
+      type: sequence
+      label: 'Allowed icon packs'
+      sequence:
+        type: string
+        label: 'Icon pack ID'
