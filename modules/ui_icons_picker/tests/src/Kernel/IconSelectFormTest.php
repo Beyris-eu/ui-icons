@@ -82,7 +82,7 @@ class IconSelectFormTest extends KernelTestBase {
 
     $this->assertSame(self::WRAPPER_ID, $form['wrapper_id']['#value']);
 
-    $options = $form['list']['icon_full_id']['#options'];
+    $options = $form['results']['list']['icon_full_id']['#options'];
     // The empty option always comes first so a selection can be cleared.
     $this->assertArrayHasKey('_none_', $options);
     unset($options['_none_']);
@@ -99,7 +99,7 @@ class IconSelectFormTest extends KernelTestBase {
   public function testBuildFormWithoutPackLimit(): void {
     $form = $this->buildPicker(['wrapper_id' => self::WRAPPER_ID]);
 
-    $options = $form['list']['icon_full_id']['#options'];
+    $options = $form['results']['list']['icon_full_id']['#options'];
     unset($options['_none_']);
 
     $packs = [];
@@ -120,7 +120,7 @@ class IconSelectFormTest extends KernelTestBase {
       'allowed_icon_pack' => 'test_path',
     ]);
 
-    $attached = $form['list']['#attached'];
+    $attached = $form['results']['list']['#attached'];
     $this->assertContains('ui_icons_picker/library', $attached['library']);
     $this->assertContains('ui_icons/ui_icons.preview', $attached['library']);
 
@@ -141,7 +141,7 @@ class IconSelectFormTest extends KernelTestBase {
 
     $this->assertSame('foo', $form['filters']['filter']['#default_value']);
 
-    $options = $form['list']['icon_full_id']['#options'];
+    $options = $form['results']['list']['icon_full_id']['#options'];
     unset($options['_none_']);
     $this->assertNotEmpty($options);
   }
@@ -155,11 +155,11 @@ class IconSelectFormTest extends KernelTestBase {
       ['filter' => 'nothing_can_ever_match_this_query'],
     );
 
-    $this->assertSame('markup', $form['list']['#type']);
-    $this->assertStringContainsString('No icon found', (string) $form['list']['#markup']);
+    $this->assertSame('markup', $form['results']['list']['#type']);
+    $this->assertStringContainsString('No icon found', (string) $form['results']['list']['#markup']);
     // The empty state stops before the select button and the pager.
     $this->assertArrayNotHasKey('actions', $form);
-    $this->assertArrayNotHasKey('pagination', $form);
+    $this->assertArrayNotHasKey('pagination', $form['results']);
   }
 
   /**
@@ -172,7 +172,7 @@ class IconSelectFormTest extends KernelTestBase {
     ]);
 
     $this->assertArrayHasKey('actions', $form);
-    $this->assertArrayNotHasKey('pagination', $form);
+    $this->assertArrayNotHasKey('pagination', $form['results']);
   }
 
   /**
@@ -211,7 +211,7 @@ class IconSelectFormTest extends KernelTestBase {
    * Tests submitting without a selection is rejected.
    */
   public function testValidateFormRequiresSelection(): void {
-    $form = ['list' => ['#parents' => ['list']]];
+    $form = ['results' => ['list' => ['#parents' => ['results', 'list']]]];
     $form_state = new FormState();
     $form_state->setTriggeringElement(['#parents' => ['submit']]);
 
@@ -226,7 +226,7 @@ class IconSelectFormTest extends KernelTestBase {
    * Tests validation is skipped for the pager and search buttons.
    */
   public function testValidateFormIgnoresOtherButtons(): void {
-    $form = ['list' => ['#parents' => ['list']]];
+    $form = ['results' => ['list' => ['#parents' => ['results', 'list']]]];
     $form_state = new FormState();
     $form_state->setTriggeringElement(['#parents' => ['search']]);
 

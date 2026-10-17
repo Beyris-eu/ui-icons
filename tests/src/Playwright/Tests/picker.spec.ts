@@ -236,6 +236,21 @@ test('Filter the grid and clear a selection', { tag: [ '@base' ] }, async ({ pag
   })
 })
 
+// The auto-search used to replace the whole form, the filter input included,
+// so whatever was typed while it ran landed before the first letters.
+test('Typing in the filter survives the auto-search', { tag: [ '@base' ] }, async ({ page }) => {
+  await openPicker(page)
+  await page.locator('input[name="filter"]').click()
+
+  const search = page.waitForResponse((response) => response.url().includes('_wrapper_format=drupal_ajax'))
+  await page.keyboard.type('b')
+  await search
+  await expect(page.locator('.ajax-progress, .ajax-progress-throbber')).toHaveCount(0)
+  await page.keyboard.type('ar')
+
+  await expect(page.locator('input[name="filter"]')).toHaveValue('bar')
+})
+
 test('Open the grid from the autocomplete preview', { tag: [ '@base' ] }, async ({ page, drupal }) => {
   await useAutocompleteWidget(drupal)
   await page.goto(config.contentTypeAdd.replace('{bundle}', BUNDLE_ID))

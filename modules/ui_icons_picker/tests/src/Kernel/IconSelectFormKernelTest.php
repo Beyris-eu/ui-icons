@@ -72,7 +72,7 @@ class IconSelectFormKernelTest extends KernelTestBase {
     $form = $this->container->get('form_builder')
       ->buildForm(IconSelectForm::class, $form_state);
 
-    $this->assertSame($expected, isset($form['list']['icon_full_id']['#options']['_none_']));
+    $this->assertSame($expected, isset($form['results']['list']['icon_full_id']['#options']['_none_']));
   }
 
 }

@@ -112,8 +112,7 @@ final class IconSelectForm extends FormBase {
 
     $icons = array_slice($icons, $pager['offset'], self::NUM_PER_PAGE);
 
-    $form['#prefix'] = '<div id="' . self::AJAX_WRAPPER_ID . '"><div id="' . self::MESSAGE_WRAPPER_ID . '"></div>';
-    $form['#suffix'] = '</div>';
+    $form['#prefix'] = '<div id="' . self::MESSAGE_WRAPPER_ID . '"></div>';
 
     $form['wrapper_id'] = [
       '#type' => 'hidden',
@@ -139,15 +138,22 @@ final class IconSelectForm extends FormBase {
 
     $form['filters'] = $this->buildFilters($input['filter'] ?? '', $ajax_settings);
 
+    $form['results'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'id' => self::AJAX_WRAPPER_ID,
+      ],
+    ];
+
     if (empty($icons)) {
-      $form['list'] = [
+      $form['results']['list'] = [
         '#type' => 'markup',
         '#markup' => $this->t('No icon found, please adjust your filters and try again.'),
       ];
       return $form;
     }
 
-    $form['list'] = $this->buildIconList($icons, $required);
+    $form['results']['list'] = $this->buildIconList($icons, $required);
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
@@ -171,16 +177,16 @@ final class IconSelectForm extends FormBase {
       return $form;
     }
 
-    $form['pagination'] = [
+    $form['results']['pagination'] = [
       '#type' => 'container',
       '#attributes' => [
         'class' => ['pagination'],
       ],
     ];
 
-    $form['pagination']['page_previous'] = $pager['page_previous'];
-    $form['pagination']['page_next'] = $pager['page_next'];
-    $form['pagination']['page_info'] = $pager['page_info'];
+    $form['results']['pagination']['page_previous'] = $pager['page_previous'];
+    $form['results']['pagination']['page_next'] = $pager['page_next'];
+    $form['results']['pagination']['page_info'] = $pager['page_info'];
 
     return $form;
   }
@@ -348,7 +354,7 @@ final class IconSelectForm extends FormBase {
 
     $icon_full_id = $form_state->getValue('icon_full_id');
     if (!$icon_full_id) {
-      $form_state->setError($form['list'], $this->t('Pick an icon to insert.'));
+      $form_state->setError($form['results']['list'], $this->t('Pick an icon to insert.'));
     }
   }
 
@@ -442,13 +448,13 @@ final class IconSelectForm extends FormBase {
       '#weight' => -10,
     ];
 
-    $output = (string) $renderer->renderRoot($form);
+    $output = (string) $renderer->renderRoot($form['results']);
     $messages = (string) $renderer->renderRoot($status_messages);
 
     $message_wrapper_id = '#' . self::MESSAGE_WRAPPER_ID;
 
-    $response->setAttachments($form['#attached']);
-    $response->addCommand(new ReplaceCommand('', $output));
+    $response->setAttachments($form['results']['#attached']);
+    $response->addCommand(new ReplaceCommand('#' . self::AJAX_WRAPPER_ID, $output));
     $response->addCommand(new HtmlCommand($message_wrapper_id, ''));
     $response->addCommand(new AppendCommand($message_wrapper_id, $messages));
 
