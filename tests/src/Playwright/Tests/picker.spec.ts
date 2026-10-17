@@ -324,3 +324,22 @@ test('The modal grid opens with its filter in view', { tag: [ '@base' ] }, async
   const content = page.locator('.icon-library-widget-modal .ui-dialog-content')
   expect(await content.evaluate((el) => el.scrollTop)).toBe(0)
 })
+
+// Core disables the input while the element rebuilds itself, so the dialog
+// could not hand the focus back to it, and the element opts out of core's
+// refocus after the rebuild: the focus fell to the page.
+test('Picking hands the focus back to the input', { tag: [ '@base' ] }, async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 300 })
+  await page.goto(config.contentTypeAdd.replace('{bundle}', BUNDLE_ID))
+  const input = pickerInput(page)
+  await input.scrollIntoViewIfNeeded()
+  const scrollY = await page.evaluate(() => window.scrollY)
+
+  await input.click()
+  await expect(page.locator('.icon-picker-modal__content')).toBeVisible()
+  await pickIcon(page, `${PACK_ID}:foo`)
+  await expect(page.locator('.ui-icons-preview-icon img[src$="foo.png"]')).toBeVisible()
+
+  await expect(pickerInput(page)).toBeFocused()
+  expect(await page.evaluate(() => window.scrollY)).toBe(scrollY)
+})

@@ -162,6 +162,17 @@
       once('dialog', 'input.form-icon-dialog', context).forEach((element) => {
         element.addEventListener('click', openDialog);
       });
+
+      // The input that received a picked icon is replaced by its rebuild.
+      if (Drupal.IconPicker.focusAfterRebuild && context.querySelector) {
+        const input = context.querySelector(
+          `input[name="${Drupal.IconPicker.focusAfterRebuild}"]`,
+        );
+        if (input) {
+          Drupal.IconPicker.focusAfterRebuild = null;
+          input.focus({ preventScroll: true });
+        }
+      }
     },
   };
 
@@ -192,6 +203,10 @@
       return;
     }
     elem.value = response.icon_full_id;
+    // Core disables the input during the rebuild this change starts, so the
+    // closing dialog cannot hand the focus back to it, and the element opts
+    // out of core's refocus. The behavior above focuses the rebuilt input.
+    Drupal.IconPicker.focusAfterRebuild = elem.name;
     jQuery(elem).trigger('change');
   };
 })(jQuery, Drupal, once, bodyScrollLock);
