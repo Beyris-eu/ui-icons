@@ -128,6 +128,18 @@
 
     preserveOpenerDialogState(element);
 
+    // jQuery UI focuses the filter as the dialog opens, before core turns the
+    // 95% height into pixels, and the browser scrolls the content to show it.
+    // Scroll back once core has sized the dialog.
+    const resetScroll = (event) => {
+      if (event.target.id !== Drupal.IconPicker.dialogTarget) {
+        return;
+      }
+      window.removeEventListener('dialogContentResize', resetScroll);
+      event.target.scrollTop = 0;
+    };
+    window.addEventListener('dialogContentResize', resetScroll);
+
     const myAjaxObject = Drupal.ajax(ajaxSettings);
     myAjaxObject.execute();
   };

@@ -310,3 +310,17 @@ for (const data of fastSaveCases) {
     await expect(page.locator('img[src$="foo.png"]')).toBeVisible()
   })
 }
+
+// jQuery UI focuses the filter as the dialog opens, while its 95% height is
+// still unresolved: core only converts it to pixels 20ms later. The browser
+// scrolled the content to show the focused filter and never scrolled back.
+test('The modal grid opens with its filter in view', { tag: [ '@base' ] }, async ({ page }) => {
+  // Short enough for the grid of the test pack to overflow the dialog.
+  await page.setViewportSize({ width: 600, height: 220 })
+  await openPicker(page)
+  await expect(page.locator('.icon-picker-modal__content img[src*="spinner.svg"]')).toHaveCount(0)
+
+  await expect(page.locator('.icon-library-widget-modal [name="filter"]')).toBeFocused()
+  const content = page.locator('.icon-library-widget-modal .ui-dialog-content')
+  expect(await content.evaluate((el) => el.scrollTop)).toBe(0)
+})
