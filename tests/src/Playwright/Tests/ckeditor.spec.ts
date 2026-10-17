@@ -449,3 +449,31 @@ for (const selector of [ 'icon_autocomplete', 'icon_picker' ]) {
     })
   })
 }
+
+// The dialog Save is an ajax submit, a different path from the node form in
+// picker.spec.ts. The element's own request is held so Save always lands
+// while it is in flight.
+test('Save the icon dialog while the element rebuilds keeps the icon', { tag: [ '@base' ] }, async ({ page }) => {
+  const iconId = `${PACK_ID}:foo`
+  const modal = page.locator('#drupal-modal')
+
+  await openEditor(page)
+  await page.getByRole('button', { name: 'Insert Icon' }).click()
+  await expect(modal.locator('[name="icon[icon_id]"]')).toBeVisible()
+
+  await page.route(/element_parents=/, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 3000))
+    await route.continue().catch(() => {})
+  })
+
+  await modal.locator('[name="icon[icon_id]"]').fill(iconId)
+  const results = page.locator('ul.ui-autocomplete li')
+  await expect(results).toHaveCount(1)
+  await results.first().click()
+  await page.locator('.ui-dialog-buttonpane').getByRole('button', { name: 'Save' }).click()
+  await expect(modal).toBeHidden()
+
+  const icons = await getEditorIcons(page)
+  expect(icons).toHaveLength(1)
+  expect(icons[0].id).toBe(iconId)
+})

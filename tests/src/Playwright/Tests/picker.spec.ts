@@ -276,3 +276,37 @@ test('Open the grid from the autocomplete preview', { tag: [ '@base' ] }, async 
     await expect(page.locator('.icon-picker-modal__content')).toBeVisible()
   })
 })
+
+// Core disables the input that triggered an ajax request until it answers,
+// and a disabled input is left out of the submitted form. The element's own
+// request is held here, so Save always lands while it is in flight instead
+// of depending on the server speed.
+const fastSaveCases: { name: string; pickSuggestion: boolean }[] = [
+  { name: 'after picking a suggestion', pickSuggestion: true },
+  { name: 'straight from typing the id', pickSuggestion: false },
+]
+
+for (const data of fastSaveCases) {
+  test(`Save ${data.name} while the element rebuilds keeps the icon`, { tag: [ '@base' ] }, async ({ page, drupal }) => {
+    await useAutocompleteWidget(drupal)
+    await page.goto(config.contentTypeAdd.replace('{bundle}', BUNDLE_ID))
+    await page.locator('[name="title[0][value]"]').fill(`Fast save ${data.name}`)
+
+    await page.route(/element_parents=/, async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+      // The page may have moved on by then, which is the point.
+      await route.continue().catch(() => {})
+    })
+
+    await autocompleteInput(page).fill(`${PACK_ID}:foo`)
+    if (data.pickSuggestion) {
+      const results = page.locator('ul.ui-autocomplete li')
+      await expect(results).toHaveCount(1)
+      await results.first().click()
+    }
+    await page.locator('[data-drupal-selector="edit-submit"]').click()
+
+    await drupal.expectMessage('has been created')
+    await expect(page.locator('img[src$="foo.png"]')).toBeVisible()
+  })
+}

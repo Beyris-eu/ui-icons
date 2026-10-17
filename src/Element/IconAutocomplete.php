@@ -265,8 +265,9 @@ class IconAutocomplete extends FormElementBase {
       'disable-refocus' => TRUE,
       'wrapper' => $ajax_wrapper_id,
       'effect' => 'none',
-      // As we used autocomplete we want matching events.
-      // @todo check for too early errors related to change.
+      // As we used autocomplete we want matching events. Core disables this
+      // input while the request runs, js/icon.autocomplete.js keeps it in a
+      // form submitted meanwhile.
       'event' => 'autocompleteclose change',
     ];
 

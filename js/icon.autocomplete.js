@@ -55,4 +55,38 @@
       });
     },
   };
+
+  /**
+   * Keeps the icon in a form submitted while the element rebuilds itself.
+   *
+   * Core disables the input that triggered an ajax request until it answers,
+   * and a disabled input is left out of the submitted values, so a Save in
+   * that window dropped the icon. Re-enable it before the form is serialized,
+   * for a plain submit and for an ajax one.
+   *
+   * @param {HTMLFormElement|undefined} form
+   *   The form being submitted.
+   */
+  const enableIconInputs = (form) => {
+    form
+      ?.querySelectorAll('.ui-icons-input-wrapper input:disabled')
+      .forEach((input) => {
+        input.disabled = false;
+      });
+  };
+
+  document.addEventListener(
+    'submit',
+    (event) => enableIconInputs(event.target),
+    true,
+  );
+
+  const { beforeSerialize } = Drupal.Ajax.prototype;
+  Drupal.Ajax.prototype.beforeSerialize = function iconBeforeSerialize(
+    element,
+    options,
+  ) {
+    enableIconInputs(this.$form?.[0]);
+    beforeSerialize.call(this, element, options);
+  };
 })(jQuery, Drupal, once);

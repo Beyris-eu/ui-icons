@@ -8,6 +8,7 @@ ui_icons.autocomplete:
   dependencies:
     - core/jquery
     - core/drupal
+    - core/drupal.ajax
     - core/once
     - core/drupal.autocomplete
 
