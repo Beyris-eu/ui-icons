@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Drupal\ui_icons_library\Controller;
 
+use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\TempStore\SharedTempStoreFactory;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\Core\Url;
 use Drupal\ui_icons\IconPreview;
@@ -31,7 +32,7 @@ class LibraryIndex extends ControllerBase {
 
   public function __construct(
     private readonly IconPackManagerInterface $pluginManagerIconPack,
-    private SharedTempStoreFactory $tempStoreFactory,
+    private PrivateTempStoreFactory $tempStoreFactory,
   ) {}
 
   /**
@@ -40,7 +41,7 @@ class LibraryIndex extends ControllerBase {
   public static function create(ContainerInterface $container): self {
     return new static(
       $container->get('plugin.manager.icon_pack'),
-      $container->get('tempstore.shared'),
+      $container->get('tempstore.private'),
     );
   }
 
@@ -55,7 +56,9 @@ class LibraryIndex extends ControllerBase {
     $this->showDisable = $temp_store->get('disabled') ?? 'off';
 
     $link = $this->t('hide disabled pack');
-    $url = Url::fromRoute('ui_icons_library.mode')->toString();
+    // The route token check puts the default mode in the path, the token only
+    // the given parameters: give the mode for both to match.
+    $url = Url::fromRoute('ui_icons_library.mode', ['mode' => 'off'])->toString();
     if ('off' === $this->showDisable) {
       $link = $this->t('show disabled pack');
       $url = Url::fromRoute('ui_icons_library.mode', ['mode' => 'on'])->toString();
@@ -65,6 +68,9 @@ class LibraryIndex extends ControllerBase {
       '#type' => 'html_tag',
       '#tag' => 'p',
       '#attributes' => ['class' => ['description']],
+      // The private tempstore keeps the choice per user, or per session when
+      // anonymous.
+      '#cache' => ['contexts' => ['session']],
       '#value' => $this->t(
         'List of Icon packs available (<a href="@url">@link</a>).',
         ['@url' => $url, '@link' => $link]
@@ -108,7 +114,12 @@ class LibraryIndex extends ControllerBase {
       $build['grid']['content'][$pack_id] = $this->buildCard($icon_data[$pack_id]);
     }
 
-    $this->cache()->set(self::CACHE_KEY, $icon_data);
+    $this->cache()->set(
+      self::CACHE_KEY,
+      $icon_data,
+      CacheBackendInterface::CACHE_PERMANENT,
+      ['icon_pack_plugin', 'icon_pack_collector'],
+    );
 
     return $build;
   }
@@ -156,6 +167,10 @@ class LibraryIndex extends ControllerBase {
 
     foreach (array_keys($card_data['icons']) as $icon_full_id) {
       $icon = $this->pluginManagerIconPack->getIcon((string) $icon_full_id);
+      // A card cached before its pack changed can list a removed icon.
+      if ($icon === NULL) {
+        continue;
+      }
       $build['#icons'][] = IconPreview::getPreview($icon, ['size' => self::PREVIEW_ICON_SIZE]);
     }
 
