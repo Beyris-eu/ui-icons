@@ -160,7 +160,7 @@ class IconEmbedFilterTest extends KernelTestBase {
       '<p>Test attributes: <drupal-icon data-icon-id="' . $icon_full_id . '" aria-label="foo" aria-hidden="true" role="presentation" /></p>',
       TRUE,
       [
-        '<span aria-hidden role="presentation" class="drupal-icon">',
+        '<span aria-hidden="true" role="presentation" class="drupal-icon">',
       ],
     ];
   }
@@ -185,6 +185,42 @@ class IconEmbedFilterTest extends KernelTestBase {
     foreach ($expected_contains as $contain) {
       $this->assertStringContainsString($contain, $result->getProcessedText());
     }
+  }
+
+  /**
+   * Data provider for ::testAriaHidden().
+   *
+   * @return \Generator
+   *   The test cases.
+   */
+  public static function providerAriaHidden(): iterable {
+    yield 'true' => ['true', 'aria-hidden="true"'];
+    yield 'false' => ['false', 'aria-hidden="false"'];
+    yield 'empty' => ['', NULL];
+    yield 'invalid' => ['hidden', NULL];
+  }
+
+  /**
+   * Tests only the 'true' and 'false' aria-hidden values are passed through.
+   *
+   * A bare aria-hidden attribute is undefined in ARIA, and any other value
+   * must not end up hiding the icon either.
+   *
+   * @param string $value
+   *   The aria-hidden value on the `<drupal-icon>` tag.
+   * @param string|null $expected
+   *   The attribute expected on the rendered icon, NULL for none.
+   */
+  #[DataProvider('providerAriaHidden')]
+  public function testAriaHidden(string $value, ?string $expected): void {
+    $html = '<drupal-icon data-icon-id="test_path:foo" aria-hidden="' . $value . '"></drupal-icon>';
+    $processed = $this->filter->process($html, 'en')->getProcessedText();
+
+    if (NULL === $expected) {
+      $this->assertStringNotContainsString('aria-hidden', $processed);
+      return;
+    }
+    $this->assertStringContainsString($expected, $processed);
   }
 
   /**

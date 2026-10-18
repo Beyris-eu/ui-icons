@@ -450,6 +450,24 @@ for (const selector of [ 'icon_autocomplete', 'icon_picker' ]) {
   })
 }
 
+// Below 600px core opens the dialog without autoResize, the only code turning
+// a percentage height into pixels. jQuery UI cannot read one, so a '75%'
+// height used to leave the dialog content 0px high.
+test('The icon dialog content is not clipped on a narrow viewport', { tag: [ '@base' ] }, async ({ page }) => {
+  const modal = page.locator('#drupal-modal')
+  const input = modal.locator('[name="icon[icon_id]"]')
+
+  await page.setViewportSize({ width: 360, height: 740 })
+  await openEditor(page)
+  await page.getByRole('button', { name: 'Insert Icon' }).click()
+  await expect(input).toBeVisible()
+
+  const modalBox = (await modal.boundingBox())!
+  const inputBox = (await input.boundingBox())!
+  expect(inputBox.y).toBeGreaterThanOrEqual(modalBox.y)
+  expect(inputBox.y + inputBox.height).toBeLessThanOrEqual(modalBox.y + modalBox.height)
+})
+
 // The dialog Save is an ajax submit, a different path from the node form in
 // picker.spec.ts. The element's own request is held so Save always lands
 // while it is in flight.
