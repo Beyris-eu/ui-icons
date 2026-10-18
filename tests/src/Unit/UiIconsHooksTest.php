@@ -193,7 +193,9 @@ class UiIconsHooksTest extends UnitTestCase {
   public function testPreprocessFromIconObject(): void {
     $icon = $this->createMock(IconDefinitionInterface::class);
     $icon->method('getPackId')->willReturn('test_path');
-    $icon->method('getId')->willReturn('baz');
+    // As in core: getId() is the full id, getIconId() the id within the pack.
+    $icon->method('getId')->willReturn('test_path:baz');
+    $icon->method('getIconId')->willReturn('baz');
 
     $variables = $this->preprocess($this->hooks(), ['#value' => ['object' => $icon]]);
 

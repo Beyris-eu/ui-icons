@@ -37,13 +37,11 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * Some base properties from FormElementBase.
  * - #description: (string) Help or description text for the input element.
- * - #placeholder: (string) Placeholder text for the input, default to
- *   'Start typing icon name'.
+ * - #placeholder: (string) Placeholder text for the input.
  * - #required: (bool) Whether or not input is required on the element.
  * - #size: (int): Textfield size, default 55.
- *
- * Global properties applied to the parent element:
- * - #attributes: (array) Attributes to the global element.
+ * - #attributes: (array) Attributes of the wrapper around the preview and the
+ *   input.
  *
  * @see web/core/lib/Drupal/Core/Render/Element/FormElementBase.php
  *

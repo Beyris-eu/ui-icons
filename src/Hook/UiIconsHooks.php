@@ -177,9 +177,9 @@ class UiIconsHooks {
     }
 
     $object = $element['#value']['object'] ?? NULL;
-    if (is_object($object) && method_exists($object, 'getPackId') && method_exists($object, 'getId')) {
+    if (is_object($object) && method_exists($object, 'getPackId') && method_exists($object, 'getIconId')) {
       $variables['pack_id'] = $object->getPackId();
-      $variables['icon_id'] = $object->getId();
+      $variables['icon_id'] = $object->getIconId();
       return TRUE;
     }
 

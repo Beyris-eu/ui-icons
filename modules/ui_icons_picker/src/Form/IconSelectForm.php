@@ -317,14 +317,14 @@ final class IconSelectForm extends FormBase {
     $options = [];
     // Empty icon to allow deletion of selection, only for optional fields.
     if (!$required) {
-      $options['_none_'] = '<img src="/core/themes/claro/images/icons/e34f4f/crossout.svg" title="Select none" width="32" height="32">';
+      $options['_none_'] = '<img src="' . base_path() . 'core/themes/claro/images/icons/e34f4f/crossout.svg" title="Select none" width="32" height="32">';
     }
     foreach ($icons as $icon_data) {
       if (is_array($icon_data)) {
         $options[$icon_data['value']] = $icon_data['label'];
         continue;
       }
-      $options[$icon_data] = '<img src="' . IconPreview::SPINNER_ICON . '" title="' . $icon_data . '" width="32" height="32">';
+      $options[$icon_data] = '<img src="' . base_path() . IconPreview::SPINNER_ICON . '" title="' . $icon_data . '" width="32" height="32">';
     }
 
     $list['icon_full_id'] = [

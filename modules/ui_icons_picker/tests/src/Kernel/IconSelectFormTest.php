@@ -176,6 +176,22 @@ class IconSelectFormTest extends KernelTestBase {
   }
 
   /**
+   * Tests the placeholder images still load from a subdirectory install.
+   */
+  public function testBuildFormImagesFollowBasePath(): void {
+    $GLOBALS['base_path'] = '/subdir/';
+
+    $form = $this->buildPicker([
+      'wrapper_id' => self::WRAPPER_ID,
+      'allowed_icon_pack' => 'test_path',
+    ]);
+
+    $options = $form['results']['list']['icon_full_id']['#options'];
+    $this->assertStringContainsString('src="/subdir/core/themes/claro/images/icons/e34f4f/crossout.svg"', $options['_none_']);
+    $this->assertStringContainsString('src="/subdir/core/themes/claro/images/icons/003ecc/spinner.svg"', $options['test_path:foo']);
+  }
+
+  /**
    * Tests the page submit handlers move the stored page and rebuild.
    */
   public function testPageSubmitHandlers(): void {
