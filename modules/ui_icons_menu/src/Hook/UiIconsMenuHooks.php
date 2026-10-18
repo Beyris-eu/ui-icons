@@ -178,7 +178,7 @@ class UiIconsMenuHooks {
       'result_format' => (string) $values['result_format'],
       'icon_required' => (bool) $values['icon_required'],
       'icon_position' => (bool) $values['icon_position'],
-      'allowed_icon_pack' => array_values(array_filter($values['allowed_icon_pack'])),
+      'allowed_icon_pack' => array_filter($values['allowed_icon_pack']),
     ];
     foreach ($settings as $key => $value) {
       $menu->setThirdPartySetting('ui_icons_menu', $key, $value);
@@ -265,14 +265,13 @@ class UiIconsMenuHooks {
   public function navigationMenuLinkTreeAlter(array &$tree): void {
     foreach ($tree as $item) {
       $definition = $item->link->getPluginDefinition()['options']['icon'] ?? NULL;
-      if (!isset($definition['target_id'])) {
+      if (!isset($definition['target_id']) || !$icon_data = IconDefinition::getIconDataFromId($definition['target_id'])) {
         continue;
       }
 
-      [$icon_pack, $icon] = explode(':', $definition['target_id']);
-      $definition['settings'] = NestedArray::mergeDeep($definition['settings'][$icon_pack] ?? [], ['class' => 'toolbar-button__icon']);
+      $definition['settings'] = NestedArray::mergeDeep($definition['settings'][$icon_data['pack_id']] ?? [], ['class' => 'toolbar-button__icon']);
 
-      $item->options['icon'] = $definition + ['pack_id' => $icon_pack, 'icon_id' => $icon];
+      $item->options['icon'] = $definition + $icon_data;
     }
   }
 

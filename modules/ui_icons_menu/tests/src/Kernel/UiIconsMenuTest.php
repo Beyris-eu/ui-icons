@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_icons_menu\Kernel;
 
 use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Menu\MenuTreeParameters;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Url;
 use Drupal\KernelTests\KernelTestBase;
@@ -191,6 +192,43 @@ class UiIconsMenuTest extends KernelTestBase {
     $this->container->get(UiIconsMenuHooks::class)->linkAlter($variables);
 
     $this->assertStringContainsString('foo:', (string) $variables['text']);
+  }
+
+  /**
+   * Tests UiIconsMenuHooks::navigationMenuLinkTreeAlter().
+   *
+   * Runs through the navigation menu tree, which is what invokes the alter.
+   */
+  public function testNavigationMenuLinkTreeAlter(): void {
+    $this->enableModules(['layout_builder', 'navigation']);
+
+    $icons = [
+      'Icon' => ['target_id' => 'test_path:foo', 'settings' => ['test_path' => ['width' => 10]]],
+      // Stored options are not validated, so a malformed id has to be skipped.
+      'Malformed' => ['target_id' => 'foo'],
+    ];
+    foreach ($icons as $title => $icon) {
+      MenuLinkContent::create([
+        'title' => $title,
+        'menu_name' => 'tools',
+        'link' => ['uri' => 'internal:/', 'options' => ['icon' => $icon]],
+      ])->save();
+    }
+
+    $menu_tree = $this->container->get('navigation.menu_tree');
+    $tree = $menu_tree->transform($menu_tree->load('tools', new MenuTreeParameters()), []);
+    $options = [];
+    foreach ($tree as $item) {
+      $options[$item->link->getTitle()] = $item->options['icon'] ?? NULL;
+    }
+
+    $this->assertSame([
+      'target_id' => 'test_path:foo',
+      'settings' => ['width' => 10, 'class' => 'toolbar-button__icon'],
+      'pack_id' => 'test_path',
+      'icon_id' => 'foo',
+    ], $options['Icon']);
+    $this->assertNull($options['Malformed']);
   }
 
 }

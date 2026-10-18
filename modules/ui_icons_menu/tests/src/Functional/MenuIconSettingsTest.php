@@ -52,11 +52,27 @@ class MenuIconSettingsTest extends BrowserTestBase {
 
     $menu = $this->container->get('entity_type.manager')->getStorage('menu')->loadUnchanged('tools');
     $this->assertSame('icon_picker', $menu->getThirdPartySetting('ui_icons_menu', 'icon_selector'));
-    $this->assertSame(['test_path'], $menu->getThirdPartySetting('ui_icons_menu', 'allowed_icon_pack'));
+    // Keyed by pack id like the field, widget and filter settings, as the
+    // widget summary matches packs by key.
+    $this->assertSame(['test_path' => 'test_path'], $menu->getThirdPartySetting('ui_icons_menu', 'allowed_icon_pack'));
     $this->assertTrue($menu->getThirdPartySetting('ui_icons_menu', 'icon_required'));
 
     $this->drupalGet('admin/structure/menu/manage/tools/add');
     $this->assertSession()->elementExists('css', 'input.form-icon-dialog[data-allowed-icon-pack="test_path"][required]');
+
+    $this->submitForm([
+      'title[0][value]' => 'Icon link',
+      'link[0][uri]' => '<front>',
+      'link[0][options][icon][icon_id]' => 'test_path:foo',
+      'link[0][options][icon_display]' => 'before',
+    ], 'Save');
+    $links = $this->container->get('entity_type.manager')->getStorage('menu_link_content')->loadByProperties(['title' => 'Icon link']);
+    $options = reset($links)->get('link')->first()->get('options')->getValue();
+    $this->assertSame('test_path:foo', $options['icon']['target_id']);
+    $this->assertSame('before', $options['icon_display']);
+    // The menu overview renders its links through ::linkAlter().
+    $this->drupalGet('admin/structure/menu/manage/tools');
+    $this->assertSession()->elementExists('css', 'img.icon-foo[src$="foo.png"]');
 
     $this->drupalGet('admin/structure/menu/manage/footer');
     $this->submitForm(['ui_icons_menu[result_format]' => 'grid'], 'Save');
