@@ -97,4 +97,32 @@ class IconSourceTest extends MediaKernelTestBase {
     $this->assertEquals('public://media-icons/generic/no-thumbnail.png', $plugin->getMetadata($media->reveal(), 'thumbnail_uri'));
   }
 
+  /**
+   * Tests icons from files sharing a basename get a thumbnail each.
+   */
+  public function testThumbnailPerIcon(): void {
+    $configuration = [
+      'source_field' => 'field_media_ui_icon',
+    ];
+    $plugin = Icon::create($this->container, $configuration, 'ui_icon', [
+      'default_thumbnail_filename' => 'no-thumbnail.png',
+    ]);
+
+    $thumbnails = [];
+    foreach (['test_same_basename:foo', 'test_same_basename:oo'] as $icon_full_id) {
+      $fieldItems = $this->prophesize('\Drupal\ui_icons_field\Plugin\Field\FieldType\IconFieldItemList');
+      $fieldItems->getValue()->willReturn([['target_id' => $icon_full_id]]);
+      $media = $this->prophesize('\Drupal\media\MediaInterface');
+      $media->get($configuration['source_field'])->willReturn($fieldItems->reveal());
+      $thumbnails[$icon_full_id] = $plugin->getMetadata($media->reveal(), 'thumbnail_uri');
+    }
+
+    $this->assertCount(2, array_unique($thumbnails));
+    $icon_pack_manager = $this->container->get('plugin.manager.icon_pack');
+    foreach ($thumbnails as $icon_full_id => $thumbnail) {
+      $source = $icon_pack_manager->getIcon($icon_full_id)->getSource();
+      $this->assertFileEquals($this->root . $source, $thumbnail);
+    }
+  }
+
 }

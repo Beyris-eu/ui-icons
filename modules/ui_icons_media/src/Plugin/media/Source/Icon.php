@@ -213,7 +213,9 @@ class Icon extends MediaSourceBase {
       return NULL;
     }
 
-    $filename = pathinfo($source, PATHINFO_BASENAME);
+    // The icon id is unique in its pack, the file basename is not: an
+    // {icon_id} pattern can give two files with the same name two ids.
+    $filename = $icon->getIconId() . '.' . pathinfo($source, PATHINFO_EXTENSION);
     $directory = $this::THUMBNAIL_DIRECTORY . DIRECTORY_SEPARATOR . $icon->getPackId();
     $destinationPath = $directory . DIRECTORY_SEPARATOR . $filename;
     try {

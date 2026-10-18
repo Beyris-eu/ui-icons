@@ -277,3 +277,14 @@ test_disabled:
     sources:
       - icons/png/*
   template: '{{ icon_id }}'
+
+# Two icons from files sharing a basename: the {icon_id} pattern gives the
+# second one another id.
+test_same_basename:
+  enabled: true
+  extractor: path
+  config:
+    sources:
+      - icons/flat_same_name/*.svg
+      - icons/group_same_name/group_1/f{icon_id}.svg
+  template: '{{ icon_id }}'
