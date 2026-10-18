@@ -1,7 +1,7 @@
 services:
   ui_icons.search:
     class: Drupal\ui_icons\IconSearch
-    arguments: ['@plugin.manager.icon_pack', '@renderer', '@cache.default']
+    arguments: ['@plugin.manager.icon_pack', '@renderer', '@cache.default', '@plugin.manager.icon_extractor']
 
   ui_icons.twig_extension:
     class: Drupal\ui_icons\Template\IconPreviewTwigExtension

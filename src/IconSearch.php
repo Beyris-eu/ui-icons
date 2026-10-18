@@ -9,6 +9,7 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\Core\Theme\Icon\IconDefinitionInterface;
+use Drupal\Core\Theme\Icon\IconExtractorPluginManager;
 use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -33,6 +34,7 @@ class IconSearch implements ContainerInjectionInterface {
     private readonly IconPackManagerInterface $pluginManagerIconPack,
     private readonly RendererInterface $renderer,
     private CacheBackendInterface $cache,
+    private readonly IconExtractorPluginManager $iconExtractorManager,
   ) {}
 
   /**
@@ -43,6 +45,7 @@ class IconSearch implements ContainerInjectionInterface {
       $container->get('plugin.manager.icon_pack'),
       $container->get('renderer'),
       $container->get('cache.default'),
+      $container->get('plugin.manager.icon_extractor'),
     );
   }
 
@@ -71,19 +74,12 @@ class IconSearch implements ContainerInjectionInterface {
       return [];
     }
 
-    $cache_key = $query . implode('', $allowed_icon_pack);
-    if (NULL !== $result_callback && is_array($result_callback)) {
-      $cache_key .= implode('', $result_callback);
-    }
-    $cache_key = hash('xxh3', $cache_key);
+    $callback_key = is_array($result_callback) ? implode('::', $result_callback) : NULL;
+    // Serialized so that no query or pack list can collide with another one.
+    $cid = 'icon_search:' . hash('xxh3', serialize([$query, $allowed_icon_pack, $max_result, $callback_key]));
 
-    $cache_data = [];
-
-    if ($cache = $this->cache->get('icon_search')) {
-      $cache_data = $cache->data;
-      if (isset($cache_data[$cache_key])) {
-        return $cache_data[$cache_key];
-      }
+    if ($cache = $this->cache->get($cid)) {
+      return $cache->data;
     }
 
     $result = $this->doSearch($query, $allowed_icon_pack, $max_result);
@@ -99,10 +95,9 @@ class IconSearch implements ContainerInjectionInterface {
       $result = $result_with_callback;
     }
 
-    $cache_data[$cache_key] = $result;
     $this->cache->set(
-      'icon_search',
-      $cache_data,
+      $cid,
+      $result,
       CacheBackendInterface::CACHE_PERMANENT,
       ['icon_pack_plugin', 'icon_pack_collector']
     );
@@ -236,7 +231,7 @@ class IconSearch implements ContainerInjectionInterface {
    *   The icon result passed through the callback.
    */
   private function createResultEntry(string $icon_full_id, callable $callback): mixed {
-    $icon = $this->pluginManagerIconPack->getIcon($icon_full_id);
+    $icon = $this->loadIcon($icon_full_id);
     if (!$icon instanceof IconDefinitionInterface) {
       return NULL;
     }
@@ -245,6 +240,38 @@ class IconSearch implements ContainerInjectionInterface {
     $rendered = $this->renderer->renderInIsolation($icon_renderable);
 
     return call_user_func($callback, $icon, $rendered);
+  }
+
+  /**
+   * Loads an icon straight from its extractor.
+   *
+   * IconPackManager::getIcon() goes through the icon collector, which keeps
+   * every icon it returns in one cache item loaded by any icon render. Search
+   * previews would grow it with every icon browsed, so do what the collector
+   * does on a miss, without storing the result.
+   *
+   * @param string $icon_full_id
+   *   The icon full id.
+   *
+   * @return \Drupal\Core\Theme\Icon\IconDefinitionInterface|null
+   *   The icon, or NULL if its pack does not list it.
+   *
+   * @see \Drupal\Core\Theme\Icon\IconCollector::resolveCacheMiss()
+   */
+  private function loadIcon(string $icon_full_id): ?IconDefinitionInterface {
+    $icon_data = IconDefinition::getIconDataFromId($icon_full_id);
+    $definition = $this->pluginManagerIconPack->getDefinition($icon_data['pack_id'], FALSE);
+    $icon_definition = $definition['icons'][$icon_full_id] ?? NULL;
+    if (NULL === $icon_definition) {
+      return NULL;
+    }
+
+    $icon_definition['icon_id'] = $icon_data['icon_id'];
+    unset($definition['icons']);
+
+    /** @var \Drupal\Core\Theme\Icon\IconExtractorInterface $extractor */
+    $extractor = $this->iconExtractorManager->createInstance($definition['extractor'], $definition);
+    return $extractor->loadIcon($icon_definition);
   }
 
 }

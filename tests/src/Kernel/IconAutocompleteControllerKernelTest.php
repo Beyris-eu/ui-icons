@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons\Kernel;
 
+use Drupal\Core\Render\Markup;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_icons\Controller\IconAutocompleteController;
 use Drupal\ui_icons\IconSearch;
 use Symfony\Component\HttpFoundation\Request;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -122,6 +126,50 @@ class IconAutocompleteControllerKernelTest extends KernelTestBase {
 
     $src = $img->item(0)->getAttribute('src');
     $this->assertStringEndsWith('tests/modules/ui_icons_test/icons/flat/foo.png', $src);
+  }
+
+  /**
+   * Provides max_result query values and the value passed to the search.
+   *
+   * @return \Generator
+   *   The test cases.
+   */
+  public static function providerMaxResult(): iterable {
+    yield 'above maximum' => ['100000', IconSearch::SEARCH_RESULT_MAX];
+    yield 'in range' => ['48', 48];
+    yield 'zero' => ['0', 1];
+    yield 'negative' => ['-5', 1];
+  }
+
+  /**
+   * Tests max_result from the query string is kept within the search limits.
+   */
+  #[DataProvider('providerMaxResult')]
+  public function testHandleSearchIconsMaxResult(string $max_result, int $expected): void {
+    $icon_search = $this->createMock(IconSearch::class);
+    $icon_search->expects($this->once())
+      ->method('search')
+      ->with('foo', [], $expected, $this->anything())
+      ->willReturn([]);
+
+    $controller = new IconAutocompleteController($icon_search);
+    $controller->handleSearchIcons(new Request(['q' => 'foo', 'max_result' => $max_result]));
+  }
+
+  /**
+   * Tests a pack label containing a colon is kept in both result formats.
+   */
+  public function testCreateResultEntryLabelWithColon(): void {
+    $icon = IconDefinition::create('test_pack', 'foo', 'template', NULL, NULL, [
+      'label' => new TranslatableMarkup('Material: Outlined'),
+    ]);
+    $preview = Markup::create('_preview_');
+
+    $entry = IconAutocompleteController::createResultEntry($icon, $preview);
+    $this->assertStringContainsString('<strong class="ui-icons-result-collection">Material: Outlined</strong>', (string) $entry['label']);
+
+    $entry = IconAutocompleteController::createResultEntryGrid($icon, $preview);
+    $this->assertStringContainsString('Foo (Material: Outlined)', (string) $entry['label']);
   }
 
 }
