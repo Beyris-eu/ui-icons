@@ -122,8 +122,8 @@ async function openPicker (page: Page): Promise<void> {
 /**
  * Pick an icon from the grid.
  *
- * The radio itself is `display: none`, the user clicks its label. Picking is
- * what submits the modal: js/library.js clicks the hidden select button on any
+ * The radio itself is visually hidden, the user clicks its label. Picking is
+ * what submits the modal: js/library.js clicks the hidden select button on a
  * radio click, so there is no separate confirmation step.
  *
  * @param {Page} page - The Playwright page.
@@ -173,6 +173,16 @@ async function applyFilter (page: Page, query: string): Promise<void> {
  */
 function isFormAjax (message: { url: () => string }): boolean {
   return message.url().includes('_wrapper_format=drupal_ajax')
+}
+
+/**
+ * The value of the focused element.
+ *
+ * @param {Page} page - The Playwright page.
+ * @returns {Promise<string>} The value, empty when the element has none.
+ */
+async function focusedValue (page: Page): Promise<string> {
+  return await page.evaluate(() => (document.activeElement as HTMLInputElement).value ?? '')
 }
 
 test.beforeEach('Setup', async ({ drupal }) => {
@@ -306,6 +316,23 @@ test('The filter searches on a changed value only', { tag: [ '@base' ] }, async 
   })
 })
 
+test('The results show they are loading during a search', { tag: [ '@base' ] }, async ({ page }) => {
+  await openPicker(page)
+  let release: () => void = () => {}
+  const held = new Promise<void>((resolve) => { release = resolve })
+  await page.route(/_wrapper_format=drupal_ajax/, async (route) => {
+    await held
+    await route.continue()
+  })
+
+  await page.locator('input[name="filter"]').fill('bar')
+  await expect(page.locator('#icon-results-wrapper')).toHaveAttribute('aria-busy', 'true')
+
+  release()
+  await expect(iconRadio(page, `${PACK_ID}:foo`)).toHaveCount(0)
+  await expect(page.locator('#icon-results-wrapper')).not.toHaveAttribute('aria-busy', 'true')
+})
+
 // Ajax deep merges drupalSettings into the previous ones, so a search, or a
 // shorter page, still sent the ids of the grid before it to the preview.
 test('The preview loads the listed icons only', { tag: [ '@base' ] }, async ({ page }) => {
@@ -323,6 +350,78 @@ test('The preview loads the listed icons only', { tag: [ '@base' ] }, async ({ p
   )
   expect(listed.length).toBeGreaterThan(0)
   expect([...posted].sort()).toEqual([...listed].sort())
+})
+
+// The radios were display: none, out of reach of the keyboard. The arrow keys
+// check the next radio and fire a click doing so, which must not pick it.
+test('Pick an icon with the keyboard', { tag: [ '@base' ] }, async ({ page }) => {
+  await openPicker(page)
+  await expect(page.locator('.icon-picker-modal__content img[src*="spinner.svg"]')).toHaveCount(0)
+  await expect(page.locator('.icon-library-widget-modal [name="filter"]')).toBeFocused()
+
+  let value = ''
+  await test.step('Tab reaches the grid and shows where the focus is', async () => {
+    await page.keyboard.press('Tab')
+    await expect(page.locator('input[name="icon_full_id"]').first()).toBeFocused()
+
+    const tile = page.locator('.icon-picker-modal__content .form-item:has(input:focus)')
+    await expect(tile).toHaveCount(1)
+    expect(await tile.evaluate((el) => getComputedStyle(el).outlineStyle)).not.toBe('none')
+  })
+
+  await test.step('Arrow keys move through the grid without picking', async () => {
+    await page.keyboard.press('ArrowRight')
+    await page.keyboard.press('ArrowRight')
+    value = await focusedValue(page)
+    expect(value).toContain(`${PACK_ID}:`)
+
+    await page.waitForTimeout(500)
+    await expect(page.locator('.icon-library-widget-modal')).toBeVisible()
+    await expect(pickerInput(page)).toHaveValue('')
+  })
+
+  await test.step('Enter picks the focused icon', async () => {
+    await page.keyboard.press('Enter')
+
+    await expect(page.locator('.icon-library-widget-modal')).toBeHidden()
+    await expect(pickerInput(page)).toHaveValue(value)
+  })
+
+  await test.step('Space picks the focused icon', async () => {
+    await expect(page.locator('.ui-icons-preview-icon')).toBeVisible()
+    await pickerInput(page).click()
+    await expect(page.locator('.icon-picker-modal__content img[src*="spinner.svg"]')).toHaveCount(0)
+    await page.locator('input[name="icon_full_id"]').first().focus()
+    await page.keyboard.press('ArrowRight')
+    const next = await focusedValue(page)
+    expect(next).not.toBe(value)
+
+    await page.keyboard.press(' ')
+
+    await expect(page.locator('.icon-library-widget-modal')).toBeHidden()
+    await expect(pickerInput(page)).toHaveValue(next)
+  })
+})
+
+test('The grid marks the current icon', { tag: [ '@base' ] }, async ({ page }) => {
+  await openPicker(page)
+  await pickIcon(page, `${PACK_ID}:bar`)
+  await expect(page.locator('.ui-icons-preview-icon img[src$="bar.png"]')).toBeVisible()
+
+  await test.step('Reopening checks the radio of the current icon', async () => {
+    await pickerInput(page).click()
+    await expect(page.locator('.icon-picker-modal__content')).toBeVisible()
+
+    await expect(iconRadio(page, `${PACK_ID}:bar`)).toBeChecked()
+  })
+
+  await test.step('A search leaving the current icon out raises no error', async () => {
+    await applyFilter(page, 'foo')
+
+    await expect(iconRadio(page, `${PACK_ID}:foo`)).toHaveCount(1)
+    await expect(iconRadio(page, `${PACK_ID}:bar`)).toHaveCount(0)
+    await expect(page.locator('.icon-library-widget-modal')).not.toContainText('illegal choice')
+  })
 })
 
 test('Open the grid from the autocomplete preview', { tag: [ '@base' ] }, async ({ page, drupal }) => {

@@ -43,8 +43,18 @@
     background-color: var(--color-gray-300, #e1e1e1);
   }
 
-  input.icon-preview-load {
-    display: none;
+  /* The icon the picker was opened with. */
+  .form-item:has(input:checked),
+  .form-item-icon-full-id:has(input:checked) {
+    border-color: var(--color-absolutezero, #003ecc);
+    background-color: var(--color-bgblue-active, #e6ecf8);
+  }
+
+  /* The radio is visually hidden, its tile shows the keyboard focus. */
+  .form-item:has(input:focus-visible),
+  .form-item-icon-full-id:has(input:focus-visible) {
+    outline: 2px solid var(--color-focus, #26a769);
+    outline-offset: 2px;
   }
   .icon-preview {
     width: var(--ui-icons-picker-preview-size, 2.89rem);
@@ -57,6 +67,12 @@
   button {
     margin: 0 1rem;
   }
+}
+
+/* Results waiting for a search, js/library.js sets the flag. */
+.ui-icons-picker-search [aria-busy="true"] {
+  cursor: progress;
+  opacity: 0.5;
 }
 
 /* Hide the modal 'Select' button, JavaScript trigger on click select. */

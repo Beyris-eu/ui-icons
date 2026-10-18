@@ -475,6 +475,19 @@ class IconSelectFormTest extends KernelTestBase {
   }
 
   /**
+   * Tests the icon the picker was opened with is the selected radio.
+   */
+  public function testCurrentIconIsSelected(): void {
+    $form = $this->buildPicker([
+      'wrapper_id' => self::WRAPPER_ID,
+      'allowed_icon_pack' => 'test_path',
+      'selected' => 'test_path:foo',
+    ]);
+
+    $this->assertSame('test_path:foo', $form['results']['list']['icon_full_id']['#default_value']);
+  }
+
+  /**
    * Tests a single character filter lists every icon.
    *
    * The search needs two characters, js/library.js does not send one. Paging

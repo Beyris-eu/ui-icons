@@ -123,6 +123,7 @@
           wrapper_id: element.getAttribute('data-wrapper-id'),
           allowed_icon_pack: element.getAttribute('data-allowed-icon-pack'),
           required: element.required ? 1 : 0,
+          selected: element.value,
         },
       },
     };

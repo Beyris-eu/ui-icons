@@ -82,6 +82,7 @@ final class IconSelectForm extends FormBase {
       'allowed_icon_pack' => $allowed_icon_pack,
       'dialog_target' => $dialog_target,
       'required' => $required,
+      'selected' => $selected,
     ] = $this->resolveDialogOptions();
 
     // Only the page is kept, form state is written to the database on every
@@ -145,7 +146,7 @@ final class IconSelectForm extends FormBase {
       return $form;
     }
 
-    $form['results']['list'] = $this->buildIconList($icons, $required, $allowed_icon_pack);
+    $form['results']['list'] = $this->buildIconList($icons, $required, $allowed_icon_pack, $selected);
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
@@ -186,7 +187,7 @@ final class IconSelectForm extends FormBase {
   /**
    * Reads the modal dialog options the picker was opened with.
    *
-   * @return array{wrapper_id: string, allowed_icon_pack: array, dialog_target: string, required: bool}
+   * @return array{wrapper_id: string, allowed_icon_pack: array, dialog_target: string, required: bool, selected: string}
    *   The options.
    *
    * @throws \Symfony\Component\HttpKernel\Exception\BadRequestHttpException
@@ -206,6 +207,7 @@ final class IconSelectForm extends FormBase {
     }
 
     $allowed_icon_pack = $options['query']['allowed_icon_pack'] ?? '';
+    $selected = $options['query']['selected'] ?? '';
 
     // Core strips 'target' from the dialog options before handing them to
     // jQuery UI, but it is still in the query the form action carries over.
@@ -222,6 +224,7 @@ final class IconSelectForm extends FormBase {
       'allowed_icon_pack' => empty($allowed_icon_pack) ? [] : explode('+', $allowed_icon_pack),
       'dialog_target' => $dialog_target,
       'required' => (bool) ($options['query']['required'] ?? FALSE),
+      'selected' => is_string($selected) ? $selected : '',
     ];
   }
 
@@ -255,6 +258,10 @@ final class IconSelectForm extends FormBase {
       'search' => [
         '#type' => 'submit',
         '#submit' => [[$this, 'searchSubmit']],
+        // The radio of the current icon is checked, and the grid rebuilt for
+        // the new filter may not hold it: validating it would report an
+        // illegal choice.
+        '#limit_validation_errors' => [],
         '#ajax' => $ajax_settings,
         '#value' => $this->t('Search'),
         '#attributes' => [
@@ -276,11 +283,13 @@ final class IconSelectForm extends FormBase {
    *   Whether the field the picker was opened for is required.
    * @param array $allowed_icon_pack
    *   The icon packs the picker is limited to, empty for all of them.
+   * @param string $selected
+   *   The icon the picker was opened with, checked when it is listed.
    *
    * @return array
    *   The list container render array.
    */
-  private function buildIconList(array $icons, bool $required, array $allowed_icon_pack): array {
+  private function buildIconList(array $icons, bool $required, array $allowed_icon_pack, string $selected): array {
     // Add the generic mass preview library.
     // Set a specific key to have the list of icons to load for preview.
     $list = [
@@ -332,8 +341,10 @@ final class IconSelectForm extends FormBase {
     $list['icon_full_id'] = [
       '#type' => 'radios',
       '#options' => $options,
+      '#default_value' => $selected,
+      // Hidden but focusable, so the arrow keys move through the grid.
       '#attributes' => [
-        'class' => ['icon-preview-load'],
+        'class' => ['icon-preview-load', 'visually-hidden'],
       ],
     ];
 
