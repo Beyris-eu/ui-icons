@@ -92,6 +92,19 @@ class IconWidgetKernelTest extends KernelTestBase {
   }
 
   /**
+   * Tests the picker selector falls back when ui_icons_picker is missing.
+   */
+  public function testFormElementPickerFallback(): void {
+    $entity = EntityTest::create([
+      'name' => 'sample entity',
+    ]);
+    $element = $this->buildWidgetForm($entity, ['icon_selector' => 'icon_picker']);
+
+    $this->assertSame('icon_autocomplete', $element['value']['#type']);
+    $this->assertSame('list', $element['value']['#result_format']);
+  }
+
+  /**
    * Build the icon widget form.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity

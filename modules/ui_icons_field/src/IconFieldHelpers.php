@@ -71,10 +71,12 @@ class IconFieldHelpers {
       return [];
     }
 
-    // Clean some icon values.
-    unset($filtered_values['icon_display'], $filtered_values['fields']['icon_display']);
+    // Clean some icon values. The settings sit under a form specific key,
+    // 'fields' in Field UI, 'options' in Views, so clean after reset().
+    $filtered_values = reset($filtered_values);
+    unset($filtered_values['icon_display']);
 
-    return reset($filtered_values);
+    return $filtered_values;
   }
 
 }

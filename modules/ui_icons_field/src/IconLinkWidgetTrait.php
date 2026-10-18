@@ -93,6 +93,7 @@ trait IconLinkWidgetTrait {
       '#options' => $options,
       '#default_value' => $this->getSetting('allowed_icon_pack'),
       '#multiple' => TRUE,
+      '#element_validate' => [[static::class, 'validateAllowedIconPack']],
     ];
 
     if (count($options) > 10) {
@@ -102,6 +103,20 @@ trait IconLinkWidgetTrait {
     }
 
     return $elements;
+  }
+
+  /**
+   * Form element validation handler for the allowed icon packs.
+   *
+   * Store only the checked packs, as `{id: id}` like the field type setting.
+   *
+   * @param array $element
+   *   The allowed_icon_pack form element.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state.
+   */
+  public static function validateAllowedIconPack(array &$element, FormStateInterface $form_state): void {
+    $form_state->setValueForElement($element, array_filter($element['#value']));
   }
 
   /**
@@ -162,7 +177,7 @@ trait IconLinkWidgetTrait {
     $label = $this->fieldDefinition->getLabel() ?? $this->t('Link');
     $field_name = $this->fieldDefinition->getName();
 
-    $icon_selector = $this->getSetting('icon_selector');
+    $icon_selector = $this->getIconSelector();
     $element['icon'] = [
       '#type' => $icon_selector,
       '#title' => $this->t('@name icon', ['@name' => $label]),

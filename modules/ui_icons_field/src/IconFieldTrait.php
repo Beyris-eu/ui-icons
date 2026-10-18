@@ -43,6 +43,25 @@ trait IconFieldTrait {
   }
 
   /**
+   * Get the icon selector element type.
+   *
+   * 'icon_picker' comes from the optional ui_icons_picker module. An unknown
+   * '#type' renders as nothing rather than failing, which would leave the
+   * field with no icon input at all, so fall back when it is gone.
+   *
+   * @return string
+   *   The form element type.
+   */
+  private function getIconSelector(): string {
+    $icon_selector = $this->getSetting('icon_selector');
+    if (!\Drupal::service('plugin.manager.element_info')->hasDefinition($icon_selector)) {
+      return 'icon_autocomplete';
+    }
+
+    return $icon_selector;
+  }
+
+  /**
    * Get the icon selector autocomplete format.
    *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup[]

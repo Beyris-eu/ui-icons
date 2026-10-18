@@ -99,7 +99,7 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     /** @var \Drupal\ui_icons_field\Plugin\Field\FieldType\IconType $item */
     $item = $items[$delta];
 
-    $icon_selector = $this->getSetting('icon_selector');
+    $icon_selector = $this->getIconSelector();
     $allowed_icon_pack = array_filter($this->fieldDefinition->getSetting('allowed_icon_pack') ?? []);
     $element['value'] = [
       '#type' => $icon_selector,
