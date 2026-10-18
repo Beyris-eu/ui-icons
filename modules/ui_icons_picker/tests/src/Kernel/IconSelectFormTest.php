@@ -53,11 +53,13 @@ class IconSelectFormTest extends KernelTestBase {
    * @param array $dialog_options
    *   Extra `dialogOptions`, siblings of `query`, `target` being the only key
    *   the form reads.
+   * @param \Drupal\Core\Form\FormState|null $form_state
+   *   The form state to build with, to inspect it afterwards.
    *
    * @return array
    *   The built form.
    */
-  private function buildPicker(array $query, array $input = [], array $dialog_options = []): array {
+  private function buildPicker(array $query, array $input = [], array $dialog_options = [], ?FormState $form_state = NULL): array {
     $request = Request::create('/ui-icons/picker/dialog', 'GET', [
       'dialogOptions' => $dialog_options + ['query' => $query],
     ]);
@@ -65,7 +67,7 @@ class IconSelectFormTest extends KernelTestBase {
     $request->setSession(new Session(new MockArraySessionStorage()));
     $this->container->get('request_stack')->push($request);
 
-    $form_state = new FormState();
+    $form_state ??= new FormState();
     if ($input) {
       $form_state->setUserInput($input);
     }
@@ -128,7 +130,9 @@ class IconSelectFormTest extends KernelTestBase {
     $this->assertContains('ui_icons/ui_icons.preview', $attached['library']);
 
     $preview_data = $attached['drupalSettings']['ui_icons_preview_data'];
-    $this->assertNotEmpty($preview_data['icon_full_ids']);
+    // Ajax deep merges settings into the previous ones, so they would still
+    // carry ids of the grid before. js/library.js reads them from the grid.
+    $this->assertArrayNotHasKey('icon_full_ids', $preview_data);
     $this->assertSame(['size' => 32], $preview_data['settings']);
     $this->assertTrue($preview_data['target_input_label']);
   }
@@ -402,6 +406,52 @@ class IconSelectFormTest extends KernelTestBase {
   }
 
   /**
+   * Tests the form state keeps the page only, not the icon list.
+   *
+   * The form state is written to the database on every ajax request of the
+   * picker, the icon list of a large pack weighs hundreds of kilobytes there.
+   */
+  public function testModalStateHoldsNoIcons(): void {
+    $form_state = new FormState();
+    $this->buildPicker(['wrapper_id' => self::WRAPPER_ID], [], [], $form_state);
+
+    $this->assertSame(['page' => 0], IconSelectForm::getModalState($form_state));
+  }
+
+  /**
+   * Data provider for ::testPackLibraries().
+   *
+   * @return array
+   *   The test cases: allowed packs query, whether the library is expected.
+   */
+  public static function providerPackLibraries(): array {
+    return [
+      'other pack allowed' => ['test_path', FALSE],
+      'pack allowed' => ['test_library', TRUE],
+      'every pack allowed' => ['', TRUE],
+    ];
+  }
+
+  /**
+   * Tests only the libraries of the allowed icon packs are attached.
+   *
+   * @param string $allowed_icon_pack
+   *   The `allowed_icon_pack` dialog query.
+   * @param bool $expected
+   *   Whether the library of the `test_library` pack is expected.
+   */
+  #[DataProvider('providerPackLibraries')]
+  public function testPackLibraries(string $allowed_icon_pack, bool $expected): void {
+    $form = $this->buildPicker([
+      'wrapper_id' => self::WRAPPER_ID,
+      'allowed_icon_pack' => $allowed_icon_pack,
+    ]);
+
+    $libraries = $form['results']['list']['#attached']['library'];
+    $this->assertSame($expected, in_array('ui_icons_test/test_library', $libraries, TRUE));
+  }
+
+  /**
    * Tests opening the picker without its dialog options is a bad request.
    */
   public function testMissingDialogOptionsIsBadRequest(): void {
@@ -422,6 +472,22 @@ class IconSelectFormTest extends KernelTestBase {
     $radios = $form['results']['list']['icon_full_id'];
     $this->assertContains('icon-picker-modal__none', $radios['_none_']['#wrapper_attributes']['class']);
     $this->assertStringContainsString('alt="Select none"', (string) $radios['#options']['_none_']);
+  }
+
+  /**
+   * Tests a single character filter lists every icon.
+   *
+   * The search needs two characters, js/library.js does not send one. Paging
+   * still posts it, and that must not empty the grid.
+   */
+  public function testSingleCharacterFilterListsEverything(): void {
+    $form = $this->buildPicker(
+      ['wrapper_id' => self::WRAPPER_ID, 'allowed_icon_pack' => 'test_path'],
+      ['filter' => 'f'],
+    );
+
+    $this->assertArrayHasKey('test_path:foo', $form['results']['list']['icon_full_id']['#options']);
+    $this->assertArrayHasKey('test_path:bar', $form['results']['list']['icon_full_id']['#options']);
   }
 
 }

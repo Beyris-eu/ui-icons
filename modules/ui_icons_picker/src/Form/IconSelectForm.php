@@ -84,30 +84,24 @@ final class IconSelectForm extends FormBase {
       'required' => $required,
     ] = $this->resolveDialogOptions();
 
+    // Only the page is kept, form state is written to the database on every
+    // ajax request and the icon list is cheap to get again from the manager.
     if (!$modal_state = static::getModalState($form_state)) {
-      $icon_list = $this->pluginManagerIconPack->getIcons($allowed_icon_pack);
-      $modal_state = [
-        'page' => 0,
-        'icon_list' => $icon_list,
-        'total_available' => count($icon_list),
-      ];
+      $modal_state = ['page' => 0];
       static::setModalState($form_state, $modal_state);
     }
 
     $input = $form_state->getUserInput();
     $query = $input['filter'] ?? '';
-    $icon_list = $modal_state['icon_list'] ?? [];
-    $total_available = $modal_state['total_available'] ?? 0;
 
-    if (empty($query)) {
-      $icons = array_keys($icon_list);
-      $pager = $this->createPager($modal_state['page'], $total_available);
-    }
-    else {
-      $icons = $this->iconSearch->search($query, $allowed_icon_pack, $total_available);
-      $pager = $this->createPager($modal_state['page'], count($icons));
+    $icons = array_keys($this->pluginManagerIconPack->getIcons($allowed_icon_pack));
+    // Below the search minimum js/library.js sends nothing, the pager still
+    // posts the filter and must not empty the grid.
+    if (mb_strlen(trim($query)) >= IconSearch::SEARCH_MIN_LENGTH) {
+      $icons = $this->iconSearch->search($query, $allowed_icon_pack, count($icons));
     }
 
+    $pager = $this->createPager($modal_state['page'], count($icons));
     $icons = array_slice($icons, $pager['offset'], self::NUM_PER_PAGE);
 
     $form['#prefix'] = '<div id="' . self::MESSAGE_WRAPPER_ID . '"></div>';
@@ -151,7 +145,7 @@ final class IconSelectForm extends FormBase {
       return $form;
     }
 
-    $form['results']['list'] = $this->buildIconList($icons, $required);
+    $form['results']['list'] = $this->buildIconList($icons, $required, $allowed_icon_pack);
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
@@ -280,11 +274,13 @@ final class IconSelectForm extends FormBase {
    *   Icon full ids, or `value`/`label` pairs when they come from a search.
    * @param bool $required
    *   Whether the field the picker was opened for is required.
+   * @param array $allowed_icon_pack
+   *   The icon packs the picker is limited to, empty for all of them.
    *
    * @return array
    *   The list container render array.
    */
-  private function buildIconList(array $icons, bool $required): array {
+  private function buildIconList(array $icons, bool $required, array $allowed_icon_pack): array {
     // Add the generic mass preview library.
     // Set a specific key to have the list of icons to load for preview.
     $list = [
@@ -298,8 +294,10 @@ final class IconSelectForm extends FormBase {
           'ui_icons/ui_icons.preview',
         ],
         'drupalSettings' => [
+          // No icon ids, ajax deep merges settings into the previous ones,
+          // which would keep ids of the grid before. js/library.js reads them
+          // from the grid.
           'ui_icons_preview_data' => [
-            'icon_full_ids' => $icons,
             'settings' => ['size' => self::PREVIEW_ICON_SIZE],
             'target_input_label' => TRUE,
           ],
@@ -308,9 +306,13 @@ final class IconSelectForm extends FormBase {
     ];
 
     foreach ($this->pluginManagerIconPack->getDefinitions() as $pack_definition) {
-      if (isset($pack_definition['library'])) {
-        $list['#attached']['library'][] = $pack_definition['library'];
+      if (!isset($pack_definition['library'])) {
+        continue;
       }
+      if ($allowed_icon_pack && !in_array($pack_definition['id'], $allowed_icon_pack, TRUE)) {
+        continue;
+      }
+      $list['#attached']['library'][] = $pack_definition['library'];
     }
 
     $options = [];

@@ -149,18 +149,30 @@ async function pickIcon (page: Page, value: string): Promise<void> {
 /**
  * Apply the name filter and wait for the grid to come back.
  *
- * The search button is hidden and its Drupal ajax is bound to `mousedown`, the
- * default for submit elements, which is exactly what js/library.js dispatches.
- * Driving it directly avoids the 600ms keyup debounce firing a second request.
+ * Enter searches at once and drops the pending debounced search, so a single
+ * request goes out.
  *
  * @param {Page} page - The Playwright page.
  * @param {string} query - The filter query.
  * @returns {Promise<void>}
  */
 async function applyFilter (page: Page, query: string): Promise<void> {
-  await page.locator('input[name="filter"]').fill(query)
-  await page.locator('.icon-ajax-search-submit').dispatchEvent('mousedown')
+  const filter = page.locator('input[name="filter"]')
+  await filter.fill(query)
+  const search = page.waitForResponse(isFormAjax)
+  await filter.press('Enter')
+  await search
   await page.locator('.ajax-progress, .ajax-progress-throbber').first().waitFor({ state: 'hidden' }).catch(() => {})
+}
+
+/**
+ * Whether a response or request is an ajax post of the picker form.
+ *
+ * @param {{ url: () => string }} message - The response or request.
+ * @returns {boolean} TRUE for a form ajax post.
+ */
+function isFormAjax (message: { url: () => string }): boolean {
+  return message.url().includes('_wrapper_format=drupal_ajax')
 }
 
 test.beforeEach('Setup', async ({ drupal }) => {
@@ -242,13 +254,75 @@ test('Typing in the filter survives the auto-search', { tag: [ '@base' ] }, asyn
   await openPicker(page)
   await page.locator('input[name="filter"]').click()
 
-  const search = page.waitForResponse((response) => response.url().includes('_wrapper_format=drupal_ajax'))
-  await page.keyboard.type('b')
+  const search = page.waitForResponse(isFormAjax)
+  await page.keyboard.type('ba')
   await search
   await expect(page.locator('.ajax-progress, .ajax-progress-throbber')).toHaveCount(0)
-  await page.keyboard.type('ar')
+  await page.keyboard.type('r')
 
   await expect(page.locator('input[name="filter"]')).toHaveValue('bar')
+})
+
+// The search used to fire on every keyup, arrows and Shift included, and
+// Enter posted at once and then again on its keyup.
+test('The filter searches on a changed value only', { tag: [ '@base' ] }, async ({ page }) => {
+  await openPicker(page)
+  const posts: string[] = []
+  page.on('request', (request) => {
+    if (isFormAjax(request)) {
+      posts.push(request.url())
+    }
+  })
+  const filter = page.locator('input[name="filter"]')
+  await filter.click()
+
+  await test.step('Keys that change nothing do not search', async () => {
+    await page.keyboard.press('ArrowLeft')
+    await page.keyboard.press('Shift')
+    await page.keyboard.press('End')
+    // Longer than the debounce.
+    await page.waitForTimeout(1000)
+    expect(posts).toHaveLength(0)
+  })
+
+  await test.step('A single character does not search', async () => {
+    await page.keyboard.type('b')
+    await page.waitForTimeout(1000)
+    expect(posts).toHaveLength(0)
+  })
+
+  await test.step('Two characters search once the typing stops', async () => {
+    const search = page.waitForResponse(isFormAjax)
+    await page.keyboard.type('a')
+    await search
+    await expect(iconRadio(page, `${PACK_ID}:bar`)).toHaveCount(1)
+    expect(posts).toHaveLength(1)
+  })
+
+  await test.step('Enter on an unchanged value does not search again', async () => {
+    await page.keyboard.press('Enter')
+    await page.waitForTimeout(1000)
+    expect(posts).toHaveLength(1)
+  })
+})
+
+// Ajax deep merges drupalSettings into the previous ones, so a search, or a
+// shorter page, still sent the ids of the grid before it to the preview.
+test('The preview loads the listed icons only', { tag: [ '@base' ] }, async ({ page }) => {
+  await openPicker(page)
+  await applyFilter(page, 'bar')
+  await expect(page.locator('.icon-picker-modal__content img[src*="spinner.svg"]')).toHaveCount(0)
+
+  const preview = page.waitForRequest((request) => request.url().includes('ui-icons/ajax/preview/icons'))
+  await applyFilter(page, 'foo')
+  // Search results are keyed by id, they reached the browser as an object.
+  const posted: string[] = Object.values((await preview).postDataJSON().icon_full_ids)
+
+  const listed = await page.locator('input[name="icon_full_id"]').evaluateAll(
+    (radios) => radios.map((radio) => (radio as HTMLInputElement).value).filter((value) => value !== '_none_'),
+  )
+  expect(listed.length).toBeGreaterThan(0)
+  expect([...posted].sort()).toEqual([...listed].sort())
 })
 
 test('Open the grid from the autocomplete preview', { tag: [ '@base' ] }, async ({ page, drupal }) => {
