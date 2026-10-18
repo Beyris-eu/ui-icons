@@ -17,6 +17,7 @@ use Drupal\ui_icons\IconPreview;
 use Drupal\ui_icons\IconSearch;
 use Drupal\ui_icons_picker\Ajax\UpdateIconSelectionCommand;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Provides an icon picker selector form.
@@ -76,15 +77,12 @@ final class IconSelectForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, ?array $options = NULL): array {
-    if (!$dialog_options = $this->resolveDialogOptions()) {
-      return [];
-    }
     [
       'wrapper_id' => $wrapper_id,
       'allowed_icon_pack' => $allowed_icon_pack,
       'dialog_target' => $dialog_target,
       'required' => $required,
-    ] = $dialog_options;
+    ] = $this->resolveDialogOptions();
 
     if (!$modal_state = static::getModalState($form_state)) {
       $icon_list = $this->pluginManagerIconPack->getIcons($allowed_icon_pack);
@@ -194,11 +192,13 @@ final class IconSelectForm extends FormBase {
   /**
    * Reads the modal dialog options the picker was opened with.
    *
-   * @return array{wrapper_id: string, allowed_icon_pack: array, dialog_target: string, required: bool}|null
-   *   The options, or NULL when they are missing, in which case a redirect to
-   *   the front page has already been sent.
+   * @return array{wrapper_id: string, allowed_icon_pack: array, dialog_target: string, required: bool}
+   *   The options.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\BadRequestHttpException
+   *   When the options are missing.
    */
-  private function resolveDialogOptions(): ?array {
+  private function resolveDialogOptions(): array {
     $request = $this->getRequest();
     $wrapper_id = NULL;
 
@@ -208,8 +208,7 @@ final class IconSelectForm extends FormBase {
     }
 
     if (NULL === $wrapper_id) {
-      $this->redirect('<front>')->send();
-      return NULL;
+      throw new BadRequestHttpException('The icon picker needs the dialog options it is opened with.');
     }
 
     $allowed_icon_pack = $options['query']['allowed_icon_pack'] ?? '';
@@ -317,7 +316,8 @@ final class IconSelectForm extends FormBase {
     $options = [];
     // Empty icon to allow deletion of selection, only for optional fields.
     if (!$required) {
-      $options['_none_'] = '<img src="' . base_path() . 'core/themes/claro/images/icons/e34f4f/crossout.svg" title="Select none" width="32" height="32">';
+      $none_label = $this->t('Select none');
+      $options['_none_'] = '<img src="' . base_path() . 'core/themes/claro/images/icons/e34f4f/crossout.svg" alt="' . $none_label . '" title="' . $none_label . '" width="32" height="32">';
     }
     foreach ($icons as $icon_data) {
       if (is_array($icon_data)) {
@@ -334,6 +334,12 @@ final class IconSelectForm extends FormBase {
         'class' => ['icon-preview-load'],
       ],
     ];
+
+    // A class of its own, styling it as the first tile took the border off
+    // the first icon when there is no empty option.
+    if (isset($options['_none_'])) {
+      $list['icon_full_id']['_none_']['#wrapper_attributes']['class'][] = 'icon-picker-modal__none';
+    }
 
     return $list;
   }
@@ -540,7 +546,7 @@ final class IconSelectForm extends FormBase {
       'wrapper' => self::AJAX_WRAPPER_ID,
     ];
 
-    $total_page = (int) round($total / self::NUM_PER_PAGE) + 1;
+    $total_page = max(1, (int) ceil($total / self::NUM_PER_PAGE));
     $arg = ['@current_page' => $current_page + 1, '@total_page' => $total_page];
 
     return [

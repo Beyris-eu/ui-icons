@@ -31,8 +31,7 @@
     }
   }
 
-  .form-item:first-child,
-  .form-item-icon-full-id:first-child {
+  .icon-picker-modal__none {
     border-color: transparent;
     background-color: transparent;
   }

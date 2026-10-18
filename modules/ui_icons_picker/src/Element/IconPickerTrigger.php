@@ -51,13 +51,23 @@ final class IconPickerTrigger {
     // page wide, so a page holding both elements would grow a trigger on the
     // 'icon_picker' preview too.
     $element['icon_id']['#attributes']['data-icon-preview-trigger'] = 'true';
+    self::setDialogAttributes($element);
+
+    return $element;
+  }
+
+  /**
+   * Puts the data js/picker.js opens the dialog with on the icon_id input.
+   *
+   * @param array $element
+   *   An 'icon_autocomplete' or 'icon_picker' element, with its icon_id input.
+   */
+  public static function setDialogAttributes(array &$element): void {
     $element['icon_id']['#attributes']['data-dialog-url'] = Url::fromRoute('ui_icons_picker.ui')->toString();
 
     if (!empty($element['#allowed_icon_pack'])) {
       $element['icon_id']['#attributes']['data-allowed-icon-pack'] = implode('+', $element['#allowed_icon_pack']);
     }
-
-    return $element;
   }
 
 }

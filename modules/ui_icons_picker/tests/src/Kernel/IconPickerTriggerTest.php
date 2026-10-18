@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\ui_icons_picker\Element\IconPicker;
 use Drupal\ui_icons_picker\Element\IconPickerTrigger;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -23,6 +24,7 @@ use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
  */
 #[RunTestsInSeparateProcesses]
 #[CoversClass(IconPickerTrigger::class)]
+#[CoversClass(IconPicker::class)]
 #[Group('ui_icons')]
 class IconPickerTriggerTest extends KernelTestBase {
 
@@ -169,6 +171,30 @@ class IconPickerTriggerTest extends KernelTestBase {
     foreach ($process as $callback) {
       $this->assertNotSame(IconPickerTrigger::class, $callback[0] ?? NULL);
     }
+  }
+
+  /**
+   * Tests the icon_picker input keeps the placeholder set on the element.
+   */
+  public function testIconPickerKeepsPlaceholder(): void {
+    $element = $this->buildElement([
+      '#type' => 'icon_picker',
+      '#placeholder' => 'Pick an icon',
+    ]);
+
+    $this->assertSame('Pick an icon', $element['icon_id']['#placeholder']);
+  }
+
+  /**
+   * Tests the pack limit of the icon_picker element is passed on as well.
+   */
+  public function testIconPickerPassesAllowedIconPack(): void {
+    $element = $this->buildElement([
+      '#type' => 'icon_picker',
+      '#allowed_icon_pack' => ['test_path', 'test_svg'],
+    ]);
+
+    $this->assertSame('test_path+test_svg', $element['icon_id']['#attributes']['data-allowed-icon-pack']);
   }
 
 }

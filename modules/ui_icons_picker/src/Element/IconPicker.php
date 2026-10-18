@@ -7,7 +7,6 @@ namespace Drupal\ui_icons_picker\Element;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\Attribute\FormElement;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\Core\Url;
 use Drupal\ui_icons\Element\IconAutocomplete;
 
 /**
@@ -67,7 +66,6 @@ class IconPicker extends IconAutocomplete {
   public static function processIcon(array &$element, FormStateInterface $form_state, array &$complete_form): array {
     $element = parent::processIcon($element, $form_state, $complete_form);
 
-    $element['icon_id']['#placeholder'] = $element['#placeholder'] ?? '';
     $element['icon_id']['#description'] = new TranslatableMarkup('Click to select an Icon.');
     $element['icon_id']['#attached'] = [
       'library' => [
@@ -75,16 +73,8 @@ class IconPicker extends IconAutocomplete {
       ],
     ];
 
-    $element['icon_id']['#attributes'] = [
-      'data-dialog-url' => Url::fromRoute('ui_icons_picker.ui')->toString(),
-      'class' => [
-        'form-icon-dialog',
-      ],
-    ];
-
-    if (!empty($element['#allowed_icon_pack'])) {
-      $element['icon_id']['#attributes']['data-allowed-icon-pack'] = implode('+', $element['#allowed_icon_pack']);
-    }
+    $element['icon_id']['#attributes']['class'][] = 'form-icon-dialog';
+    IconPickerTrigger::setDialogAttributes($element);
 
     unset($element['icon_id']['#autocomplete_route_name']);
     unset($element['icon_id']['#autocomplete_query_parameters']);

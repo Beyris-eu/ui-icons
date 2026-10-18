@@ -6,14 +6,17 @@ namespace Drupal\Tests\ui_icons_picker\Kernel;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Form\FormState;
+use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_icons_picker\Form\IconSelectForm;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Test the icon picker modal form.
@@ -349,6 +352,76 @@ class IconSelectFormTest extends KernelTestBase {
     $commands = $response->getCommands();
     $this->assertSame('closeDialog', $commands[1]['command']);
     $this->assertSame('#ui-icons-picker-dialog', $commands[1]['selector']);
+  }
+
+  /**
+   * Data provider for ::testPageCount().
+   *
+   * @return array
+   *   The test cases: icons total, expected page count.
+   */
+  public static function providerPageCount(): array {
+    return [
+      'less than a page' => [246, 1],
+      'exactly one page' => [247, 1],
+      'one more than a page' => [248, 2],
+      'exactly two pages' => [494, 2],
+      'nine pages, the last one partial' => [2147, 9],
+    ];
+  }
+
+  /**
+   * Tests the pager counts the pages the icons fill, no empty last page.
+   *
+   * @param int $total
+   *   The number of icons to list.
+   * @param int $expected
+   *   The expected page count.
+   */
+  #[DataProvider('providerPageCount')]
+  public function testPageCount(int $total, int $expected): void {
+    $icons = array_fill_keys(array_map(
+      static fn (int $index): string => 'test_path:icon_' . $index,
+      range(1, $total),
+    ), []);
+    $icon_pack_manager = $this->createMock(IconPackManagerInterface::class);
+    $icon_pack_manager->method('getIcons')->willReturn($icons);
+    $icon_pack_manager->method('getDefinitions')->willReturn([]);
+    $this->container->set('plugin.manager.icon_pack', $icon_pack_manager);
+
+    $form = $this->buildPicker(['wrapper_id' => self::WRAPPER_ID]);
+
+    if (1 === $expected) {
+      $this->assertArrayNotHasKey('pagination', $form['results']);
+      return;
+    }
+    $this->assertSame(
+      'Page 1/' . $expected,
+      (string) $form['results']['pagination']['page_info']['#markup'],
+    );
+  }
+
+  /**
+   * Tests opening the picker without its dialog options is a bad request.
+   */
+  public function testMissingDialogOptionsIsBadRequest(): void {
+    $this->expectException(BadRequestHttpException::class);
+
+    $this->buildPicker([]);
+  }
+
+  /**
+   * Tests the empty option is a tile of its own with a text alternative.
+   *
+   * Styling it from its position took the border off the first icon when the
+   * field is required and the empty option is left out.
+   */
+  public function testNoneTile(): void {
+    $form = $this->buildPicker(['wrapper_id' => self::WRAPPER_ID]);
+
+    $radios = $form['results']['list']['icon_full_id'];
+    $this->assertContains('icon-picker-modal__none', $radios['_none_']['#wrapper_attributes']['class']);
+    $this->assertStringContainsString('alt="Select none"', (string) $radios['#options']['_none_']);
   }
 
 }
