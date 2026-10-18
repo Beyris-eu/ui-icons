@@ -163,3 +163,79 @@ for (const resultFormat of [ 'list', 'grid' ]) {
     })
   })
 }
+
+// jQuery UI also closes the suggestions on Escape, on blur, below the minimum
+// length and with no match. Each close posted and rebuilt the whole form, core
+// disabling the input meanwhile, which cut typing.
+test('The element rebuilds only for a picked suggestion', { tag: [ '@base' ] }, async ({ page }) => {
+  await page.goto(config.contentTypeAdd.replace('{bundle}', BUNDLE_ID))
+  const rebuilds: string[] = []
+  page.on('request', (request) => {
+    if (request.url().includes('element_parents=')) {
+      rebuilds.push(request.url())
+    }
+  })
+  const expectRebuilds = async (count: number): Promise<void> => {
+    // A rebuild would be on its way by now.
+    await page.waitForTimeout(500)
+    expect(rebuilds).toHaveLength(count)
+  }
+  const input = iconInput(page)
+  const menu = suggestions(page)
+
+  await test.step('Closing the suggestions without a pick', async () => {
+    await input.click()
+    await page.keyboard.type('ba')
+    await expect(menu).toBeVisible()
+
+    // No match.
+    await page.keyboard.type('zz')
+    await expect(menu).toBeHidden()
+    await expectRebuilds(0)
+
+    // Below the minimum length.
+    await page.keyboard.press('Backspace')
+    await page.keyboard.press('Backspace')
+    await expect(menu).toBeVisible()
+    await page.keyboard.press('Backspace')
+    await expect(menu).toBeHidden()
+    await expectRebuilds(0)
+
+    await page.keyboard.type('a')
+    await expect(menu).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(menu).toBeHidden()
+    await expectRebuilds(0)
+    await expect(input).toHaveValue('ba')
+  })
+
+  await test.step('Picking a suggestion', async () => {
+    await input.fill(`${PACK_ID}:foo`)
+    await expect(menu.locator('li')).toHaveCount(1)
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('Enter')
+
+    await expect(preview(page)).toBeVisible()
+    expect(rebuilds).toHaveLength(1)
+  })
+
+  await test.step('Picking the same icon again', async () => {
+    await iconInput(page).fill(`${PACK_ID}:foo`)
+    await expect(suggestions(page).locator('li')).toHaveCount(1)
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('Enter')
+    await expect(suggestions(page)).toBeHidden()
+
+    await expectRebuilds(1)
+    await expect(iconInput(page)).toBeFocused()
+  })
+
+  await test.step('A value typed by hand rebuilds on change', async () => {
+    await iconInput(page).fill(`${PACK_ID}:bar`)
+    await expect(suggestions(page).locator('li')).toHaveCount(1)
+    await page.keyboard.press('Tab')
+
+    await expect(page.locator('.ui-icons-preview-icon img[src$="bar.png"]')).toBeVisible()
+    expect(rebuilds).toHaveLength(2)
+  })
+})

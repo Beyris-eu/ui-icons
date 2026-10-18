@@ -37,9 +37,10 @@
   /**
    * Name of the input a suggestion was just picked in.
    *
-   * Core disables the input during the rebuild the pick starts, and the
-   * element opts out of core's refocus afterwards: a blur starts that rebuild
-   * as well, and the focus then has to stay where the user moved it.
+   * Only a pick rebuilds the element when the suggestions close, see the
+   * eventResponse override below. Core disables the input during the rebuild,
+   * and the element opts out of core's refocus afterwards: a change on blur
+   * rebuilds it as well, and the focus then has to stay where the user went.
    *
    * @type {?string}
    */
@@ -224,5 +225,38 @@
   ) {
     enableIconInputs(this.$form?.[0]);
     beforeSerialize.call(this, element, options);
+  };
+
+  /**
+   * Spares the element rebuild when the suggestions close on no new icon.
+   *
+   * jQuery UI also closes them on Escape, on blur, below the minimum length
+   * and with no match. Each time the whole form was posted and rebuilt, core
+   * disabling the input meanwhile, which cut typing. A value typed by hand
+   * still rebuilds on change. The value attribute holds the icon the element
+   * was last rendered with.
+   *
+   * Skipped before core starts the request, so ajax.ajaxing is never set.
+   */
+  const { eventResponse } = Drupal.Ajax.prototype;
+  Drupal.Ajax.prototype.eventResponse = function iconEventResponse(
+    element,
+    event,
+  ) {
+    const picked = pickedInput === element.name;
+    if (
+      event.type === 'autocompleteclose' &&
+      element.closest?.('.ui-icons-input-wrapper') &&
+      (!picked || element.value === element.defaultValue)
+    ) {
+      if (picked) {
+        pickedInput = null;
+      }
+      // Consumed as core does, only the request is spared.
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    eventResponse.call(this, element, event);
   };
 })(jQuery, Drupal, once);
