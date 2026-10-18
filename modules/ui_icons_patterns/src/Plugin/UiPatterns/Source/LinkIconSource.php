@@ -54,7 +54,8 @@ class LinkIconSource extends SourcePluginPropValue {
       return [];
     }
 
-    $icon_data['settings'] = $icon_value[$field_index]['options']['icon']['settings'] ?? [];
+    $icon_settings = $icon_value[$field_index]['options']['icon']['settings'] ?? [];
+    $icon_data['settings'] = $icon_settings[$icon_data['pack_id']] ?? [];
 
     return $icon_data;
   }
