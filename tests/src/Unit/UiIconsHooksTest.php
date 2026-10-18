@@ -57,7 +57,7 @@ class UiIconsHooksTest extends UnitTestCase {
     $theme = $this->hooks()->theme([], 'module', 'ui_icons', '');
 
     $this->assertSame(['render element' => 'element'], $theme['icon_selector']);
-    foreach (['pack_id', 'icon_id', 'icon_label', 'settings'] as $variable) {
+    foreach (['pack_id', 'icon_id', 'icon_label', 'icon_name', 'settings'] as $variable) {
       $this->assertArrayHasKey($variable, $theme['icon_preview']['variables']);
     }
   }

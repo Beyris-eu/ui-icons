@@ -61,6 +61,7 @@ class IconPreview {
     $renderable = [
       '#theme' => 'icon_preview',
       '#icon_label' => $icon->getId(),
+      '#icon_name' => $icon->getLabel(),
       '#icon_id' => $icon->getIconId(),
       '#pack_id' => $icon->getPackId(),
       '#extractor' => $icon->getData('extractor'),

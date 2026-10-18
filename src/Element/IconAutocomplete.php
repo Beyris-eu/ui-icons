@@ -79,6 +79,9 @@ class IconAutocomplete extends FormElementBase {
         [$class, 'processAjaxForm'],
         [$class, 'processGroup'],
       ],
+      '#after_build' => [
+        [$class, 'afterBuildLabel'],
+      ],
       '#pre_render' => [
         [$class, 'preRenderGroup'],
       ],
@@ -315,6 +318,31 @@ class IconAutocomplete extends FormElementBase {
     if ($settings_empty_count === count($element['icon_settings'])) {
       unset($element['icon_settings']);
     }
+
+    return $element;
+  }
+
+  /**
+   * Makes the element title the label of the input.
+   *
+   * The input only gets its id once built, after the process callbacks. Its
+   * own label would repeat the title, so it goes, unless the element shows no
+   * label at all.
+   *
+   * @param array $element
+   *   The built element.
+   *
+   * @return array
+   *   The element, its label pointing to the input.
+   */
+  public static function afterBuildLabel(array $element): array {
+    $title_display = $element['#title_display'] ?? 'before';
+    if (empty($element['#title']) || !in_array($title_display, ['before', 'after', 'invisible'], TRUE)) {
+      return $element;
+    }
+
+    $element['#label_for'] = $element['icon_id']['#id'];
+    $element['icon_id']['#title_display'] = 'none';
 
     return $element;
   }

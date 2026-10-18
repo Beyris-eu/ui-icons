@@ -172,9 +172,20 @@ Partial support:
 
   .ui-icons-result-collection {
     margin-left: auto;
-    color: #849fdc;
+    /* 6.2:1 on white, 4.8:1 on the dark input of the default admin theme. */
+    color: light-dark(#345cb7, #94abe0);
     font-size: 0.8rem;
   }
+}
+
+/* The active suggestion has colors of its own, as in Claro. */
+.ui-state-active .ui-icons-result-collection {
+  color: inherit;
+}
+
+/* Why no suggestion shows, filled by js/icon.autocomplete.js. */
+.ui-icons-autocomplete-status {
+  font-size: var(--admin-font-size-xs, var(--font-size-xs, 0.875rem));
 }
 
 .ui-autocomplete:has(.ui-icons-result) {

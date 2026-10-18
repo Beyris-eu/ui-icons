@@ -121,6 +121,7 @@ class UiIconsHooks {
           'pack_id' => '',
           'icon_id' => '',
           'icon_label' => '',
+          'icon_name' => '',
           'extractor' => NULL,
           'source' => NULL,
           'library' => NULL,

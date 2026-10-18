@@ -73,6 +73,9 @@ class IconAutocompleteUnitTest extends UnitTestCase {
         [$class, 'processAjaxForm'],
         [$class, 'processGroup'],
       ],
+      '#after_build' => [
+        [$class, 'afterBuildLabel'],
+      ],
       '#pre_render' => [
         [$class, 'preRenderGroup'],
       ],

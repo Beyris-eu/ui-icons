@@ -60,6 +60,7 @@ class IconPreviewKernelTest extends KernelTestBase {
     $expected = [
       '#theme' => 'icon_preview',
       '#icon_label' => 'test_svg:foo',
+      '#icon_name' => 'Foo',
       '#icon_id' => 'foo',
       '#pack_id' => 'test_svg',
       '#extractor' => 'svg',

@@ -80,6 +80,9 @@ class IconPreviewTwigExtensionTest extends UnitTestCase {
       ->method('getIconId')
       ->willReturn('pack_id:icon_id');
     $icon
+      ->method('getLabel')
+      ->willReturn('Icon id');
+    $icon
       ->method('getSource')
       ->willReturn('foo/bar.svg');
     $this->pluginManagerIconPack
@@ -90,6 +93,7 @@ class IconPreviewTwigExtensionTest extends UnitTestCase {
     $expected = [
       '#theme' => 'icon_preview',
       '#icon_label' => 'icon_id',
+      '#icon_name' => 'Icon id',
       '#icon_id' => 'pack_id:icon_id',
       '#pack_id' => 'pack_id',
       '#extractor' => NULL,

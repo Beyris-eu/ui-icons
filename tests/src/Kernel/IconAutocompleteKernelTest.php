@@ -110,4 +110,29 @@ class IconAutocompleteKernelTest extends KernelTestBase {
     $this->assertCount(0, $this->cssSelect('input[data-foo]'));
   }
 
+  /**
+   * Tests the visible label names the input, and is its only label.
+   */
+  public function testLabelPointsToInput(): void {
+    $this->renderElement([]);
+
+    $input = $this->cssSelect('input[name="icon[icon_id]"]');
+    $this->assertCount(1, $input);
+    $labels = $this->cssSelect('label[for="' . $input[0]['id'] . '"]');
+    $this->assertCount(1, $labels);
+    $this->assertSame('Select icon', trim((string) $labels[0]));
+  }
+
+  /**
+   * Tests the input keeps a label of its own when the element shows none.
+   */
+  public function testInputLabelWithoutElementTitle(): void {
+    $this->renderElement(['#title_display' => 'none']);
+
+    $input = $this->cssSelect('input[name="icon[icon_id]"]');
+    $labels = $this->cssSelect('label[for="' . $input[0]['id'] . '"]');
+    $this->assertCount(1, $labels);
+    $this->assertSame('Icon', trim((string) $labels[0]));
+  }
+
 }

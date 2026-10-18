@@ -4,5 +4,5 @@
     <use xlink:href="{{ source }}#{{ icon_id }}"/>
   </svg>
 {% else %}
-  <img loading="lazy" class="icon icon-preview" src="{{ source }}" title="{{ icon_label }}" alt="{{ icon_id }}" width="{{ settings.size|default(48) }}" height="{{ settings.size|default(48) }}">
+  <img loading="lazy" class="icon icon-preview" src="{{ source }}" title="{{ icon_label }}" alt="{{ icon_name|default(icon_id) }}" width="{{ settings.size|default(48) }}" height="{{ settings.size|default(48) }}">
 {% endif %}

@@ -86,6 +86,7 @@ class IconAutocompleteControllerKernelTest extends KernelTestBase {
     $img = $result_xpath->query('//div/img');
     $this->assertSame('icon icon-preview', $img->item(0)->getAttribute('class'));
     $this->assertSame($icon_full_id, $img->item(0)->getAttribute('title'));
+    $this->assertSame('Foo', $img->item(0)->getAttribute('alt'));
     $this->assertSame(IconSearch::ICON_PREVIEW_SIZE, (int) $img->item(0)->getAttribute('width'));
     $this->assertSame(IconSearch::ICON_PREVIEW_SIZE, (int) $img->item(0)->getAttribute('height'));
 
@@ -121,6 +122,8 @@ class IconAutocompleteControllerKernelTest extends KernelTestBase {
     $img = $result_xpath->query('//span/img');
     $this->assertSame('icon icon-preview', $img->item(0)->getAttribute('class'));
     $this->assertSame($icon_full_id, $img->item(0)->getAttribute('title'));
+    // The name next to the image is hidden in a grid, only the alt names it.
+    $this->assertSame('Foo', $img->item(0)->getAttribute('alt'));
     $this->assertSame(IconSearch::ICON_PREVIEW_SIZE, (int) $img->item(0)->getAttribute('width'));
     $this->assertSame(IconSearch::ICON_PREVIEW_SIZE, (int) $img->item(0)->getAttribute('height'));
 
