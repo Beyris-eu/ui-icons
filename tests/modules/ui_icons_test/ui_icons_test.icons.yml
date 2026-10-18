@@ -288,3 +288,25 @@ test_same_basename:
       - icons/flat_same_name/*.svg
       - icons/group_same_name/group_1/f{icon_id}.svg
   template: '{{ icon_id }}'
+
+# No hand-written config schema, ui_icons generates it from the settings.
+test_settings_no_schema:
+  label: Test settings no schema
+  extractor: path
+  config:
+    sources:
+      - icons/empty/*
+  settings:
+    size:
+      title: "Size"
+      type: "integer"
+    ratio:
+      title: "Ratio"
+      type: "number"
+    rounded:
+      title: "Rounded"
+      type: "boolean"
+    label:
+      title: "Label"
+      type: "string"
+  template: '{{ icon_id }}'
