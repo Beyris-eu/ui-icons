@@ -6,14 +6,17 @@ namespace Drupal\Tests\ui_icons_picker\Kernel;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Form\FormState;
+use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_icons_picker\Form\IconSelectForm;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\Storage\MockArraySessionStorage;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Test the icon picker modal form.
@@ -50,11 +53,13 @@ class IconSelectFormTest extends KernelTestBase {
    * @param array $dialog_options
    *   Extra `dialogOptions`, siblings of `query`, `target` being the only key
    *   the form reads.
+   * @param \Drupal\Core\Form\FormState|null $form_state
+   *   The form state to build with, to inspect it afterwards.
    *
    * @return array
    *   The built form.
    */
-  private function buildPicker(array $query, array $input = [], array $dialog_options = []): array {
+  private function buildPicker(array $query, array $input = [], array $dialog_options = [], ?FormState $form_state = NULL): array {
     $request = Request::create('/ui-icons/picker/dialog', 'GET', [
       'dialogOptions' => $dialog_options + ['query' => $query],
     ]);
@@ -62,7 +67,7 @@ class IconSelectFormTest extends KernelTestBase {
     $request->setSession(new Session(new MockArraySessionStorage()));
     $this->container->get('request_stack')->push($request);
 
-    $form_state = new FormState();
+    $form_state ??= new FormState();
     if ($input) {
       $form_state->setUserInput($input);
     }
@@ -125,7 +130,9 @@ class IconSelectFormTest extends KernelTestBase {
     $this->assertContains('ui_icons/ui_icons.preview', $attached['library']);
 
     $preview_data = $attached['drupalSettings']['ui_icons_preview_data'];
-    $this->assertNotEmpty($preview_data['icon_full_ids']);
+    // Ajax deep merges settings into the previous ones, so they would still
+    // carry ids of the grid before. js/library.js reads them from the grid.
+    $this->assertArrayNotHasKey('icon_full_ids', $preview_data);
     $this->assertSame(['size' => 32], $preview_data['settings']);
     $this->assertTrue($preview_data['target_input_label']);
   }
@@ -173,6 +180,22 @@ class IconSelectFormTest extends KernelTestBase {
 
     $this->assertArrayHasKey('actions', $form);
     $this->assertArrayNotHasKey('pagination', $form['results']);
+  }
+
+  /**
+   * Tests the placeholder images still load from a subdirectory install.
+   */
+  public function testBuildFormImagesFollowBasePath(): void {
+    $GLOBALS['base_path'] = '/subdir/';
+
+    $form = $this->buildPicker([
+      'wrapper_id' => self::WRAPPER_ID,
+      'allowed_icon_pack' => 'test_path',
+    ]);
+
+    $options = $form['results']['list']['icon_full_id']['#options'];
+    $this->assertStringContainsString('src="/subdir/core/themes/claro/images/icons/e34f4f/crossout.svg"', $options['_none_']);
+    $this->assertStringContainsString('src="/subdir/core/themes/claro/images/icons/003ecc/spinner.svg"', $options['test_path:foo']);
   }
 
   /**
@@ -333,6 +356,151 @@ class IconSelectFormTest extends KernelTestBase {
     $commands = $response->getCommands();
     $this->assertSame('closeDialog', $commands[1]['command']);
     $this->assertSame('#ui-icons-picker-dialog', $commands[1]['selector']);
+  }
+
+  /**
+   * Data provider for ::testPageCount().
+   *
+   * @return array
+   *   The test cases: icons total, expected page count.
+   */
+  public static function providerPageCount(): array {
+    return [
+      'less than a page' => [246, 1],
+      'exactly one page' => [247, 1],
+      'one more than a page' => [248, 2],
+      'exactly two pages' => [494, 2],
+      'nine pages, the last one partial' => [2147, 9],
+    ];
+  }
+
+  /**
+   * Tests the pager counts the pages the icons fill, no empty last page.
+   *
+   * @param int $total
+   *   The number of icons to list.
+   * @param int $expected
+   *   The expected page count.
+   */
+  #[DataProvider('providerPageCount')]
+  public function testPageCount(int $total, int $expected): void {
+    $icons = array_fill_keys(array_map(
+      static fn (int $index): string => 'test_path:icon_' . $index,
+      range(1, $total),
+    ), []);
+    $icon_pack_manager = $this->createMock(IconPackManagerInterface::class);
+    $icon_pack_manager->method('getIcons')->willReturn($icons);
+    $icon_pack_manager->method('getDefinitions')->willReturn([]);
+    $this->container->set('plugin.manager.icon_pack', $icon_pack_manager);
+
+    $form = $this->buildPicker(['wrapper_id' => self::WRAPPER_ID]);
+
+    if (1 === $expected) {
+      $this->assertArrayNotHasKey('pagination', $form['results']);
+      return;
+    }
+    $this->assertSame(
+      'Page 1/' . $expected,
+      (string) $form['results']['pagination']['page_info']['#markup'],
+    );
+  }
+
+  /**
+   * Tests the form state keeps the page only, not the icon list.
+   *
+   * The form state is written to the database on every ajax request of the
+   * picker, the icon list of a large pack weighs hundreds of kilobytes there.
+   */
+  public function testModalStateHoldsNoIcons(): void {
+    $form_state = new FormState();
+    $this->buildPicker(['wrapper_id' => self::WRAPPER_ID], [], [], $form_state);
+
+    $this->assertSame(['page' => 0], IconSelectForm::getModalState($form_state));
+  }
+
+  /**
+   * Data provider for ::testPackLibraries().
+   *
+   * @return array
+   *   The test cases: allowed packs query, whether the library is expected.
+   */
+  public static function providerPackLibraries(): array {
+    return [
+      'other pack allowed' => ['test_path', FALSE],
+      'pack allowed' => ['test_library', TRUE],
+      'every pack allowed' => ['', TRUE],
+    ];
+  }
+
+  /**
+   * Tests only the libraries of the allowed icon packs are attached.
+   *
+   * @param string $allowed_icon_pack
+   *   The `allowed_icon_pack` dialog query.
+   * @param bool $expected
+   *   Whether the library of the `test_library` pack is expected.
+   */
+  #[DataProvider('providerPackLibraries')]
+  public function testPackLibraries(string $allowed_icon_pack, bool $expected): void {
+    $form = $this->buildPicker([
+      'wrapper_id' => self::WRAPPER_ID,
+      'allowed_icon_pack' => $allowed_icon_pack,
+    ]);
+
+    $libraries = $form['results']['list']['#attached']['library'];
+    $this->assertSame($expected, in_array('ui_icons_test/test_library', $libraries, TRUE));
+  }
+
+  /**
+   * Tests opening the picker without its dialog options is a bad request.
+   */
+  public function testMissingDialogOptionsIsBadRequest(): void {
+    $this->expectException(BadRequestHttpException::class);
+
+    $this->buildPicker([]);
+  }
+
+  /**
+   * Tests the empty option is a tile of its own with a text alternative.
+   *
+   * Styling it from its position took the border off the first icon when the
+   * field is required and the empty option is left out.
+   */
+  public function testNoneTile(): void {
+    $form = $this->buildPicker(['wrapper_id' => self::WRAPPER_ID]);
+
+    $radios = $form['results']['list']['icon_full_id'];
+    $this->assertContains('icon-picker-modal__none', $radios['_none_']['#wrapper_attributes']['class']);
+    $this->assertStringContainsString('alt="Select none"', (string) $radios['#options']['_none_']);
+  }
+
+  /**
+   * Tests the icon the picker was opened with is the selected radio.
+   */
+  public function testCurrentIconIsSelected(): void {
+    $form = $this->buildPicker([
+      'wrapper_id' => self::WRAPPER_ID,
+      'allowed_icon_pack' => 'test_path',
+      'selected' => 'test_path:foo',
+    ]);
+
+    $this->assertSame('test_path:foo', $form['results']['list']['icon_full_id']['#default_value']);
+  }
+
+  /**
+   * Tests a single character filter lists every icon.
+   *
+   * The search needs two characters, js/library.js does not send one. Paging
+   * still posts it, and that must not empty the grid.
+   */
+  public function testSingleCharacterFilterListsEverything(): void {
+    $form = $this->buildPicker(
+      ['wrapper_id' => self::WRAPPER_ID, 'allowed_icon_pack' => 'test_path'],
+      ['filter' => 'f'],
+    );
+
+    $this->assertArrayHasKey('test_path:foo', $form['results']['list']['icon_full_id']['#options']);
+    $this->assertArrayHasKey('test_path:bar', $form['results']['list']['icon_full_id']['#options']);
   }
 
 }

@@ -18,6 +18,7 @@ library:
     component:
       css/library.css: {}
   dependencies:
+    - core/drupal.ajax
     - core/drupalSettings
     - ui_icons/ui_icons.preview
 

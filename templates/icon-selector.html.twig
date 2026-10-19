@@ -4,6 +4,7 @@
  * Theme for an 'icon_autocomplete' #type form element.
  *
  * Variables:
+ * - attributes: HTML attributes for the wrapper, from the element #attributes.
  * - pack_id: The icon set id.
  * - icon_id: The icon id.
  * - icon_form: The icon input form.
@@ -12,7 +13,7 @@
 #}
 {{ attach_library('ui_icons/ui_icons.autocomplete') }}
 
-<div class="ui-icons-wrapper">
+<div{{ attributes.addClass('ui-icons-wrapper') }}>
   <div class="ui-icons-input-wrapper">
     <div class="ui-icons-preview">
       {% if pack_id and icon_id %}

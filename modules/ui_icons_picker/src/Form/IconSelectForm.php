@@ -17,6 +17,7 @@ use Drupal\ui_icons\IconPreview;
 use Drupal\ui_icons\IconSearch;
 use Drupal\ui_icons_picker\Ajax\UpdateIconSelectionCommand;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Provides an icon picker selector form.
@@ -76,40 +77,32 @@ final class IconSelectForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state, ?array $options = NULL): array {
-    if (!$dialog_options = $this->resolveDialogOptions()) {
-      return [];
-    }
     [
       'wrapper_id' => $wrapper_id,
       'allowed_icon_pack' => $allowed_icon_pack,
       'dialog_target' => $dialog_target,
       'required' => $required,
-    ] = $dialog_options;
+      'selected' => $selected,
+    ] = $this->resolveDialogOptions();
 
+    // Only the page is kept, form state is written to the database on every
+    // ajax request and the icon list is cheap to get again from the manager.
     if (!$modal_state = static::getModalState($form_state)) {
-      $icon_list = $this->pluginManagerIconPack->getIcons($allowed_icon_pack);
-      $modal_state = [
-        'page' => 0,
-        'icon_list' => $icon_list,
-        'total_available' => count($icon_list),
-      ];
+      $modal_state = ['page' => 0];
       static::setModalState($form_state, $modal_state);
     }
 
     $input = $form_state->getUserInput();
     $query = $input['filter'] ?? '';
-    $icon_list = $modal_state['icon_list'] ?? [];
-    $total_available = $modal_state['total_available'] ?? 0;
 
-    if (empty($query)) {
-      $icons = array_keys($icon_list);
-      $pager = $this->createPager($modal_state['page'], $total_available);
-    }
-    else {
-      $icons = $this->iconSearch->search($query, $allowed_icon_pack, $total_available);
-      $pager = $this->createPager($modal_state['page'], count($icons));
+    $icons = array_keys($this->pluginManagerIconPack->getIcons($allowed_icon_pack));
+    // Below the search minimum js/library.js sends nothing, the pager still
+    // posts the filter and must not empty the grid.
+    if (mb_strlen(trim($query)) >= IconSearch::SEARCH_MIN_LENGTH) {
+      $icons = $this->iconSearch->search($query, $allowed_icon_pack, count($icons));
     }
 
+    $pager = $this->createPager($modal_state['page'], count($icons));
     $icons = array_slice($icons, $pager['offset'], self::NUM_PER_PAGE);
 
     $form['#prefix'] = '<div id="' . self::MESSAGE_WRAPPER_ID . '"></div>';
@@ -153,7 +146,7 @@ final class IconSelectForm extends FormBase {
       return $form;
     }
 
-    $form['results']['list'] = $this->buildIconList($icons, $required);
+    $form['results']['list'] = $this->buildIconList($icons, $required, $allowed_icon_pack, $selected);
 
     $form['actions'] = ['#type' => 'actions'];
     $form['actions']['submit'] = [
@@ -194,11 +187,13 @@ final class IconSelectForm extends FormBase {
   /**
    * Reads the modal dialog options the picker was opened with.
    *
-   * @return array{wrapper_id: string, allowed_icon_pack: array, dialog_target: string, required: bool}|null
-   *   The options, or NULL when they are missing, in which case a redirect to
-   *   the front page has already been sent.
+   * @return array{wrapper_id: string, allowed_icon_pack: array, dialog_target: string, required: bool, selected: string}
+   *   The options.
+   *
+   * @throws \Symfony\Component\HttpKernel\Exception\BadRequestHttpException
+   *   When the options are missing.
    */
-  private function resolveDialogOptions(): ?array {
+  private function resolveDialogOptions(): array {
     $request = $this->getRequest();
     $wrapper_id = NULL;
 
@@ -208,11 +203,11 @@ final class IconSelectForm extends FormBase {
     }
 
     if (NULL === $wrapper_id) {
-      $this->redirect('<front>')->send();
-      return NULL;
+      throw new BadRequestHttpException('The icon picker needs the dialog options it is opened with.');
     }
 
     $allowed_icon_pack = $options['query']['allowed_icon_pack'] ?? '';
+    $selected = $options['query']['selected'] ?? '';
 
     // Core strips 'target' from the dialog options before handing them to
     // jQuery UI, but it is still in the query the form action carries over.
@@ -229,6 +224,7 @@ final class IconSelectForm extends FormBase {
       'allowed_icon_pack' => empty($allowed_icon_pack) ? [] : explode('+', $allowed_icon_pack),
       'dialog_target' => $dialog_target,
       'required' => (bool) ($options['query']['required'] ?? FALSE),
+      'selected' => is_string($selected) ? $selected : '',
     ];
   }
 
@@ -262,6 +258,10 @@ final class IconSelectForm extends FormBase {
       'search' => [
         '#type' => 'submit',
         '#submit' => [[$this, 'searchSubmit']],
+        // The radio of the current icon is checked, and the grid rebuilt for
+        // the new filter may not hold it: validating it would report an
+        // illegal choice.
+        '#limit_validation_errors' => [],
         '#ajax' => $ajax_settings,
         '#value' => $this->t('Search'),
         '#attributes' => [
@@ -281,11 +281,15 @@ final class IconSelectForm extends FormBase {
    *   Icon full ids, or `value`/`label` pairs when they come from a search.
    * @param bool $required
    *   Whether the field the picker was opened for is required.
+   * @param array $allowed_icon_pack
+   *   The icon packs the picker is limited to, empty for all of them.
+   * @param string $selected
+   *   The icon the picker was opened with, checked when it is listed.
    *
    * @return array
    *   The list container render array.
    */
-  private function buildIconList(array $icons, bool $required): array {
+  private function buildIconList(array $icons, bool $required, array $allowed_icon_pack, string $selected): array {
     // Add the generic mass preview library.
     // Set a specific key to have the list of icons to load for preview.
     $list = [
@@ -299,8 +303,10 @@ final class IconSelectForm extends FormBase {
           'ui_icons/ui_icons.preview',
         ],
         'drupalSettings' => [
+          // No icon ids, ajax deep merges settings into the previous ones,
+          // which would keep ids of the grid before. js/library.js reads them
+          // from the grid.
           'ui_icons_preview_data' => [
-            'icon_full_ids' => $icons,
             'settings' => ['size' => self::PREVIEW_ICON_SIZE],
             'target_input_label' => TRUE,
           ],
@@ -309,31 +315,44 @@ final class IconSelectForm extends FormBase {
     ];
 
     foreach ($this->pluginManagerIconPack->getDefinitions() as $pack_definition) {
-      if (isset($pack_definition['library'])) {
-        $list['#attached']['library'][] = $pack_definition['library'];
+      if (!isset($pack_definition['library'])) {
+        continue;
       }
+      if ($allowed_icon_pack && !in_array($pack_definition['id'], $allowed_icon_pack, TRUE)) {
+        continue;
+      }
+      $list['#attached']['library'][] = $pack_definition['library'];
     }
 
     $options = [];
     // Empty icon to allow deletion of selection, only for optional fields.
     if (!$required) {
-      $options['_none_'] = '<img src="/core/themes/claro/images/icons/e34f4f/crossout.svg" title="Select none" width="32" height="32">';
+      $none_label = $this->t('Select none');
+      $options['_none_'] = '<img src="' . base_path() . 'core/themes/claro/images/icons/e34f4f/crossout.svg" alt="' . $none_label . '" title="' . $none_label . '" width="32" height="32">';
     }
     foreach ($icons as $icon_data) {
       if (is_array($icon_data)) {
         $options[$icon_data['value']] = $icon_data['label'];
         continue;
       }
-      $options[$icon_data] = '<img src="' . IconPreview::SPINNER_ICON . '" title="' . $icon_data . '" width="32" height="32">';
+      $options[$icon_data] = '<img src="' . base_path() . IconPreview::SPINNER_ICON . '" title="' . $icon_data . '" width="32" height="32">';
     }
 
     $list['icon_full_id'] = [
       '#type' => 'radios',
       '#options' => $options,
+      '#default_value' => $selected,
+      // Hidden but focusable, so the arrow keys move through the grid.
       '#attributes' => [
-        'class' => ['icon-preview-load'],
+        'class' => ['icon-preview-load', 'visually-hidden'],
       ],
     ];
+
+    // A class of its own, styling it as the first tile took the border off
+    // the first icon when there is no empty option.
+    if (isset($options['_none_'])) {
+      $list['icon_full_id']['_none_']['#wrapper_attributes']['class'][] = 'icon-picker-modal__none';
+    }
 
     return $list;
   }
@@ -540,7 +559,7 @@ final class IconSelectForm extends FormBase {
       'wrapper' => self::AJAX_WRAPPER_ID,
     ];
 
-    $total_page = (int) round($total / self::NUM_PER_PAGE) + 1;
+    $total_page = max(1, (int) ceil($total / self::NUM_PER_PAGE));
     $arg = ['@current_page' => $current_page + 1, '@total_page' => $total_page];
 
     return [

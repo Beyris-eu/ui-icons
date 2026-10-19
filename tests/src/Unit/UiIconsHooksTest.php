@@ -57,7 +57,7 @@ class UiIconsHooksTest extends UnitTestCase {
     $theme = $this->hooks()->theme([], 'module', 'ui_icons', '');
 
     $this->assertSame(['render element' => 'element'], $theme['icon_selector']);
-    foreach (['pack_id', 'icon_id', 'icon_label', 'settings'] as $variable) {
+    foreach (['pack_id', 'icon_id', 'icon_label', 'icon_name', 'settings'] as $variable) {
       $this->assertArrayHasKey($variable, $theme['icon_preview']['variables']);
     }
   }
@@ -193,7 +193,9 @@ class UiIconsHooksTest extends UnitTestCase {
   public function testPreprocessFromIconObject(): void {
     $icon = $this->createMock(IconDefinitionInterface::class);
     $icon->method('getPackId')->willReturn('test_path');
-    $icon->method('getId')->willReturn('baz');
+    // As in core: getId() is the full id, getIconId() the id within the pack.
+    $icon->method('getId')->willReturn('test_path:baz');
+    $icon->method('getIconId')->willReturn('baz');
 
     $variables = $this->preprocess($this->hooks(), ['#value' => ['object' => $icon]]);
 
