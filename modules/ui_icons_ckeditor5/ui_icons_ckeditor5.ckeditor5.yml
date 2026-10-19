@@ -11,8 +11,10 @@ ui_icons_ckeditor5_icon:
           func:
             name: Drupal.ckeditor5.openDialog
             invoke: false
+        # No percentage height: below 600px core opens the dialog without
+        # autoResize, the only code converting it to pixels, and jQuery UI
+        # then leaves the dialog content 0px high.
         dialogSettings:
-          height: 75%
           dialogClass: ui-icons-widget-modal
           title: Insert Icon
 

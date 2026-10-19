@@ -5,12 +5,16 @@ declare(strict_types=1);
 // cspell:ignore corge quux
 namespace Drupal\Tests\ui_icons\Unit;
 
+use Drupal\Component\Datetime\Time;
 use Drupal\Core\Cache\CacheBackendInterface;
+use Drupal\Core\Cache\MemoryBackend;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\Core\Theme\Icon\IconDefinitionInterface;
+use Drupal\Core\Theme\Icon\IconExtractorInterface;
+use Drupal\Core\Theme\Icon\IconExtractorPluginManager;
 use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\Tests\Core\Theme\Icon\IconTestTrait;
 use Drupal\ui_icons\IconSearch;
@@ -47,11 +51,25 @@ class IconSearchTest extends TestCase {
   private IconPackManagerInterface $iconPackManager;
 
   /**
+   * The icon extractor manager.
+   *
+   * @var \Drupal\Core\Theme\Icon\IconExtractorPluginManager
+   */
+  private IconExtractorPluginManager $iconExtractorManager;
+
+  /**
    * The renderer.
    *
    * @var \Drupal\Core\Render\RendererInterface
    */
   private RendererInterface $renderer;
+
+  /**
+   * The cache backend.
+   *
+   * @var \Drupal\Core\Cache\MemoryBackend
+   */
+  private MemoryBackend $cache;
 
   /**
    * The icon search service.
@@ -70,16 +88,18 @@ class IconSearchTest extends TestCase {
     \Drupal::setContainer($this->container);
 
     $this->iconPackManager = $this->createMock(IconPackManagerInterface::class);
+    $this->iconExtractorManager = $this->createMock(IconExtractorPluginManager::class);
     $this->renderer = $this->createMock(RendererInterface::class);
     $this->renderer
       ->method('renderInIsolation')
       ->willReturn(Markup::create('_rendered_'));
+    $this->cache = new MemoryBackend(new Time());
 
     $this->iconSearch = new IconSearch(
       $this->iconPackManager,
       $this->renderer,
-      // @todo test the cache.
-      $this->createStub(CacheBackendInterface::class),
+      $this->cache,
+      $this->iconExtractorManager,
     );
   }
 
@@ -90,7 +110,8 @@ class IconSearchTest extends TestCase {
     $iconSearch = new IconSearch(
       $this->createStub(IconPackManagerInterface::class),
       $this->createStub(RendererInterface::class),
-      $this->createStub(CacheBackendInterface::class)
+      $this->createStub(CacheBackendInterface::class),
+      $this->createStub(IconExtractorPluginManager::class),
     );
 
     $this->assertInstanceOf(IconSearch::class, $iconSearch);
@@ -413,7 +434,53 @@ class IconSearchTest extends TestCase {
   }
 
   /**
-   * Helper to mock the iconPackManager getIcon() and getIcons() method.
+   * Tests a repeated search is served from cache until icon packs change.
+   */
+  public function testSearchCache(): void {
+    $this->iconPackManager
+      ->expects($this->exactly(2))
+      ->method('getIcons')
+      ->willReturn(array_flip(['foo:_match_', 'bar:_match_']));
+
+    $expected = ['foo:_match_', 'bar:_match_'];
+    $this->assertSame($expected, array_values($this->iconSearch->search('_match_')));
+    $this->assertSame($expected, array_values($this->iconSearch->search('_match_')));
+
+    // Core invalidates this tag when icon pack definitions are rebuilt.
+    $this->cache->invalidateTags(['icon_pack_plugin']);
+    $this->assertSame($expected, array_values($this->iconSearch->search('_match_')));
+  }
+
+  /**
+   * Tests a cached search does not answer a search with another max result.
+   */
+  public function testSearchCacheMaxResult(): void {
+    $this->iconPackManager
+      ->method('getIcons')
+      ->willReturn(array_flip(['foo:_match_', 'bar:_match_', 'baz:_match_']));
+
+    $this->assertCount(2, $this->iconSearch->search('_match_', [], 2));
+    $this->assertCount(3, $this->iconSearch->search('_match_', [], 24));
+  }
+
+  /**
+   * Tests pack lists joining to the same string get their own cache entry.
+   */
+  public function testSearchCachePacks(): void {
+    $this->iconPackManager
+      ->method('getIcons')
+      ->willReturnCallback(static fn (array $packs): array => array_flip(array_map(
+        static fn (string $pack): string => $pack . ':_match_',
+        $packs,
+      )));
+
+    $this->assertSame(['ab:_match_', 'c:_match_'], array_values($this->iconSearch->search('_match_', ['ab', 'c'])));
+    $this->assertSame(['a:_match_', 'bc:_match_'], array_values($this->iconSearch->search('_match_', ['a', 'bc'])));
+    $this->assertSame(['d:_match_'], array_values($this->iconSearch->search('_match_', ['d'])));
+  }
+
+  /**
+   * Helper to mock the icon pack definitions and their extractor.
    *
    * @param array $icons
    *   The icons returned by IconPackManager::getIcons().
@@ -435,21 +502,38 @@ class IconSearchTest extends TestCase {
       ->with($allowed_icon_pack)
       ->willReturn(array_flip($icons));
 
-    $icons_returned_map = [];
+    $definitions = [];
     foreach ($icons as $icon_full_id) {
-      [$pack_id, $icon_id] = explode(IconDefinition::ICON_SEPARATOR, $icon_full_id);
-      $icons_returned_map[] = [
-        $icon_full_id,
-        $this->createTestIcon([
-          'pack_id' => $pack_id,
-          'icon_id' => $icon_id,
-        ]),
-      ];
+      [$pack_id] = explode(IconDefinition::ICON_SEPARATOR, $icon_full_id);
+      $definitions[$pack_id]['id'] = $pack_id;
+      $definitions[$pack_id]['extractor'] = 'test';
+      $definitions[$pack_id]['icons'][$icon_full_id] = [];
     }
 
     $this->iconPackManager
-      ->method('getIcon')
-      ->willReturnMap($icons_returned_map);
+      ->method('getDefinition')
+      ->willReturnCallback(static fn (string $pack_id): ?array => $definitions[$pack_id] ?? NULL);
+
+    // The icon collector behind getIcon() keeps every icon in one cache item.
+    $this->iconPackManager
+      ->expects($this->never())
+      ->method('getIcon');
+
+    $this->iconExtractorManager
+      ->method('createInstance')
+      ->willReturnCallback(function (string $plugin_id, array $configuration): IconExtractorInterface {
+        $this->assertSame('test', $plugin_id);
+        $this->assertArrayNotHasKey('icons', $configuration);
+        $extractor = $this->createStub(IconExtractorInterface::class);
+        $extractor
+          ->method('loadIcon')
+          ->willReturnCallback(fn (array $icon_data): IconDefinitionInterface => $this->createTestIcon([
+            'pack_id' => $configuration['id'],
+            'icon_id' => $icon_data['icon_id'],
+          ]));
+
+        return $extractor;
+      });
   }
 
 }

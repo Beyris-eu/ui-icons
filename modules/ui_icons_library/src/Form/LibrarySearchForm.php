@@ -7,7 +7,7 @@ namespace Drupal\ui_icons_library\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Pager\PagerManagerInterface;
-use Drupal\Core\TempStore\SharedTempStoreFactory;
+use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\ui_icons\IconSearch;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -27,7 +27,7 @@ final class LibrarySearchForm extends FormBase {
     protected IconPackManagerInterface $pluginManagerIconPack,
     protected PagerManagerInterface $pagerManager,
     protected IconSearch $iconSearch,
-    protected SharedTempStoreFactory $tempStoreFactory,
+    protected PrivateTempStoreFactory $tempStoreFactory,
   ) {}
 
   /**
@@ -38,7 +38,7 @@ final class LibrarySearchForm extends FormBase {
       $container->get('plugin.manager.icon_pack'),
       $container->get('pager.manager'),
       $container->get('ui_icons.search'),
-      $container->get('tempstore.shared'),
+      $container->get('tempstore.private'),
     );
   }
 

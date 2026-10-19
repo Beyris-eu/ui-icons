@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Drupal\ui_icons_field;
 
 use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Theme\Icon\IconDefinition;
 
 /**
@@ -112,14 +114,14 @@ trait IconLinkFormatterTrait {
         case 'before':
           $elements[$delta]['#title'] = new FormattableMarkup('@icon @title', [
             '@title' => $elements[$delta]['#title'],
-            '@icon' => $this->renderer->renderInIsolation($icon_element),
+            '@icon' => $this->renderIcon($icon_element, $elements[$delta]),
           ]);
           break;
 
         case 'after':
           $elements[$delta]['#title'] = new FormattableMarkup('@title @icon', [
             '@title' => $elements[$delta]['#title'],
-            '@icon' => $this->renderer->renderInIsolation($icon_element),
+            '@icon' => $this->renderIcon($icon_element, $elements[$delta]),
           ]);
           break;
 
@@ -139,6 +141,31 @@ trait IconLinkFormatterTrait {
     }
 
     return $elements;
+  }
+
+  /**
+   * Render an icon to put in a link title.
+   *
+   * The icon pack library and cache metadata do not survive the cast to a
+   * string, so they are carried over to the link element.
+   *
+   * @param array|null $icon_element
+   *   The icon renderable.
+   * @param array $element
+   *   The link element.
+   *
+   * @return \Drupal\Component\Render\MarkupInterface|string
+   *   The rendered icon.
+   */
+  private function renderIcon(?array $icon_element, array &$element): MarkupInterface|string {
+    $icon = $this->renderer->renderInIsolation($icon_element);
+    if (NULL !== $icon_element) {
+      BubbleableMetadata::createFromRenderArray($element)
+        ->merge(BubbleableMetadata::createFromRenderArray($icon_element))
+        ->applyTo($element);
+    }
+
+    return $icon;
   }
 
   /**

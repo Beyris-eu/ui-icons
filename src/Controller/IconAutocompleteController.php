@@ -68,6 +68,8 @@ class IconAutocompleteController extends ControllerBase {
     }
 
     $max_result = (int) $request->query->get('max_result', IconSearch::SEARCH_RESULT);
+    // Each result renders an icon, so cap what the query string can ask for.
+    $max_result = max(1, min($max_result, IconSearch::SEARCH_RESULT_MAX));
     $result = $this->iconSearch->search(
       $query,
       $allowed_icon_pack,
@@ -90,10 +92,10 @@ class IconAutocompleteController extends ControllerBase {
    *   The icon result with keys 'value' and 'label' for autocomplete.
    */
   public static function createResultEntry(IconDefinitionInterface $icon, Markup $renderable): ?array {
-    $label = new FormattableMarkup('<div class="ui-icons-result">' . $renderable . '<span class="ui-icons-result-icon-name">:name</span><strong class="ui-icons-result-collection">:pack_label</strong></div>',
+    $label = new FormattableMarkup('<div class="ui-icons-result">' . $renderable . '<span class="ui-icons-result-icon-name">@name</span><strong class="ui-icons-result-collection">@pack_label</strong></div>',
       [
-        ':name' => $icon->getLabel(),
-        ':pack_label' => $icon->getPackLabel() ?: $icon->getPackId(),
+        '@name' => $icon->getLabel(),
+        '@pack_label' => $icon->getPackLabel() ?: $icon->getPackId(),
       ],
     );
 
@@ -112,10 +114,10 @@ class IconAutocompleteController extends ControllerBase {
    *   The icon result with keys 'value' and 'label' for autocomplete.
    */
   public static function createResultEntryGrid(IconDefinitionInterface $icon, Markup $renderable): ?array {
-    $label = new FormattableMarkup('<span class="ui-icons-result-grid">' . $renderable . '<span class="ui-icons-result-icon-name">:name (:pack_label)</span></span>',
+    $label = new FormattableMarkup('<span class="ui-icons-result-grid">' . $renderable . '<span class="ui-icons-result-icon-name">@name (@pack_label)</span></span>',
       [
-        ':name' => $icon->getLabel(),
-        ':pack_label' => $icon->getPackLabel() ?: $icon->getPackId(),
+        '@name' => $icon->getLabel(),
+        '@pack_label' => $icon->getPackLabel() ?: $icon->getPackId(),
       ],
     );
 

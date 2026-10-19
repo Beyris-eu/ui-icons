@@ -23,6 +23,7 @@ ui_icons_library.mode:
     mode: 'off'
   requirements:
     _permission: 'access ui icons library'
+    _csrf_token: 'TRUE'
 
 ui_icons_library.pack:
   path: '/admin/appearance/ui/icons/{pack_id}'

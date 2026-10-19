@@ -10,5 +10,9 @@ ui_icons_ckeditor5.icon_dialog:
   defaults:
     _title: 'Icon Dialog'
     _form: 'Drupal\ui_icons_ckeditor5\Form\IconDialog'
+  options:
+    parameters:
+      filter_format:
+        type: 'entity:filter_format'
   requirements:
-    _permission: 'access content'
+    _entity_access: 'filter_format.use'

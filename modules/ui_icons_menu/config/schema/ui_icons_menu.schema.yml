@@ -8,6 +8,9 @@ system.menu.*.third_party.ui_icons_menu:
     result_format:
       type: string
       label: 'Autocomplete result format'
+    max_result:
+      type: integer
+      label: 'Maximum result'
     icon_required:
       type: boolean
       label: 'Icon required'

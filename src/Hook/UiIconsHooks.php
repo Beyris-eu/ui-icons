@@ -8,6 +8,7 @@ use Drupal\Core\Hook\Attribute\Hook;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Theme\Icon\IconDefinition;
+use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
 
 /**
@@ -31,7 +32,58 @@ class UiIconsHooks {
 
   public function __construct(
     protected readonly ThemeManagerInterface $themeManager,
+    protected readonly IconPackManagerInterface $iconPackManager,
   ) {}
+
+  /**
+   * Implements hook_config_schema_info_alter().
+   *
+   * Core forbids adding schema types from this hook, so each icon pack gets a
+   * key in the existing ui_icons.icon_pack_settings mapping instead.
+   */
+  #[Hook('config_schema_info_alter')]
+  public function configSchemaInfoAlter(array &$definitions): void {
+    $mapping = &$definitions['ui_icons.icon_pack_settings']['mapping'];
+    foreach ($this->iconPackManager->getDefinitions() as $pack_id => $pack) {
+      $type = 'ui_icons.icon_pack_options.' . $pack_id;
+      $schema = isset($definitions[$type]) ? ['type' => $type] : $this->buildPackSchema($pack['settings'] ?? []);
+      // Settings only hold the packs that were configured.
+      $mapping[$pack_id] = $schema + ['requiredKey' => FALSE];
+    }
+    // Saved settings follow the mapping order: keep it independent of the
+    // extension weights.
+    ksort($mapping);
+  }
+
+  /**
+   * Builds a config schema from icon pack settings, a JSON schema subset.
+   *
+   * @param array $settings
+   *   The icon pack definition settings.
+   *
+   * @return array
+   *   The mapping schema, same types as IconExtractorSettingsForm values.
+   *
+   * @see \Drupal\Core\Theme\Icon\IconExtractorSettingsForm
+   */
+  private function buildPackSchema(array $settings): array {
+    $mapping = [];
+    foreach ($settings as $setting_id => $setting) {
+      $mapping[$setting_id] = [
+        'type' => match ($setting['type'] ?? NULL) {
+          'integer' => 'integer',
+          'number' => 'float',
+          'boolean' => 'boolean',
+          default => 'string',
+        },
+        'label' => $setting['title'] ?? $setting_id,
+        // A setting added to the pack later is missing from saved config.
+        'requiredKey' => FALSE,
+      ];
+    }
+
+    return ['type' => 'mapping', 'mapping' => $mapping];
+  }
 
   /**
    * Implements hook_help().

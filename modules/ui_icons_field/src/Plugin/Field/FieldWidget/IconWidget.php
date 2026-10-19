@@ -42,6 +42,11 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
    */
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $element = [];
+    $autocomplete_only = [
+      'visible' => [
+        ':input[name="fields[' . $this->fieldDefinition->getName() . '][settings_edit_form][settings][icon_selector]"]' => ['value' => 'icon_autocomplete'],
+      ],
+    ];
 
     $element['icon_selector'] = [
       '#type' => 'select',
@@ -55,11 +60,7 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       '#title' => $this->t('Result format'),
       '#options' => $this->getAutocompleteFormat(),
       '#default_value' => $this->getSetting('result_format'),
-      '#states' => [
-        'visible' => [
-          ':input[name="fields[' . $this->fieldDefinition->getName() . '][settings_edit_form][settings][icon_selector]"]' => ['value' => 'icon_autocomplete'],
-        ],
-      ],
+      '#states' => $autocomplete_only,
     ];
 
     $element['max_result'] = [
@@ -68,6 +69,7 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       '#max' => IconSearch::SEARCH_RESULT_MAX,
       '#title' => $this->t('Maximum results'),
       '#default_value' => $this->getSetting('max_result'),
+      '#states' => $autocomplete_only,
     ];
 
     return $element;
@@ -84,8 +86,8 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $summary[] = $this->t('Selector: @type', ['@type' => $this->getPickerOptions()[$icon_selector] ?? '']);
     if ($icon_selector === 'icon_autocomplete') {
       $summary[] = $this->t('Result format: @format', ['@format' => $this->getAutocompleteFormat()[$result_format] ?? 'list']);
+      $summary[] = $this->t('Max results: @results', ['@results' => $this->getSetting('max_result')]);
     }
-    $summary[] = $this->t('Max results: @results', ['@results' => $this->getSetting('max_result')]);
 
     return $summary;
   }
@@ -99,7 +101,7 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     /** @var \Drupal\ui_icons_field\Plugin\Field\FieldType\IconType $item */
     $item = $items[$delta];
 
-    $icon_selector = $this->getSetting('icon_selector');
+    $icon_selector = $this->getIconSelector();
     $allowed_icon_pack = array_filter($this->fieldDefinition->getSetting('allowed_icon_pack') ?? []);
     $element['value'] = [
       '#type' => $icon_selector,

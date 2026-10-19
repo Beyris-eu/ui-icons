@@ -70,8 +70,10 @@ class IconLinkWidget extends LinkWidget implements ContainerFactoryPluginInterfa
    * {@inheritdoc}
    */
   public function settingsSummary(): array {
-    $summary = parent::settingsSummary();
-    $summary += $this->traitSettingsSummary();
+    $summary = array_merge(
+      parent::settingsSummary(),
+      $this->traitSettingsSummary()
+    );
     return $summary;
   }
 

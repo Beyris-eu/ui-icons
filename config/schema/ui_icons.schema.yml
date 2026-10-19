@@ -1,8 +1,10 @@
+# Keyed by icon pack id. UiIconsHooks::configSchemaInfoAlter() adds a key per
+# pack, typed ui_icons.icon_pack_options.PACK_ID when an extension declares
+# that schema, else built from the pack settings.
 ui_icons.icon_pack_settings:
-  type: sequence
+  type: mapping
   label: 'Icon settings'
-  sequence:
-    type: ui_icons.icon_pack_options.[%key]
+  mapping: {}
 
 ui_icons.icon_value:
   type: mapping

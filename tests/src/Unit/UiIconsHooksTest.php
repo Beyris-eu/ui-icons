@@ -6,6 +6,7 @@ namespace Drupal\Tests\ui_icons\Unit;
 
 use Drupal\Core\Theme\ActiveTheme;
 use Drupal\Core\Theme\Icon\IconDefinitionInterface;
+use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\Core\Theme\ThemeManagerInterface;
 use Drupal\Tests\UnitTestCase;
 use Drupal\ui_icons\Hook\UiIconsHooks;
@@ -43,7 +44,7 @@ class UiIconsHooksTest extends UnitTestCase {
     $theme_manager = $this->createMock(ThemeManagerInterface::class);
     $theme_manager->method('getActiveTheme')->willReturn($theme);
 
-    $hooks = new UiIconsHooks($theme_manager);
+    $hooks = new UiIconsHooks($theme_manager, $this->createStub(IconPackManagerInterface::class));
     $hooks->setStringTranslation($this->getStringTranslationStub());
 
     return $hooks;
@@ -71,6 +72,58 @@ class UiIconsHooksTest extends UnitTestCase {
     $this->assertStringContainsString('UI Icons', (string) $help);
 
     $this->assertNull($this->hooks()->help('help.page.node', $route_match));
+  }
+
+  /**
+   * Tests a schema is added for each icon pack in the icon settings mapping.
+   */
+  public function testConfigSchemaInfoAlter(): void {
+    $icon_pack_manager = $this->createStub(IconPackManagerInterface::class);
+    $icon_pack_manager->method('getDefinitions')->willReturn([
+      'pack_settings' => [
+        'settings' => [
+          'size' => ['type' => 'integer', 'title' => 'Size'],
+          'ratio' => ['type' => 'number'],
+          'rounded' => ['type' => 'boolean'],
+          'alt' => ['type' => 'string'],
+          'items' => ['type' => 'array'],
+        ],
+      ],
+      'pack_hand_written' => ['settings' => ['size' => ['type' => 'integer']]],
+      'pack_no_settings' => [],
+    ]);
+    $hooks = new UiIconsHooks($this->createStub(ThemeManagerInterface::class), $icon_pack_manager);
+
+    $hand_written = ['type' => 'mapping', 'mapping' => []];
+    $definitions = [
+      'ui_icons.icon_pack_settings' => ['type' => 'mapping', 'mapping' => []],
+      'ui_icons.icon_pack_options.pack_hand_written' => $hand_written,
+    ];
+    $hooks->configSchemaInfoAlter($definitions);
+
+    $this->assertSame([
+      'pack_hand_written' => [
+        'type' => 'ui_icons.icon_pack_options.pack_hand_written',
+        'requiredKey' => FALSE,
+      ],
+      'pack_no_settings' => [
+        'type' => 'mapping',
+        'mapping' => [],
+        'requiredKey' => FALSE,
+      ],
+      'pack_settings' => [
+        'type' => 'mapping',
+        'mapping' => [
+          'size' => ['type' => 'integer', 'label' => 'Size', 'requiredKey' => FALSE],
+          'ratio' => ['type' => 'float', 'label' => 'ratio', 'requiredKey' => FALSE],
+          'rounded' => ['type' => 'boolean', 'label' => 'rounded', 'requiredKey' => FALSE],
+          'alt' => ['type' => 'string', 'label' => 'alt', 'requiredKey' => FALSE],
+          'items' => ['type' => 'string', 'label' => 'items', 'requiredKey' => FALSE],
+        ],
+        'requiredKey' => FALSE,
+      ],
+    ], $definitions['ui_icons.icon_pack_settings']['mapping']);
+    $this->assertSame($hand_written, $definitions['ui_icons.icon_pack_options.pack_hand_written']);
   }
 
   /**

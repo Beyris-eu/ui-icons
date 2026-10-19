@@ -251,8 +251,11 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
     if ($aria_label = $node->getAttribute('aria-label')) {
       $attributes['aria-label'] = $aria_label;
     }
-    if ($node->getAttribute('aria-hidden')) {
-      $attributes['aria-hidden'] = TRUE;
+    // A bare aria-hidden is undefined in ARIA, so only the two valid values
+    // are copied, as strings.
+    $aria_hidden = $node->getAttribute('aria-hidden');
+    if (in_array($aria_hidden, ['true', 'false'], TRUE)) {
+      $attributes['aria-hidden'] = $aria_hidden;
     }
     if ($role = $node->getAttribute('role')) {
       $attributes['role'] = $role;
