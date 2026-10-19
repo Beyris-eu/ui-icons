@@ -63,4 +63,33 @@ class IconSourceSettingsFormTest extends KernelTestBase {
     ];
   }
 
+  /**
+   * Tests the selector comes from config while its module is enabled.
+   */
+  #[DataProvider('providerIconSelector')]
+  public function testIconSelector(array $modules, ?string $icon_selector, string $expected): void {
+    $this->enableModules($modules);
+    $this->installConfig(['ui_icons_patterns']);
+    if ($icon_selector) {
+      $this->config('ui_icons_patterns.settings')->set('icon_selector', $icon_selector)->save();
+    }
+    $source = $this->container->get('plugin.manager.ui_patterns_source')
+      ->createInstance('icon', ['settings' => ['value' => ['target_id' => 'test_path:foo']]]);
+
+    $form = $source->settingsForm([], new FormState());
+
+    $this->assertSame($expected, $form['value']['#type']);
+  }
+
+  /**
+   * Data provider for ::testIconSelector().
+   */
+  public static function providerIconSelector(): array {
+    return [
+      'popover by default' => [['ui_icons_popover'], NULL, 'icon_popover'],
+      'picker when configured' => [['ui_icons_picker'], 'icon_picker', 'icon_picker'],
+      'autocomplete when the popover is off' => [[], NULL, 'icon_autocomplete'],
+    ];
+  }
+
 }

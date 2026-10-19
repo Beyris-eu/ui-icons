@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the ui_icons_patterns module.
+ */
+
+declare(strict_types=1);
+
+/**
+ * Add the icon selector setting of the icon sources.
+ */
+function ui_icons_patterns_update_11201(): string {
+  $config = \Drupal::configFactory()->getEditable('ui_icons_patterns.settings');
+  if (!$config->isNew()) {
+    return 'The icon selector setting already exists.';
+  }
+
+  // A copy of config/install when this update was written. The popover is
+  // optional, the sources fall back to the autocomplete while it is off.
+  $config->set('icon_selector', 'icon_popover')->save(TRUE);
+
+  return 'Added the icon selector setting.';
+}

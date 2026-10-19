@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Drupal\ui_icons_patterns\Plugin\UiPatterns\Source;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\ElementInfoManagerInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\ui_patterns\Attribute\Source;
 use Drupal\ui_patterns\SourcePluginBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the source.
@@ -21,6 +24,30 @@ use Drupal\ui_patterns\SourcePluginBase;
   tags: ['widget', 'widget:dismissible']
 )]
 class IconSource extends SourcePluginBase {
+
+  /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected ConfigFactoryInterface $configFactory;
+
+  /**
+   * The element info manager.
+   *
+   * @var \Drupal\Core\Render\ElementInfoManagerInterface
+   */
+  protected ElementInfoManagerInterface $elementInfo;
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition): static {
+    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    $instance->configFactory = $container->get('config.factory');
+    $instance->elementInfo = $container->get('plugin.manager.element_info');
+    return $instance;
+  }
 
   /**
    * {@inheritdoc}
@@ -44,7 +71,7 @@ class IconSource extends SourcePluginBase {
     $value = $this->getSetting('value');
     $element = [
       'value' => [
-        '#type' => 'icon_autocomplete',
+        '#type' => $this->getIconSelector(),
         '#default_value' => $value['target_id'] ?? '',
         '#default_settings' => $value['settings'] ?? [],
         '#show_settings' => TRUE,
@@ -76,6 +103,25 @@ class IconSource extends SourcePluginBase {
     return [
       $icon_data['icon_id'] . ' (' . $icon_data['pack_id'] . ')',
     ];
+  }
+
+  /**
+   * Get the icon selector element type.
+   *
+   * 'icon_popover' and 'icon_picker' come from optional submodules. An unknown
+   * '#type' renders as nothing rather than failing, which would leave the
+   * source with no icon input at all, so fall back when it is gone.
+   *
+   * @return string
+   *   The form element type.
+   */
+  private function getIconSelector(): string {
+    $icon_selector = (string) $this->configFactory->get('ui_icons_patterns.settings')->get('icon_selector');
+    if (!$this->elementInfo->hasDefinition($icon_selector)) {
+      return 'icon_autocomplete';
+    }
+
+    return $icon_selector;
   }
 
 }

@@ -10,3 +10,11 @@ ui_patterns_source.icon:
 ui_patterns_source.icon_renderable:
   type: ui_patterns_source.icon
   label: 'Source: Icon renderable'
+
+ui_icons_patterns.settings:
+  type: config_object
+  label: 'UI Icons for UI Patterns settings'
+  mapping:
+    icon_selector:
+      type: string
+      label: 'Icon selector'
