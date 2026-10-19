@@ -607,7 +607,6 @@
     };
 
     const open = async () => {
-      resetSearch();
       if (!index) {
         showStatus(Drupal.t('Loading icons…'));
         try {
@@ -660,6 +659,14 @@
       panel.style.top = `${top}px`;
       panel.style.left = `${left}px`;
     };
+
+    // Before the panel shows: the toggle event comes after the browser has
+    // focused the search box, maybe after keys typed in it.
+    panel.addEventListener('beforetoggle', (event) => {
+      if (event.newState === 'open') {
+        resetSearch();
+      }
+    });
 
     panel.addEventListener('toggle', (event) => {
       if (event.newState === 'open') {

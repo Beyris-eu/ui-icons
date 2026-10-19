@@ -177,6 +177,21 @@ test('The search box has the focus as soon as the panel shows', { tag: [ '@base'
   expect(focused).toBe('ui-icons-popover__search')
 })
 
+test('Words typed as soon as the panel shows are searched', { tag: [ '@base' ] }, async ({ page }) => {
+  await openForm(page)
+
+  // Typed before the browser fires the toggle event of the panel.
+  await trigger(page).evaluate((button) => {
+    button.click()
+    const search = document.activeElement as HTMLInputElement
+    search.value = 'arrow l'
+    search.dispatchEvent(new Event('input', { bubbles: true }))
+  })
+
+  await expect(panel(page).getByRole('listbox').getByRole('option')).toHaveCount(1)
+  await expect(panel(page).locator('.ui-icons-popover__search')).toHaveValue('arrow l')
+})
+
 test('Search and pick with the keyboard', { tag: [ '@base' ] }, async ({ page, drupal }) => {
   await test.step('Results narrow down and are announced', async () => {
     // Words typed while the index still loads must not be lost.
