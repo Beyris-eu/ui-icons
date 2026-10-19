@@ -105,6 +105,22 @@ class IconWidgetKernelTest extends KernelTestBase {
   }
 
   /**
+   * Tests the maximum results show for the autocomplete selector only.
+   */
+  public function testSettingsMaxResult(): void {
+    $widget = $this->container->get('plugin.manager.field.widget')->createInstance('icon_widget', [
+      'field_definition' => $this->baseField,
+      'settings' => ['icon_selector' => 'icon_picker'] + IconWidget::defaultSettings(),
+      'third_party_settings' => [],
+    ]);
+    $form = $widget->settingsForm([], new FormState());
+    $summary = array_map('strval', $widget->settingsSummary());
+
+    $this->assertSame($form['result_format']['#states'], $form['max_result']['#states'] ?? NULL);
+    $this->assertEmpty(preg_grep('/^Max results/', $summary));
+  }
+
+  /**
    * Build the icon widget form.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity

@@ -77,6 +77,18 @@ class IconLinkWidgetKernelTest extends KernelTestBase {
   }
 
   /**
+   * Tests the maximum results show for the autocomplete selector only.
+   */
+  public function testSettingsMaxResult(): void {
+    $widget = $this->createWidget(['icon_selector' => 'icon_picker']);
+    $form = $widget->settingsForm([], new FormState());
+    $summary = array_map('strval', $widget->settingsSummary());
+
+    $this->assertSame($form['result_format']['#states'], $form['max_result']['#states'] ?? NULL);
+    $this->assertEmpty(preg_grep('/^Max results/', $summary));
+  }
+
+  /**
    * Tests the picker selector falls back when ui_icons_picker is missing.
    */
   public function testFormElementPickerFallback(): void {

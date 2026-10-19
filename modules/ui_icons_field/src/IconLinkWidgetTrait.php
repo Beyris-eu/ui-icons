@@ -44,6 +44,12 @@ trait IconLinkWidgetTrait {
    */
   public function settingsForm(array $form, FormStateInterface $form_state): array {
     $elements = [];
+    $autocomplete_only = [
+      'visible' => [
+        ':input[name="fields[' . $this->fieldDefinition->getName() . '][settings_edit_form][settings][icon_selector]"]' => ['value' => 'icon_autocomplete'],
+      ],
+    ];
+
     $elements['icon_selector'] = [
       '#type' => 'select',
       '#title' => $this->t('Icon selector'),
@@ -56,11 +62,7 @@ trait IconLinkWidgetTrait {
       '#title' => $this->t('Result format'),
       '#options' => $this->getAutocompleteFormat(),
       '#default_value' => $this->getSetting('result_format'),
-      '#states' => [
-        'visible' => [
-          ':input[name="fields[' . $this->fieldDefinition->getName() . '][settings_edit_form][settings][icon_selector]"]' => ['value' => 'icon_autocomplete'],
-        ],
-      ],
+      '#states' => $autocomplete_only,
     ];
 
     $elements['max_result'] = [
@@ -69,6 +71,7 @@ trait IconLinkWidgetTrait {
       '#max' => IconSearch::SEARCH_RESULT_MAX,
       '#title' => $this->t('Maximum results'),
       '#default_value' => $this->getSetting('max_result'),
+      '#states' => $autocomplete_only,
     ];
 
     $elements['icon_required'] = [
@@ -143,8 +146,8 @@ trait IconLinkWidgetTrait {
     $result_format = $this->getSetting('result_format');
     if ($icon_selector === 'icon_autocomplete') {
       $summary[] = $this->t('Result format: @format', ['@format' => $this->getAutocompleteFormat()[$result_format] ?? 'list']);
+      $summary[] = $this->t('Max results: @results', ['@results' => $this->getSetting('max_result')]);
     }
-    $summary[] = $this->t('Max results: @results', ['@results' => $this->getSetting('max_result')]);
 
     if (TRUE === (bool) $settings['icon_required']) {
       $summary[] = $this->t('Icon is required');
