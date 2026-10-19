@@ -10,8 +10,10 @@ use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\Core\TypedData\MapDataDefinition;
 
 /**
  * Plugin implementation of the 'ui_icon' field type.
@@ -73,6 +75,13 @@ class IconType extends FieldItemBase {
           'length' => 128,
           'not null' => TRUE,
         ],
+        'settings' => [
+          'description' => 'Serialized array of icon pack settings for this icon.',
+          'type' => 'blob',
+          'size' => 'big',
+          'serialize' => TRUE,
+          'not null' => FALSE,
+        ],
       ],
       'indexes' => [
         'target_id' => ['target_id'],
@@ -91,7 +100,31 @@ class IconType extends FieldItemBase {
       ->setRequired(TRUE)
       ->addConstraint('Regex', ['pattern' => self::ICON_ID_PCRE]);
 
+    // The icon pack's extractor settings (width, size, title, …, as declared by
+    // the pack in its `*.icons.yml`), keyed by icon pack — the structure the
+    // form element emits and `ui_icons.icon_value` config schema types.
+    $properties['settings'] = MapDataDefinition::create()
+      ->setLabel(new TranslatableMarkup('Icon settings, keyed by icon pack'))
+      ->setInternal(FALSE);
+
     return $properties;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setValue($values, $notify = TRUE): void {
+    // Settings are stored keyed by icon pack, as `icon_autocomplete` submits
+    // them and `ui_icons.icon_value` config schema types them.
+    // @see \Drupal\ui_icons\Element\IconAutocomplete::buildValue()
+    if (is_array($values) && isset($values['target_id']) && !empty($values['settings']) && is_array($values['settings'])) {
+      $pack_id = IconDefinition::getIconDataFromId($values['target_id'])['pack_id'] ?? NULL;
+      if ($pack_id !== NULL) {
+        // Keep only the settings that belong to this item's own icon.
+        $values['settings'] = array_intersect_key($values['settings'], [$pack_id => TRUE]);
+      }
+    }
+    parent::setValue($values, $notify);
   }
 
   /**
@@ -107,6 +140,7 @@ class IconType extends FieldItemBase {
   public static function defaultFieldSettings(): array {
     return [
       'allowed_icon_pack' => [],
+      'allow_settings' => FALSE,
     ] + parent::defaultFieldSettings();
   }
 
@@ -123,6 +157,12 @@ class IconType extends FieldItemBase {
         '#description' => $this->t('If none are selected, all will be allowed.'),
         '#options' => $options,
         '#default_value' => $this->getSetting('allowed_icon_pack'),
+      ],
+      'allow_settings' => [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Store icon settings'),
+        '#description' => $this->t("Let editors set the icon pack's own settings (size, title, …) per value, stored alongside the icon."),
+        '#default_value' => $this->getSetting('allow_settings'),
       ],
     ];
 

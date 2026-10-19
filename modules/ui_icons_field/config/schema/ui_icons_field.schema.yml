@@ -14,6 +14,9 @@ field.field_settings.ui_icon:
       sequence:
         type: string
         label: 'Icon pack id'
+    allow_settings:
+      type: boolean
+      label: 'Store the icon pack settings with each value'
 
 field.formatter.settings.icon_formatter:
   type: mapping

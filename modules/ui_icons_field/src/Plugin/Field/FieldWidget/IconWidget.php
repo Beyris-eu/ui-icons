@@ -109,7 +109,7 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       '#description' => $element['#description'] ?? '',
       '#allowed_icon_pack' => $allowed_icon_pack,
       '#required' => $element['#required'] ?? FALSE,
-      '#show_settings' => FALSE,
+      '#show_settings' => (bool) $this->fieldDefinition->getSetting('allow_settings'),
       '#default_value' => NULL,
       '#max_result' => $this->getSetting('max_result'),
     ];
@@ -120,6 +120,11 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
 
     if ($item && $target_id = $item->get('target_id')->getValue()) {
       $element['value']['#default_value'] = $target_id;
+      // Both storage and the element key settings by icon pack.
+      $settings = $item->get('settings')->getValue();
+      if (is_array($settings) && $settings !== []) {
+        $element['value']['#default_settings'] = $settings;
+      }
     }
 
     return $element;
@@ -139,6 +144,9 @@ class IconWidget extends WidgetBase implements ContainerFactoryPluginInterface {
 
       $icon = $item['value']['icon'];
       $item['target_id'] = $icon->getId();
+      // Keep the icon pack's settings alongside the id, in the element's own
+      // `[pack_id => settings]` keying, which is also how they are stored.
+      $item['settings'] = $item['value']['settings'] ?? [];
       unset($item['value']);
     }
 

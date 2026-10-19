@@ -116,6 +116,7 @@ class IconFormatter extends FormatterBase implements ContainerFactoryPluginInter
    */
   public function viewElements(FieldItemListInterface $items, $langcode): array {
     $elements = [];
+    $allow_settings = (bool) $this->fieldDefinition->getSetting('allow_settings');
 
     foreach ($items as $delta => $item) {
       if ($item->isEmpty()) {
@@ -126,6 +127,11 @@ class IconFormatter extends FormatterBase implements ContainerFactoryPluginInter
       $formatter_settings = $this->getSetting('icon_settings') ?? [];
       if (!is_array($formatter_settings)) {
         $formatter_settings = [];
+      }
+      // Both are keyed by icon pack, so the item's entry for its own pack wins.
+      $item_settings = $allow_settings ? $item->get('settings')->getValue() : [];
+      if (is_array($item_settings)) {
+        $formatter_settings = $item_settings + $formatter_settings;
       }
 
       $elements[$delta] = IconDefinition::getRenderable($icon_full_id, $formatter_settings);

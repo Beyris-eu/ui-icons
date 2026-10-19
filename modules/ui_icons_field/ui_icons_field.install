@@ -1,0 +1,117 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the UI Icons Field module.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Entity\Sql\SqlContentEntityStorage;
+use Drupal\Core\Entity\Sql\TableMappingInterface;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
+
+/**
+ * Adds the `settings` column to every `ui_icon` field.
+ *
+ * The `ui_icon` field type gained a serialized `settings` column so that an
+ * icon can carry its pack's extractor settings.
+ *
+ * The columns are changed directly rather than through
+ * EntityDefinitionUpdateManager: it refuses a schema change on a field with
+ * data, and on a configurable field it probes the not-yet-existing column for
+ * data and fails.
+ *
+ * A single-value base field also gets its icon id column renamed: a shared
+ * table names the only column of a field after the field, and each of several
+ * columns `{field}__{property}`. Its last installed definition is replaced
+ * too, since a base field definition is stored with its schema.
+ *
+ * @see \Drupal\ui_icons_field\Plugin\Field\FieldType\IconType::schema()
+ * @see \Drupal\Core\Entity\Sql\DefaultTableMapping::getFieldColumnName()
+ */
+function ui_icons_field_update_11201(): string {
+  $entity_type_manager = \Drupal::entityTypeManager();
+  $entity_field_manager = \Drupal::service('entity_field.manager');
+  $last_installed = \Drupal::service('entity.last_installed_schema.repository');
+
+  $updated = 0;
+  foreach ($entity_field_manager->getFieldMapByFieldType('ui_icon') as $entity_type_id => $fields) {
+    $storage = $entity_type_manager->getStorage($entity_type_id);
+    if (!$storage instanceof SqlContentEntityStorage) {
+      continue;
+    }
+    $table_mapping = $storage->getTableMapping();
+    $storage_definitions = $entity_field_manager->getFieldStorageDefinitions($entity_type_id);
+
+    foreach (array_intersect_key($storage_definitions, $fields) as $storage_definition) {
+      if (_ui_icons_field_add_settings_column($table_mapping, $storage_definition)) {
+        $last_installed->setLastInstalledFieldStorageDefinition($storage_definition);
+        $updated++;
+      }
+    }
+  }
+
+  if ($updated) {
+    // Storage maps columns from the last installed definitions it cached.
+    $entity_type_manager->clearCachedDefinitions();
+    $entity_field_manager->clearCachedFieldDefinitions();
+  }
+
+  return (string) t('Added the icon settings column to @count icon field(s).', ['@count' => $updated]);
+}
+
+/**
+ * Adds the `settings` column to the tables of one `ui_icon` field.
+ *
+ * @return bool
+ *   Whether the column was added to any table.
+ *
+ * @see ui_icons_field_update_11201()
+ */
+function _ui_icons_field_add_settings_column(TableMappingInterface $table_mapping, FieldStorageDefinitionInterface $storage_definition): bool {
+  $db_schema = \Drupal::database()->schema();
+  $key_value = \Drupal::keyValue('entity.storage_schema.sql');
+
+  // A copy of the column in ::schema() when this update was written. Updates
+  // must not read live code: a later change to ::schema() needs its own update.
+  $spec = [
+    'description' => 'Serialized array of icon pack settings for this icon.',
+    'type' => 'blob',
+    'size' => 'big',
+    'serialize' => TRUE,
+    'not null' => FALSE,
+  ];
+
+  $field_name = $storage_definition->getName();
+  $column = $table_mapping->getFieldColumnName($storage_definition, 'settings');
+  $id_column = $table_mapping->getFieldColumnName($storage_definition, 'target_id');
+  $schema_key = $storage_definition->getTargetEntityTypeId() . '.field_schema_data.' . $field_name;
+  $stored_schema = $key_value->get($schema_key);
+  $added = FALSE;
+
+  foreach ($table_mapping->getAllFieldTableNames($field_name) as $table) {
+    if (!$db_schema->tableExists($table) || $db_schema->fieldExists($table, $column)) {
+      continue;
+    }
+    if (!$db_schema->fieldExists($table, $id_column) && $db_schema->fieldExists($table, $field_name)) {
+      $db_schema->changeField($table, $field_name, $id_column, $stored_schema[$table]['fields'][$field_name]);
+      $stored_schema[$table]['fields'][$id_column] = $stored_schema[$table]['fields'][$field_name];
+      unset($stored_schema[$table]['fields'][$field_name]);
+      array_walk_recursive($stored_schema[$table]['indexes'], function (&$index_column) use ($field_name, $id_column): void {
+        $index_column = $index_column === $field_name ? $id_column : $index_column;
+      });
+    }
+    $db_schema->addField($table, $column, $spec);
+    $added = TRUE;
+    if (isset($stored_schema[$table]['fields'])) {
+      $stored_schema[$table]['fields'][$column] = $spec;
+    }
+  }
+
+  if ($added && $stored_schema !== NULL) {
+    $key_value->set($schema_key, $stored_schema);
+  }
+
+  return $added;
+}

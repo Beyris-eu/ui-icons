@@ -9,6 +9,7 @@ use Drupal\Core\Form\FormState;
 use Drupal\entity_test\Entity\EntityTest;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_icons_field\Plugin\Field\FieldFormatter\IconFormatter;
+use Drupal\ui_icons_field\Plugin\Field\FieldType\IconType;
 use Drupal\ui_icons_field\Plugin\Field\FieldWidget\IconWidget;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -25,6 +26,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
  */
 #[RunTestsInSeparateProcesses]
 #[CoversClass(IconFormatter::class)]
+#[CoversClass(IconType::class)]
 #[CoversClass(IconWidget::class)]
 #[Group('ui_icons')]
 class MissingIconPackTest extends KernelTestBase {
@@ -90,6 +92,19 @@ class MissingIconPackTest extends KernelTestBase {
     $entity->icon = ['target_id' => 'test_path:foo'];
     $build = $entity->get('icon')->view(['type' => 'icon_formatter']);
     $this->assertStringContainsString('<img', (string) $renderer->renderInIsolation($build));
+  }
+
+  /**
+   * Tests settings of a missing pack keep their pack keying through a load.
+   */
+  public function testSettingsOfMissingPackKeepTheirKeying(): void {
+    $settings = [self::MISSING_PACK_ID => ['width' => 10]];
+    $entity = EntityTest::create(['name' => 'Missing pack']);
+    $entity->icon = ['target_id' => self::MISSING_PACK_ID . ':foo', 'settings' => $settings];
+    $entity->save();
+
+    $entity = EntityTest::load($entity->id());
+    $this->assertSame($settings, $entity->icon->settings);
   }
 
   /**
