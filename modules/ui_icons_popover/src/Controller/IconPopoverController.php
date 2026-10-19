@@ -82,8 +82,8 @@ class IconPopoverController extends ControllerBase {
       }
     }
 
-    usort($groups, static fn (array $a, array $b): int => strnatcasecmp($a['label'], $b['label']));
-    usort($icons, static fn (array $a, array $b): int => strnatcasecmp($a[1], $b[1]) ?: strcmp($a[0], $b[0]));
+    usort($groups, static fn (array $one, array $other): int => strnatcasecmp($one['label'], $other['label']));
+    usort($icons, static fn (array $one, array $other): int => strnatcasecmp($one[1], $other[1]) ?: strcmp($one[0], $other[0]));
 
     $response = new CacheableJsonResponse([
       'packs' => (object) $packs,
@@ -129,7 +129,10 @@ class IconPopoverController extends ControllerBase {
 
     $response = new CacheableJsonResponse((object) $previews);
 
-    return $response->addCacheableDependency($this->getCacheability(['url.query_args:ids', 'url.query_args:allowed_icon_pack']));
+    return $response->addCacheableDependency($this->getCacheability([
+      'url.query_args:ids',
+      'url.query_args:allowed_icon_pack',
+    ]));
   }
 
   /**

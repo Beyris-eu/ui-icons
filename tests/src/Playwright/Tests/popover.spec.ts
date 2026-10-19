@@ -12,7 +12,9 @@ import config from '../playwright.config.loader'
 // @see \Drupal\ui_icons_popover\Controller\IconPopoverController
 
 const BUNDLE_ID = 'page'
-const FIELD_NAME = 'field_icon'
+// Not picker.spec.ts's field_icon: specs in a worker share one site, and the
+// first to create the field would decide its allowed packs for the other.
+const FIELD_NAME = 'field_icon_popover'
 const PACKS = [ 'popover_one', 'popover_two', 'popover_flat' ]
 
 /**
