@@ -26,3 +26,13 @@ popover_flat:
       - icons/flat/*.svg
   template: >-
     <img src="{{ source }}" width="32" height="32">
+
+# Enough icons without a group to span several render chunks.
+popover_big:
+  label: Popover big
+  extractor: svg_sprite
+  config:
+    sources:
+      - icons/big/big.svg
+  template: >-
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><use xlink:href="{{ source }}#{{ icon_id }}"/></svg>

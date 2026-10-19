@@ -103,6 +103,9 @@
       ['×'],
     );
     clear.hidden = !input.value || input.required;
+    // A required input the editor cannot reach would silently stop the
+    // browser from submitting the form. The server still enforces it.
+    input.required = false;
 
     const search = create('input', {
       type: 'search',
@@ -119,11 +122,15 @@
       role: 'tablist',
       'aria-orientation': 'vertical',
       'aria-label': Drupal.t('Icon groups'),
+      // Firefox makes a scroll container a tab stop of its own, the tabs and
+      // tiles inside already are.
+      tabindex: '-1',
     });
     const grid = create('div', {
       class: 'ui-icons-popover__grid',
       id: `${id}--tabpanel`,
       role: 'tabpanel',
+      tabindex: '-1',
     });
     const footer = create('div', {
       class: 'ui-icons-popover__footer',
@@ -312,13 +319,18 @@
         }
       });
 
-      const appendRows = (from) => {
+      // The first chunk reaches the current icon, so it can be scrolled to
+      // and be the tab stop right away.
+      const currentRow = rows.findIndex(([, icons]) =>
+        icons.some((icon) => icon.id === input.value),
+      );
+      const appendRows = (from, until) => {
         if (current !== renderId) {
           return;
         }
         let count = 0;
         let position = from;
-        while (position < rows.length && count < CHUNK) {
+        while (position < rows.length && (count < CHUNK || position <= until)) {
           const [group, icons] = rows[position];
           group.append(
             create(
@@ -331,10 +343,10 @@
           position += 1;
         }
         if (position < rows.length) {
-          requestAnimationFrame(() => appendRows(position));
+          requestAnimationFrame(() => appendRows(position, -1));
         }
       };
-      appendRows(0);
+      appendRows(0, currentRow);
 
       const tiles = table.querySelectorAll('.ui-icons-popover__tile');
       const focusable =
@@ -403,7 +415,15 @@
 
     const tabId = (entry) => `${id}--tab-${entries.indexOf(entry)}`;
 
+    /**
+     * The query the results show, so the same one is not rendered twice.
+     *
+     * @type {?string}
+     */
+    let shownQuery = null;
+
     const resetSearch = () => {
+      shownQuery = null;
       search.value = '';
       search.setAttribute('aria-expanded', 'false');
       search.removeAttribute('aria-controls');
@@ -412,6 +432,7 @@
 
     const showEntry = (entry) => {
       currentEntry = entry;
+      shownQuery = null;
       rail.querySelectorAll('[role="tab"]').forEach((tab) => {
         const selected = tab.id === tabId(entry);
         tab.setAttribute('aria-selected', String(selected));
@@ -488,6 +509,11 @@
      *   The words to search for.
      */
     const showResults = (query) => {
+      // Rendering again would drop the result the arrows made active.
+      if (query === shownQuery) {
+        return;
+      }
+      shownQuery = query;
       const icons = data.search(index, query);
       renderId += 1;
       observer.disconnect();

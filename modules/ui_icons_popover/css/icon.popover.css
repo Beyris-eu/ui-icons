@@ -11,7 +11,7 @@
   --ui-icons-popover-text: var(--admin-color-text, var(--gin-color-text, CanvasText));
   --ui-icons-popover-border: var(--admin-color-border, var(--gin-border-color, GrayText));
   --ui-icons-popover-accent: var(--admin-color-primary, var(--gin-color-primary, AccentColor));
-  --ui-icons-popover-hover: var(--admin-color-bg-item-hover, var(--gin-bg-item-hover, Field));
+  --ui-icons-popover-hover: var(--admin-color-bg-item-hover, var(--gin-bg-item-hover, color-mix(in srgb, CanvasText 10%, Canvas)));
   --ui-icons-popover-focus: var(--admin-color-focus, var(--gin-color-focus, Highlight));
   --ui-icons-popover-error: var(--admin-color-error, #d72222);
   --ui-icons-popover-tile: 2.5rem;
@@ -81,6 +81,8 @@
 .ui-icons-popover__tile > * {
   max-width: 1.5rem;
   max-height: 1.5rem;
+  /* The preview template titles icons with their raw id, keep the tile's. */
+  pointer-events: none;
 }
 
 .ui-icons-popover__panel {
@@ -211,6 +213,11 @@
 .ui-icons-popover__tile:hover,
 .ui-icons-popover__tile[aria-selected="true"] {
   background: var(--ui-icons-popover-hover);
+}
+
+.ui-icons-popover__tile[aria-selected="true"] {
+  outline: 2px solid var(--ui-icons-popover-focus);
+  outline-offset: 1px;
 }
 
 .ui-icons-popover__tile[aria-current="true"] {

@@ -330,3 +330,85 @@ test('The open popover has no axe violations on Default Admin', { tag: [ '@base'
     await setThemes(themes.default, themes.admin ?? '')
   }
 })
+
+/**
+ * Change a setting of the popover field for one test.
+ *
+ * @param {Drupal} drupal - The Drupal object.
+ * @param {string} php - The method call on the field config, such as setRequired(TRUE).
+ * @returns {Promise<void>}
+ */
+async function updateField (drupal: Drupal, php: string): Promise<void> {
+  await drupal.drush(`php:eval "\\Drupal\\field\\Entity\\FieldConfig::loadByName('node', '${BUNDLE_ID}', '${FIELD_NAME}')->${php}->save();"`)
+}
+
+test('An empty required field is reported by the server', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  await updateField(drupal, 'setRequired(TRUE)')
+  try {
+    await openForm(page)
+    await page.locator('[name="title[0][value]"]').fill('No icon content')
+    await page.locator('[data-drupal-selector="edit-submit"]').click()
+
+    // The hidden input must not hold the browser validation back silently.
+    await expect(page.getByRole('contentinfo', { name: 'Error message' })).toContainText('field is required')
+    await expect(trigger(page)).toHaveAttribute('aria-invalid', 'true')
+  }
+  finally {
+    await updateField(drupal, 'setRequired(FALSE)')
+  }
+})
+
+test('Editing opens on the icon deep in a large group', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  const allowed = [ ...PACKS, 'popover_big' ].map((pack) => `'${pack}' => '${pack}'`).join(', ')
+  await updateField(drupal, `setSetting('allowed_icon_pack', [${allowed}])`)
+  try {
+    await openForm(page)
+    await trigger(page).click()
+    await page.keyboard.type('big 350')
+    await expect(panel(page).getByRole('option')).toHaveCount(1)
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('Enter')
+    await expect(input(page)).toHaveValue('popover_big:big-350')
+    await drupal.ajaxReady()
+
+    await trigger(page).click()
+    await expect(panel(page).getByRole('tab', { name: /^Other/ })).toHaveAttribute('aria-selected', 'true')
+    await expect(tile(page, 'popover_big:big-350')).toBeInViewport()
+    // The current icon is the grid tab stop: search, rail, then the grid.
+    await page.keyboard.press('Tab')
+    await page.keyboard.press('Tab')
+    await expect(tile(page, 'popover_big:big-350')).toBeFocused()
+  }
+  finally {
+    const packs = PACKS.map((pack) => `'${pack}' => '${pack}'`).join(', ')
+    await updateField(drupal, `setSetting('allowed_icon_pack', [${packs}])`)
+  }
+})
+
+test('The active search result is visible without admin theme colors', { tag: [ '@base' ] }, async ({ page }) => {
+  // The test site theme defines none of the Default Admin or Gin tokens.
+  await openForm(page)
+  await trigger(page).click()
+  await page.keyboard.type('arrow')
+  await expect(panel(page).getByRole('option')).toHaveCount(4)
+  await page.keyboard.press('ArrowDown')
+
+  const active = panel(page).locator('[role="option"][aria-selected="true"]')
+  await expect(active).toHaveCount(1)
+  expect(await active.evaluate((element) => getComputedStyle(element).outlineStyle)).toBe('solid')
+})
+
+test('Tooltips name the icon, never its raw id', { tag: [ '@base' ] }, async ({ page }) => {
+  await openForm(page)
+  await trigger(page).click()
+  await panel(page).getByRole('tab', { name: /^Arrows/ }).click()
+  await expect(tile(page, 'popover_two:dot.name').locator('img')).toBeVisible()
+
+  // A tooltip comes from the nearest title under the pointer.
+  const tooltip = await tile(page, 'popover_two:dot.name').evaluate((element) => {
+    const box = element.getBoundingClientRect()
+    const target = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)
+    return target?.closest('[title]')?.getAttribute('title') ?? null
+  })
+  expect(tooltip).toBe('Dot Name (Popover two)')
+})
