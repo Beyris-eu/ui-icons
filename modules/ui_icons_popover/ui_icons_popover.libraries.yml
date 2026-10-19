@@ -1,0 +1,13 @@
+popover:
+  version: VERSION
+  js:
+    js/icon.popover.data.js: {}
+    js/icon.popover.js: {}
+  css:
+    component:
+      css/icon.popover.css: {}
+  dependencies:
+    - core/drupal
+    - core/once
+    - core/drupal.debounce
+    - core/drupal.announce
