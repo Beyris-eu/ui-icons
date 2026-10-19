@@ -36,3 +36,13 @@ popover_big:
       - icons/big/big.svg
   template: >-
     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><use xlink:href="{{ source }}#{{ icon_id }}"/></svg>
+
+# A flat pack the popover groups by the first word of the icon names.
+popover_names:
+  label: Popover names
+  extractor: path
+  config:
+    sources:
+      - icons/names/*.svg
+  template: >-
+    <img src="{{ source }}" width="32" height="32">

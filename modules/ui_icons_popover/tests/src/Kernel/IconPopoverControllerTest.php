@@ -80,6 +80,32 @@ class IconPopoverControllerTest extends KernelTestBase {
   }
 
   /**
+   * Tests a pack without groups is grouped by the first word of its names.
+   *
+   * Trailing digits go, a plural joins its singular, and a group needs at
+   * least 3 icons, the floor for a pack this small.
+   */
+  public function testIndexDerivesGroupsFromNames(): void {
+    $data = json_decode((string) $this->index('popover_names')->getContent(), TRUE);
+
+    $this->assertSame([
+      ['key' => 'arrow', 'label' => 'Arrow'],
+      ['key' => 'cloud', 'label' => 'Cloud'],
+    ], $data['groups']);
+    $this->assertSame([
+      ['popover_names:7-circle', '7 Circle', NULL],
+      // Natural sorting skips spaces: "ArrowsExpand" comes before "ArrowUp".
+      ['popover_names:arrow-down', 'Arrow Down', 'arrow'],
+      ['popover_names:arrows-expand', 'Arrows Expand', 'arrow'],
+      ['popover_names:arrow-up', 'Arrow Up', 'arrow'],
+      ['popover_names:cloud2-rain', 'Cloud2 Rain', 'cloud'],
+      ['popover_names:cloud3', 'Cloud3', 'cloud'],
+      ['popover_names:cloud-sun', 'Cloud Sun', 'cloud'],
+      ['popover_names:solo-one', 'Solo One', NULL],
+    ], $data['icons']);
+  }
+
+  /**
    * Tests a pack the element allows but that no longer exists is skipped.
    */
   public function testIndexIgnoresMissingPack(): void {

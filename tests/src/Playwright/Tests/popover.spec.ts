@@ -372,7 +372,8 @@ test('Editing opens on the icon deep in a large group', { tag: [ '@base' ] }, as
     await drupal.ajaxReady()
 
     await trigger(page).click()
-    await expect(panel(page).getByRole('tab', { name: /^Other/ })).toHaveAttribute('aria-selected', 'true')
+    // popover_big declares no group, its names all start with "big".
+    await expect(panel(page).getByRole('tab', { name: /^Big\s*400$/ })).toHaveAttribute('aria-selected', 'true')
     await expect(tile(page, 'popover_big:big-350')).toBeInViewport()
     // The current icon is the grid tab stop: search, rail, then the grid.
     await page.keyboard.press('Tab')

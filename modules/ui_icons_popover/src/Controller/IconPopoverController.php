@@ -27,6 +27,10 @@ class IconPopoverController extends ControllerBase {
   public const PREVIEW_SIZE = 24;
   // Each preview is a render, so cap what one request can ask for.
   public const PREVIEWS_MAX = IconSearch::SEARCH_RESULT_MAX;
+  // A group derived from icon names needs one icon in this many of its pack,
+  // and never fewer than DERIVED_GROUP_MIN: Bootstrap Icons gets groups of 5.
+  private const DERIVED_GROUP_SHARE = 400;
+  private const DERIVED_GROUP_MIN = 3;
 
   public function __construct(
     private readonly IconPackManagerInterface $pluginManagerIconPack,
@@ -48,7 +52,8 @@ class IconPopoverController extends ControllerBase {
   /**
    * Lists the icons of the allowed packs with their label and group.
    *
-   * Groups come from the icon discovery, `{group}` in a pack source path. The
+   * Groups come from the icon discovery, `{group}` in a pack source path, or
+   * from the icon names for a pack declaring none, see ::deriveGroups(). The
    * same name in two packs is one group, so the editor browses groups and
    * never needs to know which pack an icon comes from.
    *
@@ -62,12 +67,15 @@ class IconPopoverController extends ControllerBase {
   public function index(Request $request): CacheableJsonResponse {
     $allowed_icon_pack = $this->getAllowedIconPack($request);
 
+    $discovered = $this->pluginManagerIconPack->getIcons($allowed_icon_pack);
+    $derived = $this->deriveGroups($discovered);
+
     $packs = $groups = $icons = [];
-    foreach ($this->pluginManagerIconPack->getIcons($allowed_icon_pack) as $icon_full_id => $icon_data) {
+    foreach ($discovered as $icon_full_id => $icon_data) {
       ['pack_id' => $pack_id, 'icon_id' => $icon_id] = IconDefinition::getIconDataFromId($icon_full_id);
       $packs[$pack_id] = $pack_id;
 
-      $group = trim((string) ($icon_data['group'] ?? ''));
+      $group = trim((string) ($icon_data['group'] ?? $derived[$icon_full_id] ?? ''));
       $group_key = $group === '' ? NULL : mb_strtolower($group);
       if (NULL !== $group_key) {
         $groups[$group_key] ??= ['key' => $group_key, 'label' => IconDefinition::humanize($group)];
@@ -92,6 +100,55 @@ class IconPopoverController extends ControllerBase {
     ]);
 
     return $response->addCacheableDependency($this->getCacheability(['url.query_args:allowed_icon_pack']));
+  }
+
+  /**
+   * Groups the icons of the packs declaring no group by their first word.
+   *
+   * Trailing digits go, so `calendar2` joins `calendar`, and a plural joins
+   * its singular when the pack has both. A group too small for the size of
+   * its pack is dropped, its icons go to Other.
+   *
+   * @param array $icons
+   *   The discovered icons keyed by full id, as getIcons() returns them.
+   *
+   * @return array
+   *   The derived group keyed by icon full id, for the icons getting one.
+   */
+  private function deriveGroups(array $icons): array {
+    $words = $sizes = $grouped = [];
+    foreach ($icons as $icon_full_id => $icon_data) {
+      ['pack_id' => $pack_id, 'icon_id' => $icon_id] = IconDefinition::getIconDataFromId($icon_full_id);
+      $sizes[$pack_id] = ($sizes[$pack_id] ?? 0) + 1;
+      if (trim((string) ($icon_data['group'] ?? '')) !== '') {
+        $grouped[$pack_id] = TRUE;
+      }
+      $word = preg_replace('/\d+$/', '', preg_split('/[-_.\s]/', mb_strtolower($icon_id))[0]);
+      if ($word !== '') {
+        $words[$pack_id][$icon_full_id] = $word;
+      }
+    }
+
+    $derived = [];
+    foreach (array_diff_key($words, $grouped) as $pack_id => $pack_words) {
+      $known = array_flip($pack_words);
+      foreach ($pack_words as $icon_full_id => $word) {
+        $singular = substr($word, 0, -1);
+        if (str_ends_with($word, 's') && isset($known[$singular])) {
+          $pack_words[$icon_full_id] = $singular;
+        }
+      }
+
+      $minimum = max(self::DERIVED_GROUP_MIN, (int) round($sizes[$pack_id] / self::DERIVED_GROUP_SHARE));
+      $counts = array_count_values($pack_words);
+      foreach ($pack_words as $icon_full_id => $word) {
+        if ($counts[$word] >= $minimum) {
+          $derived[$icon_full_id] = $word;
+        }
+      }
+    }
+
+    return $derived;
   }
 
   /**
