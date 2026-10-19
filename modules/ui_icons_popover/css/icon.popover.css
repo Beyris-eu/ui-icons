@@ -168,6 +168,8 @@
 .ui-icons-popover__grid {
   position: relative;
   overflow-y: auto;
+  /* Same width with or without a scrollbar: the columns are counted once. */
+  scrollbar-gutter: stable;
   flex: 1;
   padding: 0.5rem;
 }

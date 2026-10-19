@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, Locator, Page } from '@playwright/test'
+import { chromium, expect, Locator, Page } from '@playwright/test'
 import { test } from '../fixtures/loader'
 import { Drupal } from '../objects/Drupal'
 import config from '../playwright.config.loader'
@@ -412,4 +412,34 @@ test('Tooltips name the icon, never its raw id', { tag: [ '@base' ] }, async ({ 
     return target?.closest('[title]')?.getAttribute('title') ?? null
   })
   expect(tooltip).toBe('Dot Name (Popover two)')
+})
+
+test('Rows stay on one line whether the grid scrolls or not', { tag: [ '@base' ] }, async ({ page, drupal, browserName, baseURL }) => {
+  // Headless browsers draw scrollbars over the content. Only Chromium without
+  // its --hide-scrollbars default shows the grid losing width to one.
+  test.skip(browserName !== 'chromium', 'Only Chromium can draw such scrollbars headless.')
+  const allowed = [ ...PACKS, 'popover_big' ].map((pack) => `'${pack}' => '${pack}'`).join(', ')
+  await updateField(drupal, `setSetting('allowed_icon_pack', [${allowed}])`)
+  const browser = await chromium.launch({ ignoreDefaultArgs: [ '--hide-scrollbars' ] })
+  try {
+    const context = await browser.newContext({ baseURL, storageState: await page.context().storageState() })
+    const scrolling = await context.newPage()
+    await openForm(scrolling)
+    await trigger(scrolling).click()
+    // A group too short to scroll, then one that scrolls: the columns of each
+    // are counted while the other one is shown.
+    for (const group of [ /^Weather/, /^Big/ ]) {
+      await panel(scrolling).getByRole('tab', { name: group }).click()
+      const lines = await panel(scrolling).evaluate((element) => [ ...element.querySelectorAll('[role="row"]') ].map((row) => {
+        const tiles = [ ...row.querySelectorAll('.ui-icons-popover__tile') ] as HTMLElement[]
+        return new Set(tiles.map((tile) => tile.offsetTop)).size
+      }))
+      expect(lines.filter((count) => count > 1), `${group}: rows wrapping onto a second line`).toEqual([])
+    }
+  }
+  finally {
+    await browser.close()
+    const packs = PACKS.map((pack) => `'${pack}' => '${pack}'`).join(', ')
+    await updateField(drupal, `setSetting('allowed_icon_pack', [${packs}])`)
+  }
 })
