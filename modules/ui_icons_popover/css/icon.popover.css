@@ -177,6 +177,12 @@
   margin-block-end: var(--ui-icons-popover-gap);
 }
 
+.ui-icons-popover__results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--ui-icons-popover-tile));
+  gap: var(--ui-icons-popover-gap);
+}
+
 .ui-icons-popover__section--lazy {
   content-visibility: auto;
   contain-intrinsic-size: auto calc(var(--rows) * (var(--ui-icons-popover-tile) + var(--ui-icons-popover-gap)) + 1.75rem);

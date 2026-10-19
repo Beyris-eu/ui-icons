@@ -110,6 +110,9 @@
       placeholder: Drupal.t('Search icons'),
       'aria-label': Drupal.t('Search icons'),
       autocomplete: 'off',
+      role: 'combobox',
+      'aria-autocomplete': 'list',
+      'aria-expanded': 'false',
     });
     const rail = create('div', {
       class: 'ui-icons-popover__rail',
@@ -391,9 +394,24 @@
 
     let entries = [];
 
+    /**
+     * The rail entry shown, restored when a search is cleared.
+     *
+     * @type {?object}
+     */
+    let currentEntry = null;
+
     const tabId = (entry) => `${id}--tab-${entries.indexOf(entry)}`;
 
+    const resetSearch = () => {
+      search.value = '';
+      search.setAttribute('aria-expanded', 'false');
+      search.removeAttribute('aria-controls');
+      search.removeAttribute('aria-activedescendant');
+    };
+
     const showEntry = (entry) => {
+      currentEntry = entry;
       rail.querySelectorAll('[role="tab"]').forEach((tab) => {
         const selected = tab.id === tabId(entry);
         tab.setAttribute('aria-selected', String(selected));
@@ -427,7 +445,10 @@
               }),
             ],
           );
-          tab.addEventListener('click', () => showEntry(entry));
+          tab.addEventListener('click', () => {
+            resetSearch();
+            showEntry(entry);
+          });
           return tab;
         }),
       );
@@ -460,7 +481,104 @@
       }
     };
 
+    /**
+     * Shows the search results as a listbox the search input drives.
+     *
+     * @param {string} query
+     *   The words to search for.
+     */
+    const showResults = (query) => {
+      const icons = data.search(index, query);
+      renderId += 1;
+      observer.disconnect();
+      queued.clear();
+      search.removeAttribute('aria-activedescendant');
+
+      if (!icons.length) {
+        const status = create('p', { class: 'ui-icons-popover__status' });
+        status.innerHTML = Drupal.t('No icon matches %query.', {
+          '%query': query.trim(),
+        });
+        grid.replaceChildren(status);
+        search.setAttribute('aria-expanded', 'false');
+        search.removeAttribute('aria-controls');
+        Drupal.announce(status.textContent);
+        return;
+      }
+
+      const listbox = create(
+        'div',
+        {
+          class: 'ui-icons-popover__results',
+          id: `${id}--results`,
+          role: 'listbox',
+          'aria-label': Drupal.t('Search icons'),
+        },
+        icons.map((icon, position) => {
+          const option = create('div', {
+            class: 'ui-icons-popover__tile',
+            id: `${id}--option-${position}`,
+            role: 'option',
+            'aria-selected': 'false',
+            'data-icon-id': icon.id,
+            'aria-label': icon.label,
+            title: `${icon.label} (${icon.pack})`,
+          });
+          if (!fillPreview(option)) {
+            observer.observe(option);
+          }
+          return option;
+        }),
+      );
+      grid.replaceChildren(listbox);
+      grid.scrollTop = 0;
+      search.setAttribute('aria-expanded', 'true');
+      search.setAttribute('aria-controls', listbox.id);
+      Drupal.announce(
+        Drupal.formatPlural(icons.length, '1 icon', '@count icons'),
+      );
+    };
+
+    const onSearch = Drupal.debounce(() => {
+      if (!index) {
+        return;
+      }
+      if (search.value.trim()) {
+        showResults(search.value);
+        return;
+      }
+      resetSearch();
+      if (currentEntry) {
+        showEntry(currentEntry);
+      }
+    }, 150);
+
+    /**
+     * Moves the active search result, which the input keeps the focus over.
+     *
+     * @param {number} step
+     *   1 for the next result, -1 for the previous one.
+     */
+    const moveActiveOption = (step) => {
+      const options = [...grid.querySelectorAll('[role="option"]')];
+      if (!options.length) {
+        return;
+      }
+      const active = options.findIndex(
+        (option) => option.id === search.getAttribute('aria-activedescendant'),
+      );
+      const next =
+        options[Math.max(0, Math.min(options.length - 1, active + step))];
+      options.forEach((option) => {
+        option.setAttribute('aria-selected', String(option === next));
+      });
+      search.setAttribute('aria-activedescendant', next.id);
+      next.scrollIntoView({ block: 'nearest' });
+      footer.textContent = next.getAttribute('aria-label');
+    };
+
     const open = async () => {
+      resetSearch();
       search.focus();
       if (!index) {
         showStatus(Drupal.t('Loading icons…'));
@@ -474,6 +592,10 @@
       buildRail();
       showEntry(initialEntry());
       scrollToCurrent();
+      // Words typed while the index loaded.
+      if (search.value.trim()) {
+        showResults(search.value);
+      }
     };
 
     const pick = (iconId) => {
@@ -541,10 +663,87 @@
     grid.addEventListener('mouseover', showName);
     grid.addEventListener('focusin', showName);
 
-    // The search input sits in the node form: Enter must not submit it.
+    search.addEventListener('input', onSearch);
     search.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        moveActiveOption(event.key === 'ArrowDown' ? 1 : -1);
+      }
+      // The search input sits in the node form: Enter must not submit it.
       if (event.key === 'Enter') {
         event.preventDefault();
+        const active = search.getAttribute('aria-activedescendant');
+        if (active) {
+          pick(document.getElementById(active).dataset.iconId);
+        }
+      }
+    });
+
+    // Manual activation: arrows move the focus, Enter or Space shows the tab.
+    rail.addEventListener('keydown', (event) => {
+      const tabs = [...rail.querySelectorAll('[role="tab"]')];
+      const position = tabs.indexOf(document.activeElement);
+      const targets = {
+        ArrowDown: position + 1,
+        ArrowRight: position + 1,
+        ArrowUp: position - 1,
+        ArrowLeft: position - 1,
+        Home: 0,
+        End: tabs.length - 1,
+      };
+      if (position < 0 || !(event.key in targets)) {
+        return;
+      }
+      event.preventDefault();
+      const next = tabs[(targets[event.key] + tabs.length) % tabs.length];
+      tabs.forEach((tab) => {
+        tab.tabIndex = tab === next ? 0 : -1;
+      });
+      next.focus();
+    });
+
+    // Roving focus over the grid tiles, row by row across the sections.
+    grid.addEventListener('keydown', (event) => {
+      const tile = event.target.closest('button.ui-icons-popover__tile');
+      if (!tile) {
+        return;
+      }
+      const rows = [...grid.querySelectorAll('[role="row"]')];
+      const row = tile.closest('[role="row"]');
+      const y = rows.indexOf(row);
+      const tilesOf = (target) =>
+        target ? [...target.querySelectorAll('.ui-icons-popover__tile')] : [];
+      const current = tilesOf(row);
+      const x = current.indexOf(tile);
+      const sameColumn = (target) => {
+        const others = tilesOf(target);
+        return others[Math.min(x, others.length - 1)];
+      };
+      const moves = {
+        ArrowRight: () => current[x + 1] ?? tilesOf(rows[y + 1])[0],
+        ArrowLeft: () => current[x - 1] ?? tilesOf(rows[y - 1]).at(-1),
+        ArrowDown: () => sameColumn(rows[y + 1]),
+        ArrowUp: () => sameColumn(rows[y - 1]),
+        Home: () => current[0],
+        End: () => current.at(-1),
+      };
+      if (!moves[event.key]) {
+        return;
+      }
+      event.preventDefault();
+      const target = moves[event.key]();
+      if (target) {
+        tile.tabIndex = -1;
+        target.tabIndex = 0;
+        target.focus();
+      }
+    });
+
+    // A dialog the popover opens in, such as the CKEditor icon dialog, closes
+    // on Escape too. The popover closes itself.
+    panel.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
       }
     });
 

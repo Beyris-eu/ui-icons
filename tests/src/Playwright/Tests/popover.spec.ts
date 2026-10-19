@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright'
 import { expect, Locator, Page } from '@playwright/test'
 import { test } from '../fixtures/loader'
 import { Drupal } from '../objects/Drupal'
@@ -161,4 +162,169 @@ test('The panel reports an index that fails to load', { tag: [ '@base' ] }, asyn
   await trigger(page).click()
 
   await expect(panel(page)).toContainText('Icons could not be loaded.')
+})
+
+test('Search and pick with the keyboard', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  await test.step('Results narrow down and are announced', async () => {
+    // Words typed while the index still loads must not be lost.
+    await page.route('**/ui-icons/ajax/popover/index**', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await route.continue()
+    })
+    await openForm(page)
+    await trigger(page).click()
+    await page.keyboard.type('arrow l')
+
+    await expect(panel(page).getByRole('listbox').getByRole('option')).toHaveCount(1)
+    await expect(page.locator('#drupal-live-announce')).toContainText('1 icon')
+  })
+
+  await test.step('Down then Enter picks the result', async () => {
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('Enter')
+
+    await expect(panel(page)).toBeHidden()
+    await expect(input(page)).toHaveValue('popover_two:arrow-left')
+    await expect(trigger(page)).toContainText('Arrow Left')
+  })
+
+  await test.step('A search matching nothing says so', async () => {
+    await drupal.ajaxReady()
+    await trigger(page).click()
+    await page.keyboard.type('zzz')
+
+    await expect(panel(page)).toContainText('No icon matches zzz.')
+  })
+})
+
+test('Grid keyboard, edit mode, Escape, clear and Recent', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  await test.step('Tab reaches the rail then the grid, arrows move, Enter picks', async () => {
+    await openForm(page)
+    await trigger(page).click()
+    await expect(panel(page).getByRole('tab', { name: /^All/ })).toHaveAttribute('aria-selected', 'true')
+
+    await page.keyboard.press('Tab')
+    await page.keyboard.press('ArrowDown')
+    await expect(panel(page).getByRole('tab', { name: /^Arrows/ })).toBeFocused()
+    // Manual activation: moving the focus does not switch the view.
+    await expect(panel(page).getByRole('tab', { name: /^All/ })).toHaveAttribute('aria-selected', 'true')
+    await page.keyboard.press('Enter')
+    await expect(panel(page).getByRole('tab', { name: /^Arrows/ })).toHaveAttribute('aria-selected', 'true')
+
+    await page.keyboard.press('Tab')
+    await expect(tile(page, 'popover_one:arrow-down')).toBeFocused()
+    await page.keyboard.press('ArrowRight')
+    await expect(tile(page, 'popover_two:arrow-left')).toBeFocused()
+    await page.keyboard.press('Enter')
+
+    await expect(input(page)).toHaveValue('popover_two:arrow-left')
+  })
+
+  await test.step('Editing opens on the icon group, the icon marked', async () => {
+    await drupal.ajaxReady()
+    await trigger(page).click()
+
+    await expect(panel(page).getByRole('tab', { name: /^Arrows/ })).toHaveAttribute('aria-selected', 'true')
+    await expect(tile(page, 'popover_two:arrow-left')).toHaveAttribute('aria-current', 'true')
+    await expect(tile(page, 'popover_two:arrow-left')).toBeInViewport()
+  })
+
+  await test.step('Escape closes and gives the focus back', async () => {
+    await page.keyboard.press('Escape')
+
+    await expect(panel(page)).toBeHidden()
+    await expect(trigger(page)).toBeFocused()
+  })
+
+  await test.step('Clearing empties the value, Recent then opens first', async () => {
+    await page.locator('.ui-icons-popover__clear').click()
+    await expect(input(page)).toHaveValue('')
+    await drupal.ajaxReady()
+
+    await trigger(page).click()
+    await expect(panel(page).getByRole('tab', { name: /^Recent/ })).toHaveAttribute('aria-selected', 'true')
+    await expect(tiles(page)).toHaveCount(1)
+  })
+})
+
+test('Recent ignores junk in storage', { tag: [ '@base' ] }, async ({ page }) => {
+  await test.step('A stored value that is no list counts as empty', async () => {
+    await openForm(page)
+    await page.evaluate(() => localStorage.setItem('ui_icons_popover.recent', '{"bad":1}'))
+    await openForm(page)
+    await trigger(page).click()
+
+    await expect(panel(page).getByRole('tab', { name: /^All/ })).toHaveAttribute('aria-selected', 'true')
+    await expect(panel(page).getByRole('tab', { name: /^Recent/ })).toHaveCount(0)
+  })
+
+  await test.step('Unknown ids and non strings are dropped', async () => {
+    await page.evaluate(() => localStorage.setItem('ui_icons_popover.recent', JSON.stringify([ 'popover_one:gone', 42, 'popover_one:sun' ])))
+    await openForm(page)
+    await trigger(page).click()
+
+    await expect(panel(page).getByRole('tab', { name: /^Recent/ })).toHaveAttribute('aria-selected', 'true')
+    await expect(tiles(page)).toHaveCount(1)
+    await expect(tile(page, 'popover_one:sun')).toHaveCount(1)
+  })
+})
+
+test('Two popovers on one page stay independent', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  const setCardinality = async (cardinality: number) => {
+    await drupal.drush(`php:eval "\\Drupal\\field\\Entity\\FieldStorageConfig::loadByName('node', '${FIELD_NAME}')->setCardinality(${cardinality})->save();"`)
+  }
+  await setCardinality(2)
+  try {
+    await openForm(page)
+    await trigger(page, 0).click()
+    await expect(panel(page, 0)).toBeVisible()
+
+    // The open panel covers the second trigger, so reach it with the keyboard.
+    await trigger(page, 1).focus()
+    await page.keyboard.press('Enter')
+    await expect(panel(page, 0)).toBeHidden()
+    await expect(panel(page, 1)).toBeVisible()
+
+    await panel(page, 1).getByRole('tab', { name: /^Weather/ }).click()
+    await tile(page, 'popover_one:sun').click()
+
+    await expect(input(page, 1)).toHaveValue('popover_one:sun')
+    await expect(input(page, 0)).toHaveValue('')
+  }
+  finally {
+    await setCardinality(1)
+  }
+})
+
+test('Small screens get a bottom sheet', { tag: [ '@base' ] }, async ({ page }) => {
+  await page.setViewportSize({ width: 400, height: 800 })
+  await openForm(page)
+  await trigger(page).click()
+  await expect(panel(page)).toBeVisible()
+
+  const box = await panel(page).boundingBox()
+  const viewport = await page.evaluate(() => ({ width: document.documentElement.clientWidth, height: window.innerHeight }))
+  expect(Math.round(box?.width ?? 0)).toBe(viewport.width)
+  expect(Math.round((box?.y ?? 0) + (box?.height ?? 0))).toBe(viewport.height)
+})
+
+test('The open popover has no axe violations on Default Admin', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  // Workers run their tests one at a time, so putting the themes back keeps
+  // the other specs on theirs.
+  const themes = JSON.parse(await drupal.drush(`php:eval "echo json_encode(\\Drupal::config('system.theme')->get());"`))
+  const setThemes = async (front: string, admin: string) => {
+    await drupal.drush(`php:eval "\\Drupal::service('theme_installer')->install(['default_admin']); \\Drupal::configFactory()->getEditable('system.theme')->set('default', '${front}')->set('admin', '${admin}')->save();"`)
+  }
+  await setThemes('default_admin', 'default_admin')
+  try {
+    await openForm(page)
+    await trigger(page).click()
+    await expect(tiles(page).first()).toBeVisible()
+
+    const results = await new AxeBuilder({ page }).include('.ui-icons-popover').analyze()
+    expect(results.violations).toEqual([])
+  }
+  finally {
+    await setThemes(themes.default, themes.admin ?? '')
+  }
 })

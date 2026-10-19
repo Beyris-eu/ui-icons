@@ -11,6 +11,16 @@
   const BATCH_SIZE = 60;
 
   /**
+   * Where the recently picked icons are kept, for the whole site.
+   */
+  const RECENT_KEY = 'ui_icons_popover.recent';
+
+  /**
+   * How many recently picked icons are kept.
+   */
+  const RECENT_MAX = 24;
+
+  /**
    * Index requests, keyed by url and allowed packs.
    *
    * @type {Map<string, Promise<object>>}
@@ -72,6 +82,23 @@
    */
   const allowedParams = (allowed) =>
     allowed ? [['allowed_icon_pack', allowed]] : [];
+
+  /**
+   * Reads the recently picked icon ids, most recent first.
+   *
+   * @return {Array<string>}
+   *   The ids, empty when the storage is unavailable or holds anything else.
+   */
+  const readRecent = () => {
+    try {
+      const ids = JSON.parse(window.localStorage.getItem(RECENT_KEY));
+      return Array.isArray(ids)
+        ? ids.filter((id) => typeof id === 'string')
+        : [];
+    } catch (error) {
+      return [];
+    }
+  };
 
   /**
    * @namespace
@@ -165,6 +192,78 @@
       return Promise.allSettled(ids.map((id) => inflight.get(id))).then(
         () => {},
       );
+    },
+
+    /**
+     * Searches an index.
+     *
+     * Every word must appear in the icon id, label or group. Icons whose id
+     * starts with the first word come first, the index order is kept
+     * otherwise.
+     *
+     * @param {object} index
+     *   An index from loadIndex().
+     * @param {string} query
+     *   The words to search for.
+     *
+     * @return {Array<object>}
+     *   The matching icons.
+     */
+    search(index, query) {
+      const words = query.toLowerCase().trim().split(/\s+/).filter(Boolean);
+      if (!words.length) {
+        return [];
+      }
+      const matches = index.icons.filter((icon) =>
+        words.every((word) => icon.text.includes(word)),
+      );
+      const startsWith = (icon) =>
+        icon.id
+          .slice(icon.id.indexOf(':') + 1)
+          .toLowerCase()
+          .startsWith(words[0]);
+      return [
+        ...matches.filter(startsWith),
+        ...matches.filter((icon) => !startsWith(icon)),
+      ];
+    },
+
+    /**
+     * The icons picked lately, shared by every popover of the site.
+     *
+     * @namespace
+     */
+    recent: {
+      /**
+       * Gets the recently picked icons an index holds.
+       *
+       * @param {object} index
+       *   An index from loadIndex(), limited to the packs of the element.
+       *
+       * @return {Array<string>}
+       *   The icon full ids, most recent first.
+       */
+      get(index) {
+        return readRecent().filter((id) => index.byId.has(id));
+      },
+
+      /**
+       * Remembers a picked icon.
+       *
+       * @param {string} id
+       *   The icon full id.
+       */
+      add(id) {
+        const ids = [id, ...readRecent().filter((other) => other !== id)];
+        try {
+          window.localStorage.setItem(
+            RECENT_KEY,
+            JSON.stringify(ids.slice(0, RECENT_MAX)),
+          );
+        } catch (error) {
+          // Without storage, Recent just stays empty.
+        }
+      },
     },
   };
 })(Drupal);

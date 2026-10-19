@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons_popover\Kernel;
 
+// cspell:ignore autocompleteclose
+
 use Drupal\Core\Form\FormInterface;
 use Drupal\Core\Form\FormState;
 use Drupal\Core\Form\FormStateInterface;
