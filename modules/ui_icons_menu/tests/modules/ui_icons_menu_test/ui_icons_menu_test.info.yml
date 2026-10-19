@@ -1,0 +1,5 @@
+name: 'UI Icons Menu Test'
+type: module
+description: 'Static menu link with an icon for the ui_icons_menu tests.'
+package: Testing
+core_version_requirement: ^11.3 || ^12.0

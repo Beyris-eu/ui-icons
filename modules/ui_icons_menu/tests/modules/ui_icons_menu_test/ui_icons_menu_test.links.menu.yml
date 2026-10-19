@@ -1,0 +1,9 @@
+ui_icons_menu_test.icon_link:
+  title: 'Icon link'
+  route_name: '<front>'
+  menu_name: tools
+  # The options ui_icons_menu reads, as the menu link form saves them.
+  options:
+    icon:
+      target_id: 'test_path:foo'
+    icon_display: before
