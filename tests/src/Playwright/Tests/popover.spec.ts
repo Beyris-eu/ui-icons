@@ -166,6 +166,17 @@ test('The panel reports an index that fails to load', { tag: [ '@base' ] }, asyn
   await expect(panel(page)).toContainText('Icons could not be loaded.')
 })
 
+test('The search box has the focus as soon as the panel shows', { tag: [ '@base' ] }, async ({ page }) => {
+  await openForm(page)
+
+  // In the same task as the click: what the editor types next must reach it.
+  const focused = await trigger(page).evaluate((button) => {
+    button.click()
+    return document.activeElement?.className
+  })
+  expect(focused).toBe('ui-icons-popover__search')
+})
+
 test('Search and pick with the keyboard', { tag: [ '@base' ] }, async ({ page, drupal }) => {
   await test.step('Results narrow down and are announced', async () => {
     // Words typed while the index still loads must not be lost.

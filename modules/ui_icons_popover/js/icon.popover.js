@@ -113,6 +113,9 @@
       placeholder: Drupal.t('Search icons'),
       'aria-label': Drupal.t('Search icons'),
       autocomplete: 'off',
+      // Focused by the browser while it shows the panel. The toggle event
+      // comes later, after keys typed right after the click.
+      autofocus: '',
       role: 'combobox',
       'aria-autocomplete': 'list',
       'aria-expanded': 'false',
@@ -605,7 +608,6 @@
 
     const open = async () => {
       resetSearch();
-      search.focus();
       if (!index) {
         showStatus(Drupal.t('Loading icons…'));
         try {
