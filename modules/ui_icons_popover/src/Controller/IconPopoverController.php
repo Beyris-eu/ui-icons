@@ -7,8 +7,11 @@ namespace Drupal\ui_icons_popover\Controller;
 use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Controller\ControllerBase;
+use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
+use Drupal\ui_icons\IconPreview;
+use Drupal\ui_icons\IconSearch;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -20,8 +23,15 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class IconPopoverController extends ControllerBase {
 
+  // Matches the 24px icon in a popover tile, see css/icon.popover.css.
+  public const PREVIEW_SIZE = 24;
+  // Each preview is a render, so cap what one request can ask for.
+  public const PREVIEWS_MAX = IconSearch::SEARCH_RESULT_MAX;
+
   public function __construct(
     private readonly IconPackManagerInterface $pluginManagerIconPack,
+    private readonly IconSearch $iconSearch,
+    private readonly RendererInterface $renderer,
   ) {}
 
   /**
@@ -30,6 +40,8 @@ class IconPopoverController extends ControllerBase {
   public static function create(ContainerInterface $container): self {
     return new static(
       $container->get('plugin.manager.icon_pack'),
+      $container->get('ui_icons.search'),
+      $container->get('renderer'),
     );
   }
 
@@ -80,6 +92,44 @@ class IconPopoverController extends ControllerBase {
     ]);
 
     return $response->addCacheableDependency($this->getCacheability(['url.query_args:allowed_icon_pack']));
+  }
+
+  /**
+   * Renders the previews of the icons the popover shows.
+   *
+   * Icons load straight from their extractor, see IconSearch::loadIcon(), so
+   * scrolling through a large pack does not grow the icon collector cache.
+   *
+   * @param \Symfony\Component\HttpFoundation\Request $request
+   *   The request, with the icon full ids as a repeated `ids[]` argument, and
+   *   `allowed_icon_pack` joined with `+`, or none for all.
+   *
+   * @return \Drupal\Core\Cache\CacheableJsonResponse
+   *   The preview markup keyed by icon full id. Icons outside the allowed
+   *   packs or unknown are left out.
+   */
+  public function previews(Request $request): CacheableJsonResponse {
+    $allowed_icon_pack = $this->getAllowedIconPack($request);
+    $ids = array_slice($request->query->all('ids'), 0, self::PREVIEWS_MAX);
+
+    $previews = [];
+    foreach (array_filter($ids, 'is_string') as $icon_full_id) {
+      $icon_data = IconDefinition::getIconDataFromId($icon_full_id);
+      if (!$icon_data || ($allowed_icon_pack && !in_array($icon_data['pack_id'], $allowed_icon_pack, TRUE))) {
+        continue;
+      }
+
+      if (!$icon = $this->iconSearch->loadIcon($icon_full_id)) {
+        continue;
+      }
+
+      $preview = IconPreview::getPreview($icon, ['size' => self::PREVIEW_SIZE]);
+      $previews[$icon_full_id] = (string) $this->renderer->renderInIsolation($preview);
+    }
+
+    $response = new CacheableJsonResponse((object) $previews);
+
+    return $response->addCacheableDependency($this->getCacheability(['url.query_args:ids', 'url.query_args:allowed_icon_pack']));
   }
 
   /**

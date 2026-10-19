@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Drupal\Tests\ui_icons_popover\Kernel;
 
 use Drupal\Core\Cache\CacheableJsonResponse;
+use Drupal\Core\Theme\Icon\IconCollector;
 use Drupal\KernelTests\KernelTestBase;
+use Drupal\ui_icons\IconPreview;
 use Drupal\ui_icons_popover\Controller\IconPopoverController;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -95,6 +97,92 @@ class IconPopoverControllerTest extends KernelTestBase {
 
     $this->assertContains('icon_pack_plugin', $metadata->getCacheTags());
     $this->assertContains('icon_pack_collector', $metadata->getCacheTags());
+    $this->assertContains('url.query_args:allowed_icon_pack', $metadata->getCacheContexts());
+  }
+
+  /**
+   * Requests the previews of some icons.
+   *
+   * @param array $ids
+   *   The icon full ids.
+   * @param string $allowed_icon_pack
+   *   The pack ids, joined with `+` as the element sends them.
+   *
+   * @return \Drupal\Core\Cache\CacheableJsonResponse
+   *   The previews response.
+   */
+  private function previews(array $ids, string $allowed_icon_pack): CacheableJsonResponse {
+    $request = Request::create('/ui-icons/ajax/popover/previews', 'GET', ['ids' => $ids, 'allowed_icon_pack' => $allowed_icon_pack]);
+    return IconPopoverController::create($this->container)->previews($request);
+  }
+
+  /**
+   * Tests each preview is the one the other selectors show.
+   */
+  public function testPreviewsRenderPreview(): void {
+    $ids = ['popover_one:sun', 'popover_two:dot.name'];
+    $data = json_decode((string) $this->previews($ids, 'popover_one+popover_two')->getContent(), TRUE);
+
+    foreach ($ids as $id) {
+      $icon = $this->container->get('ui_icons.search')->loadIcon($id);
+      $preview = IconPreview::getPreview($icon, ['size' => 24]);
+      $expected = (string) $this->container->get('renderer')->renderInIsolation($preview);
+      $this->assertSame($expected, $data[$id]);
+    }
+  }
+
+  /**
+   * Tests a pack declaring its own preview gets that, not its template.
+   */
+  public function testPreviewsUsePreviewKey(): void {
+    $data = json_decode((string) $this->previews(['test_preview:foo'], 'test_preview')->getContent(), TRUE);
+
+    $this->assertStringContainsString('_preview_ foo', $data['test_preview:foo']);
+    $this->assertStringNotContainsString('_template_', $data['test_preview:foo']);
+  }
+
+  /**
+   * Tests icons outside the allowed packs and unknown icons are left out.
+   */
+  public function testPreviewsRejectOutsideAndUnknown(): void {
+    $ids = ['popover_two:arrow-left', 'popover_one:missing', 'popover_one:sun'];
+    $data = json_decode((string) $this->previews($ids, 'popover_one')->getContent(), TRUE);
+
+    $this->assertSame(['popover_one:sun'], array_keys($data));
+  }
+
+  /**
+   * Tests one request renders a bounded number of previews.
+   */
+  public function testPreviewsCap(): void {
+    $ids = array_map(static fn (int $i): string => 'popover_one:missing-' . $i, range(1, 132));
+    $ids[] = 'popover_one:sun';
+    $data = json_decode((string) $this->previews($ids, 'popover_one')->getContent(), TRUE);
+
+    $this->assertSame([], $data);
+  }
+
+  /**
+   * Tests browsing previews leaves the icon collector cache alone.
+   *
+   * The collector keeps every icon it ever returned in one cache item, loaded
+   * by any icon render, so scrolling a large pack must not grow it.
+   */
+  public function testPreviewsDoNotGrowIconCollector(): void {
+    $this->previews(['popover_one:sun'], 'popover_one');
+    $this->container->get(IconCollector::class)->destruct();
+
+    $this->assertFalse($this->container->get('cache.default')->get('icon_info'));
+  }
+
+  /**
+   * Tests the previews are cached per icon list and pack limit.
+   */
+  public function testPreviewsCacheability(): void {
+    $metadata = $this->previews(['popover_one:sun'], 'popover_one')->getCacheableMetadata();
+
+    $this->assertContains('icon_pack_plugin', $metadata->getCacheTags());
+    $this->assertContains('url.query_args:ids', $metadata->getCacheContexts());
     $this->assertContains('url.query_args:allowed_icon_pack', $metadata->getCacheContexts());
   }
 

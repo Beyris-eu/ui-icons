@@ -5,3 +5,11 @@ ui_icons_popover.index:
   requirements:
     _permission: 'access content'
   methods: [GET]
+
+ui_icons_popover.previews:
+  path: '/ui-icons/ajax/popover/previews'
+  defaults:
+    _controller: '\Drupal\ui_icons_popover\Controller\IconPopoverController::previews'
+  requirements:
+    _permission: 'access content'
+  methods: [GET]
