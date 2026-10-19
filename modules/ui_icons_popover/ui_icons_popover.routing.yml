@@ -1,0 +1,7 @@
+ui_icons_popover.index:
+  path: '/ui-icons/ajax/popover/index'
+  defaults:
+    _controller: '\Drupal\ui_icons_popover\Controller\IconPopoverController::index'
+  requirements:
+    _permission: 'access content'
+  methods: [GET]

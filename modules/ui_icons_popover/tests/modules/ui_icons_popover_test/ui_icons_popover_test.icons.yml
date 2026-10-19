@@ -1,0 +1,28 @@
+# Two packs sharing a group name in a different case, so the popover index
+# merges them, and a flat pack whose icons have no group.
+popover_one:
+  label: Popover one
+  extractor: svg
+  config:
+    sources:
+      - icons/one/{group}/*.svg
+  template: >-
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">{{ content }}</svg>
+
+popover_two:
+  label: Popover two
+  extractor: svg
+  config:
+    sources:
+      - icons/two/{group}/*.svg
+  template: >-
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">{{ content }}</svg>
+
+popover_flat:
+  label: Popover flat
+  extractor: path
+  config:
+    sources:
+      - icons/flat/*.svg
+  template: >-
+    <img src="{{ source }}" width="32" height="32">
