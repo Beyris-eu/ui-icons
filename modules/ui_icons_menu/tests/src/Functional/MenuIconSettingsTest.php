@@ -75,9 +75,16 @@ class MenuIconSettingsTest extends BrowserTestBase {
     $this->assertSession()->elementExists('css', 'img.icon-foo[src$="foo.png"]');
 
     $this->drupalGet('admin/structure/menu/manage/footer');
-    $this->submitForm(['ui_icons_menu[result_format]' => 'grid'], 'Save');
+    $this->assertSession()->elementTextContains('css', 'details[data-drupal-selector="edit-ui-icons-menu"] > summary', 'Icons settings');
+    // Like the result format, the picker does not use it.
+    $this->assertSession()->elementAttributeContains('css', 'input[name="ui_icons_menu[max_result]"]', 'data-drupal-states', 'icon_autocomplete');
+    $this->submitForm([
+      'ui_icons_menu[result_format]' => 'grid',
+      'ui_icons_menu[max_result]' => 5,
+    ], 'Save');
     $this->drupalGet('admin/structure/menu/manage/footer/add');
     $this->assertSession()->elementAttributeContains('css', 'input[name="link[0][options][icon][icon_id]"]', 'data-autocomplete-path', 'result_format=grid');
+    $this->assertSession()->elementAttributeContains('css', 'input[name="link[0][options][icon][icon_id]"]', 'data-autocomplete-path', 'max_result=5');
 
     $this->drupalGet('admin/structure/menu/manage/main/add');
     $this->assertSession()->elementNotExists('css', 'input.form-icon-dialog');

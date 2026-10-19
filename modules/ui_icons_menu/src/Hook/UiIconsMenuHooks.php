@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Drupal\ui_icons_menu\Hook;
 
 use Drupal\Component\Render\FormattableMarkup;
-use Drupal\Component\Utility\NestedArray;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
@@ -19,6 +18,7 @@ use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\Core\Url;
 use Drupal\menu_link_content\MenuLinkContentInterface;
 use Drupal\system\MenuInterface;
+use Drupal\ui_icons\IconSearch;
 
 /**
  * Hook implementations for ui_icons_menu.
@@ -40,6 +40,7 @@ class UiIconsMenuHooks {
   private const DEFAULT_SETTINGS = [
     'icon_selector' => 'icon_autocomplete',
     'result_format' => 'list',
+    'max_result' => IconSearch::SEARCH_RESULT,
     'icon_required' => FALSE,
     'icon_position' => TRUE,
     'allowed_icon_pack' => [],
@@ -113,7 +114,7 @@ class UiIconsMenuHooks {
     // Same fields and labels as IconLinkWidgetTrait::settingsForm().
     $element = [
       '#type' => 'details',
-      '#title' => $this->t('Icons'),
+      '#title' => $this->t('Icons settings'),
       '#description' => $this->t('How icons are selected on the links of this menu.'),
       '#open' => $own_settings !== [],
       '#tree' => TRUE,
@@ -124,16 +125,25 @@ class UiIconsMenuHooks {
       '#options' => $selectors,
       '#default_value' => $settings['icon_selector'],
     ];
+    $autocomplete_only = [
+      'visible' => [
+        ':input[name="ui_icons_menu[icon_selector]"]' => ['value' => 'icon_autocomplete'],
+      ],
+    ];
     $element['result_format'] = [
       '#type' => 'select',
       '#title' => $this->t('Result format'),
       '#options' => ['list' => $this->t('List'), 'grid' => $this->t('Grid')],
       '#default_value' => $settings['result_format'],
-      '#states' => [
-        'visible' => [
-          ':input[name="ui_icons_menu[icon_selector]"]' => ['value' => 'icon_autocomplete'],
-        ],
-      ],
+      '#states' => $autocomplete_only,
+    ];
+    $element['max_result'] = [
+      '#type' => 'number',
+      '#min' => 2,
+      '#max' => IconSearch::SEARCH_RESULT_MAX,
+      '#title' => $this->t('Maximum results'),
+      '#default_value' => $settings['max_result'],
+      '#states' => $autocomplete_only,
     ];
     $element['icon_required'] = [
       '#type' => 'checkbox',
@@ -176,6 +186,7 @@ class UiIconsMenuHooks {
     $settings = [
       'icon_selector' => (string) $values['icon_selector'],
       'result_format' => (string) $values['result_format'],
+      'max_result' => (int) $values['max_result'],
       'icon_required' => (bool) $values['icon_required'],
       'icon_position' => (bool) $values['icon_position'],
       'allowed_icon_pack' => array_filter($values['allowed_icon_pack']),
@@ -269,7 +280,7 @@ class UiIconsMenuHooks {
         continue;
       }
 
-      $definition['settings'] = NestedArray::mergeDeep($definition['settings'][$icon_data['pack_id']] ?? [], ['class' => 'toolbar-button__icon']);
+      $definition['settings'] = array_merge($definition['settings'][$icon_data['pack_id']] ?? [], ['class' => 'toolbar-button__icon']);
 
       $item->options['icon'] = $definition + $icon_data;
     }
