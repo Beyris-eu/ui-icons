@@ -110,6 +110,9 @@ class UiIconsMenuHooks {
     if ($this->moduleHandler->moduleExists('ui_icons_picker')) {
       $selectors['icon_picker'] = $this->t('Picker');
     }
+    if ($this->moduleHandler->moduleExists('ui_icons_popover')) {
+      $selectors['icon_popover'] = $this->t('Popover');
+    }
 
     // Same fields and labels as IconLinkWidgetTrait::settingsForm().
     $element = [

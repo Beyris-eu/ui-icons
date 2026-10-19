@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\ui_icons_text\Plugin\Filter;
 
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
@@ -65,6 +66,13 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
   protected $loggerFactory;
 
   /**
+   * The module handler, to offer the selectors of enabled submodules.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected ModuleHandlerInterface $moduleHandler;
+
+  /**
    * Constructs a IconEmbed object.
    *
    * @param array $configuration
@@ -79,6 +87,8 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
    *   The renderer.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
    *   The logger factory.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   The module handler.
    */
   public function __construct(
     array $configuration,
@@ -87,11 +97,13 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
     IconPackManagerInterface $plugin_manager_icon_pack,
     RendererInterface $renderer,
     LoggerChannelFactoryInterface $logger_factory,
+    ModuleHandlerInterface $module_handler,
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->pluginManagerIconPack = $plugin_manager_icon_pack;
     $this->renderer = $renderer;
     $this->loggerFactory = $logger_factory;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -104,7 +116,8 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       $plugin_definition,
       $container->get('plugin.manager.icon_pack'),
       $container->get('renderer'),
-      $container->get('logger.factory')
+      $container->get('logger.factory'),
+      $container->get('module_handler'),
     );
   }
 
@@ -403,10 +416,15 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
    *   Icon selector format options.
    */
   private function getSelectorFormat(): array {
-    return [
+    $options = [
       'icon_autocomplete' => $this->t('Autocomplete'),
       'icon_picker' => $this->t('Picker'),
     ];
+    if ($this->moduleHandler->moduleExists('ui_icons_popover')) {
+      $options['icon_popover'] = $this->t('Popover');
+    }
+
+    return $options;
   }
 
   /**

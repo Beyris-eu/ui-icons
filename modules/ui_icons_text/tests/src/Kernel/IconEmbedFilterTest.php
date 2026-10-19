@@ -89,7 +89,8 @@ class IconEmbedFilterTest extends KernelTestBase {
       $plugin_definition,
       $this->pluginManagerIconPack,
       $this->container->get('renderer'),
-      $this->container->get('logger.factory')
+      $this->container->get('logger.factory'),
+      $this->container->get('module_handler'),
     );
   }
 
