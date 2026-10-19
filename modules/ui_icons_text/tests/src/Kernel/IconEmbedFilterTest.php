@@ -203,4 +203,22 @@ class IconEmbedFilterTest extends KernelTestBase {
     $this->assertSame(1, substr_count($processed, 'drupal-icon'));
   }
 
+  /**
+   * Tests an allowed pack list left with a pack removed from the site.
+   *
+   * Uninstalling the extension providing a pack does not update the filter
+   * settings. Its icons are unknown and leave an empty wrapper, like an
+   * invalid id, the icons of the other packs are not allowed and removed.
+   */
+  public function testProcessAllowedMissingIconPack(): void {
+    $this->filter->setConfiguration([
+      'settings' => ['allowed_icon_pack' => ['missing_pack' => 'missing_pack']],
+    ]);
+
+    $html = '<p><drupal-icon data-icon-id="missing_pack:foo"></drupal-icon><drupal-icon data-icon-id="test_path:foo"></drupal-icon></p>';
+    $processed = $this->filter->process($html, 'en')->getProcessedText();
+
+    $this->assertSame('<p><span class="drupal-icon"></span></p>', $processed);
+  }
+
 }
