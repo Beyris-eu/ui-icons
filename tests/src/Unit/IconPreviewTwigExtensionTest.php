@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons\Unit;
 
-use Drupal\Core\Theme\Icon\IconDefinitionInterface;
 use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\Tests\Core\Theme\Icon\IconTestTrait;
 use Drupal\Tests\UnitTestCase;
-use Drupal\ui_icons\IconPreview;
 use Drupal\ui_icons\Template\IconPreviewTwigExtension;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
@@ -64,44 +62,43 @@ class IconPreviewTwigExtensionTest extends UnitTestCase {
   public function testGetIconPreview(): void {
     $settings = ['foo' => 'bar'];
 
-    $iconPreview = $this->createMock(IconPreview::class);
-    $iconPreview->method('getPreview')
-      ->with($settings)
-      ->willReturn(['preview_icon'] + $settings);
-
-    $icon = $this->createMock(IconDefinitionInterface::class);
-    $icon
-      ->method('getPackId')
-      ->willReturn('pack_id');
-    $icon
-      ->method('getId')
-      ->willReturn('icon_id');
-    $icon
-      ->method('getIconId')
-      ->willReturn('pack_id:icon_id');
-    $icon
-      ->method('getLabel')
-      ->willReturn('Icon id');
-    $icon
-      ->method('getSource')
-      ->willReturn('foo/bar.svg');
+    // A real definition: getId() is the full id, getIconId() the short one.
+    $icon = $this->createTestIcon([
+      'pack_id' => 'pack_id',
+      'icon_id' => 'icon_id',
+      'source' => 'foo/bar.svg',
+    ]);
     $this->pluginManagerIconPack
+      ->expects($this->once())
       ->method('getIcon')
+      ->with('pack_id:icon_id')
       ->willReturn($icon);
 
     $result = $this->iconPreviewTwigExtension->getIconPreview('pack_id', 'icon_id', $settings);
     $expected = [
       '#theme' => 'icon_preview',
-      '#icon_label' => 'icon_id',
-      '#icon_name' => 'Icon id',
-      '#icon_id' => 'pack_id:icon_id',
+      '#icon_label' => 'pack_id:icon_id',
+      '#icon_name' => 'Icon Id',
+      '#icon_id' => 'icon_id',
       '#pack_id' => 'pack_id',
       '#extractor' => NULL,
       '#source' => 'foo/bar.svg',
       '#library' => NULL,
       '#settings' => $settings,
     ];
-    $this->assertEquals($expected, $result);
+    $this->assertSame($expected, $result);
+  }
+
+  /**
+   * Test the getIconPreview method falls back to a default size.
+   */
+  public function testGetIconPreviewNullSettings(): void {
+    $this->pluginManagerIconPack
+      ->method('getIcon')
+      ->willReturn($this->createTestIcon());
+
+    $result = $this->iconPreviewTwigExtension->getIconPreview('foo', 'bar', NULL);
+    $this->assertSame(['size' => 32], $result['#settings']);
   }
 
   /**

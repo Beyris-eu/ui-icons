@@ -11,9 +11,6 @@ parameters:
       - */tests/*
       # Depends on the canvas module, not in require-dev.
       - */ui_icons_canvas/src/Hook/UiIconsCanvasHooks.php
-      # Depends on the ui_patterns module, not in require-dev.
-      - */ui_icons_patterns/src/Plugin/UiPatterns/*
-      - */ui_icons_patterns/src/Plugin/Derivative/FieldIconSourceDeriver.php
   fileExtensions:
     - php
     - module

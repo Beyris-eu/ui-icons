@@ -1,7 +1,8 @@
 ## INTRODUCTION
 
-The UI Icons Font module is a UI Icons extractor to support discovery of Icons
-with Font packs through TTF/Woff files or metadata as codepoints, json or yml.
+The UI Icons Font module provides the `font` icon extractor for the Drupal core
+Icon API, to support discovery of Icons with Font packs through TTF/Woff files
+or metadata as codepoints, json or yml.
 
 ## INSTALLATION
 
@@ -16,6 +17,8 @@ Install from Drupal root with:
 composer require dompdf/php-font-lib
 ```
 
+The status report warns when the library is missing.
+
 ## DOCUMENTATION
 
-See [online documentation](https://project.pages.drupalcode.org/ui_icons) or local [docs/index.md](./docs/index.md).
+See [online documentation](https://project.pages.drupalcode.org/ui_icons) or local [docs/index.md](../../docs/index.md).

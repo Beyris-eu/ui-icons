@@ -10,7 +10,7 @@ manager `plugin.manager.icon_pack`). This module adds the UI on top: a form
 element to search and configure an icon, plus integrations (field, media, menu,
 CKEditor 5, text filter, UI Patterns, Canvas).
 
-Current branch line is **1.1.x**, Drupal 11.3+ and Drupal 12. The 1.0.x line
+Current branch line is **2.0.x**, Drupal 11.3+ and Drupal 12. The 1.0.x line
 shipped an API backport through `ui_icons_backport` and `ui_icons_iconify_api`,
 both removed here.
 
@@ -37,8 +37,8 @@ submodule.
 | `src/IconPreview.php`, `src/Template/IconPreviewTwigExtension.php` | Preview rendering, exposed to Twig as `icon_preview()`. |
 | `src/Controller/` | Ajax endpoints, see `ui_icons.routing.yml` (`/ui-icons/ajax/autocomplete/icons`, `/ui-icons/ajax/preview/icons`). |
 | `templates/icon-selector.html.twig` | Markup of the element. Provides the `.ui-icons-preview-icon` and `.ui-icons-settings-wrapper` hooks used by tests and themes. |
-| `src/Hook/UiIconsHooks.php` | `help`, `theme` and `preprocess_icon_selector`. |
-| `css/*.icon.autocomplete.css` | Per admin theme overrides (gin, dsfr, daisyui), picked by `UiIconsHooks::preprocessIconSelector()` via its `isThemeActive()` helper. |
+| `src/Hook/UiIconsHooks.php` | `config_schema_info_alter`, `help`, `theme` and `preprocess_icon_selector`. The alter adds a schema key per icon pack to `ui_icons.icon_pack_settings`. |
+| `css/*.icon.autocomplete.css` | Per admin theme overrides (default_admin, gin, dsfr, daisyui), picked by `UiIconsHooks::preprocessIconSelector()` via its `isThemeActive()` helper. |
 
 Submodules worth knowing:
 
@@ -80,8 +80,9 @@ Test setup is done per test with `drupal.installModules()` and
 `drupal.drush('php:eval "..."')`, so keep it idempotent: tests in a worker share
 one site.
 
-CKEditor 5 icon coverage is Playwright only (`Tests/ckeditor.spec.ts`), the old
-`FunctionalJavascript/IconPluginTest.php` was removed.
+CKEditor 5 browser coverage is Playwright only (`Tests/ckeditor.spec.ts`), the
+old `FunctionalJavascript/IconPluginTest.php` was removed. Kernel tests cover
+`IconDialog` and `IconFilterController`.
 
 ## QA
 
@@ -97,8 +98,9 @@ so keep it that way instead of suppressing new findings. This only holds with
 the module's require-dev installed: without `linkit` and `link_attributes` you
 get ~66 bogus `class.notFound` errors from the field submodules.
 
-`phpstan.neon` excludes files depending on contrib that is *not* in require-dev
-(ui_patterns, canvas). If you add such a file, add it there too.
+`phpstan.neon` excludes the file depending on canvas, which is *not* in
+require-dev. If you add a file depending on contrib outside require-dev, add it
+there too.
 
 `.phpmd.baseline.xml` holds exactly two entries, `CouplingBetweenObjects` on
 `IconEmbed` and `IconAutocomplete`. Both are inherent to what those classes are
@@ -111,8 +113,9 @@ and rewritten by CI, so it will not match when run locally.
 
 - `declare(strict_types=1);` everywhere, enforced by phpcs.
 - All hooks are `#[Hook]` classes in `src/Hook/<CamelCaseModule>Hooks.php`, one
-  per module, autowired. There is no `.module` file left in the project and
-  none should come back.
+  per module, autowired. `ui_icons_font` is the exception: its only hook,
+  `runtime_requirements`, is in `UiIconsFontRequirements.php`. There is no
+  `.module` file left in the project and none should come back.
 - Icon settings are always keyed by pack id (`[$pack_id => $settings]`) when
   passed as `#default_settings`. Flattening them silently empties the extractor
   sub-form.
