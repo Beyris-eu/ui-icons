@@ -1,0 +1,265 @@
+/**
+ * @file
+ * Styles for the UI Icons popover selector.
+ *
+ * Colors follow the Default Admin and Gin tokens when the page has them,
+ * else system colors. Themes can override the custom properties.
+ */
+
+.ui-icons-popover {
+  --ui-icons-popover-bg: var(--admin-color-bg-raised, var(--gin-bg-layer3, Canvas));
+  --ui-icons-popover-text: var(--admin-color-text, var(--gin-color-text, CanvasText));
+  --ui-icons-popover-border: var(--admin-color-border, var(--gin-border-color, GrayText));
+  --ui-icons-popover-accent: var(--admin-color-primary, var(--gin-color-primary, AccentColor));
+  --ui-icons-popover-hover: var(--admin-color-bg-item-hover, var(--gin-bg-item-hover, color-mix(in srgb, CanvasText 10%, Canvas)));
+  --ui-icons-popover-focus: var(--admin-color-focus, var(--gin-color-focus, Highlight));
+  --ui-icons-popover-error: var(--admin-color-error, #d72222);
+  --ui-icons-popover-tile: 2.5rem;
+  --ui-icons-popover-gap: 0.25rem;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* The input wrapper sets its own display, which the hidden attribute loses to. */
+.ui-icons-input-wrapper[hidden] {
+  display: none;
+}
+
+.ui-icons-popover__trigger,
+.ui-icons-popover__clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.25rem 0.75rem;
+  cursor: pointer;
+  color: var(--ui-icons-popover-text);
+  border: 1px solid var(--ui-icons-popover-border);
+  border-radius: 0.375rem;
+  background: var(--ui-icons-popover-bg);
+  font: inherit;
+}
+
+.ui-icons-popover__trigger::after {
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-inline-start: 0.25rem;
+  content: "";
+  transform: translateY(-25%) rotate(45deg);
+  border: solid currentColor;
+  border-width: 0 2px 2px 0;
+}
+
+.ui-icons-popover__trigger.error {
+  border-color: var(--ui-icons-popover-error);
+}
+
+.ui-icons-popover__trigger:focus-visible,
+.ui-icons-popover__clear:focus-visible,
+.ui-icons-popover__tab:focus-visible,
+.ui-icons-popover__tile:focus-visible,
+.ui-icons-popover__search:focus-visible {
+  outline: 2px solid var(--ui-icons-popover-focus);
+  outline-offset: 1px;
+}
+
+.ui-icons-popover__preview {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.ui-icons-popover__preview:empty {
+  display: none;
+}
+
+.ui-icons-popover__preview > *,
+.ui-icons-popover__tile > * {
+  max-width: 1.5rem;
+  max-height: 1.5rem;
+  /* The preview template titles icons with their raw id, keep the tile's. */
+  pointer-events: none;
+}
+
+.ui-icons-popover__panel {
+  overflow: hidden;
+  flex-direction: column;
+  width: min(27rem, calc(100vw - 1rem));
+  margin: 0;
+  padding: 0;
+  color: var(--ui-icons-popover-text);
+  border: 1px solid var(--ui-icons-popover-border);
+  border-radius: 0.5rem;
+  background: var(--ui-icons-popover-bg);
+  box-shadow: 0 0.5rem 1.5rem rgb(0, 0, 0, 0.2);
+  inset: auto;
+}
+
+.ui-icons-popover__panel:popover-open {
+  display: flex;
+}
+
+@supports (anchor-name: --a) {
+  .ui-icons-popover__panel {
+    margin-block: 0.25rem;
+    position-area: block-end span-inline-end;
+    position-try-fallbacks: flip-block;
+  }
+}
+
+.ui-icons-popover__search {
+  margin: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  color: inherit;
+  border: 1px solid var(--ui-icons-popover-border);
+  border-radius: 0.375rem;
+  background: var(--admin-color-bg-input, var(--ui-icons-popover-bg));
+  font: inherit;
+}
+
+.ui-icons-popover__body {
+  display: flex;
+  height: 18rem;
+  border-block: 1px solid var(--ui-icons-popover-border);
+}
+
+.ui-icons-popover__rail {
+  display: flex;
+  overflow-y: auto;
+  flex: 0 0 8.5rem;
+  flex-direction: column;
+  padding-block: 0.25rem;
+  border-inline-end: 1px solid var(--ui-icons-popover-border);
+}
+
+.ui-icons-popover__tab {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.25rem;
+  padding: 0.375rem 0.75rem;
+  cursor: pointer;
+  text-align: start;
+  color: inherit;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.ui-icons-popover__tab:hover {
+  background: var(--ui-icons-popover-hover);
+}
+
+.ui-icons-popover__tab[aria-selected="true"] {
+  background: var(--ui-icons-popover-hover);
+  box-shadow: inset 3px 0 var(--ui-icons-popover-accent);
+  font-weight: 600;
+}
+
+.ui-icons-popover__count {
+  font-size: 0.75rem;
+  font-weight: normal;
+}
+
+.ui-icons-popover__grid {
+  position: relative;
+  overflow-y: auto;
+  /* Same width with or without a scrollbar: the columns are counted once. */
+  scrollbar-gutter: stable;
+  flex: 1;
+  padding: 0.5rem;
+}
+
+.ui-icons-popover__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--ui-icons-popover-tile));
+  gap: var(--ui-icons-popover-gap);
+  margin-block-end: var(--ui-icons-popover-gap);
+}
+
+.ui-icons-popover__results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--ui-icons-popover-tile));
+  gap: var(--ui-icons-popover-gap);
+}
+
+.ui-icons-popover__section--lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: auto calc(var(--rows) * (var(--ui-icons-popover-tile) + var(--ui-icons-popover-gap)) + 1.75rem);
+}
+
+.ui-icons-popover__heading {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-block: 0.5rem 0.25rem;
+}
+
+.ui-icons-popover__tile {
+  display: grid;
+  place-items: center;
+  width: var(--ui-icons-popover-tile);
+  height: var(--ui-icons-popover-tile);
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  background: none;
+}
+
+.ui-icons-popover__tile:hover,
+.ui-icons-popover__tile[aria-selected="true"] {
+  background: var(--ui-icons-popover-hover);
+}
+
+.ui-icons-popover__tile[aria-selected="true"] {
+  outline: 2px solid var(--ui-icons-popover-focus);
+  outline-offset: 1px;
+}
+
+.ui-icons-popover__tile[aria-current="true"] {
+  border-color: var(--ui-icons-popover-accent);
+}
+
+.ui-icons-popover__status {
+  margin: 1rem 0.5rem;
+}
+
+.ui-icons-popover__footer {
+  min-height: 1.75rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 480px) {
+  .ui-icons-popover__panel {
+    width: auto;
+    max-height: 80vh;
+    margin: 0;
+    border-radius: 0.5rem 0.5rem 0 0;
+    inset: auto 0 0;
+    position-area: none;
+  }
+
+  .ui-icons-popover__body {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .ui-icons-popover__rail {
+    overflow-x: auto;
+    flex: none;
+    flex-direction: row;
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--ui-icons-popover-border);
+  }
+
+  .ui-icons-popover__grid {
+    height: 50vh;
+  }
+}

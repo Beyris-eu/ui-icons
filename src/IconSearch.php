@@ -248,7 +248,8 @@ class IconSearch implements ContainerInjectionInterface {
    * IconPackManager::getIcon() goes through the icon collector, which keeps
    * every icon it returns in one cache item loaded by any icon render. Search
    * previews would grow it with every icon browsed, so do what the collector
-   * does on a miss, without storing the result.
+   * does on a miss, without storing the result. Other icon browsers, such as
+   * the ui_icons_popover previews, load their icons here for the same reason.
    *
    * @param string $icon_full_id
    *   The icon full id.
@@ -258,7 +259,7 @@ class IconSearch implements ContainerInjectionInterface {
    *
    * @see \Drupal\Core\Theme\Icon\IconCollector::resolveCacheMiss()
    */
-  private function loadIcon(string $icon_full_id): ?IconDefinitionInterface {
+  public function loadIcon(string $icon_full_id): ?IconDefinitionInterface {
     $icon_data = IconDefinition::getIconDataFromId($icon_full_id);
     $definition = $this->pluginManagerIconPack->getDefinition($icon_data['pack_id'], FALSE);
     $icon_definition = $definition['icons'][$icon_full_id] ?? NULL;

@@ -211,7 +211,7 @@ async function pickIconFromLibrary (page: Page, iconId: string): Promise<void> {
 }
 
 test.beforeEach('Setup', async ({ drupal }) => {
-  await drupal.installModules([ 'node', 'text', 'ckeditor5', 'ui_icons_ckeditor5', 'ui_icons_picker', 'ui_icons_test' ])
+  await drupal.installModules([ 'node', 'text', 'ckeditor5', 'ui_icons_ckeditor5', 'ui_icons_picker', 'ui_icons_popover', 'ui_icons_test' ])
   await createTextFormat(drupal)
   await createContentType(drupal)
   await drupal.loginAsAdmin()
@@ -412,6 +412,61 @@ test('Use the icon_picker selector in the icon dialog', { tag: [ '@base' ] }, as
 
     const icons = await getEditorIcons(page)
     expect(icons, 'The picker selector must reach the editor like the autocomplete does.').toHaveLength(1)
+    expect(icons[0].id).toBe(iconId)
+  })
+})
+
+test('Use the icon_popover selector in the icon dialog', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  const iconId = `${PACK_ID}:foo`
+  const modal = page.locator('#drupal-modal')
+  const panel = modal.locator('.ui-icons-popover__panel')
+
+  await setSelectorFormat(drupal, 'icon_popover')
+
+  await test.step('The dialog shows the popover trigger instead of the input', async () => {
+    await openEditor(page)
+    await page.getByRole('button', { name: 'Insert Icon' }).click()
+    await expect(modal).toBeVisible()
+
+    await expect(modal.locator('.ui-icons-popover__trigger')).toBeVisible()
+    await expect(modal.locator('[name="icon[icon_id]"]')).toBeHidden()
+  })
+
+  await test.step('The panel opens over the dialog, inside the viewport', async () => {
+    await modal.locator('.ui-icons-popover__trigger').click()
+    await expect(panel).toBeVisible()
+    await expect(panel).toBeInViewport()
+
+    // The popover sits in the top layer, so no part of the dialog covers it.
+    const onTop = await panel.evaluate((element) => {
+      const box = element.getBoundingClientRect()
+      return element.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2))
+    })
+    expect(onTop).toBe(true)
+  })
+
+  await test.step('Escape closes the panel and leaves the dialog open', async () => {
+    await page.keyboard.press('Escape')
+
+    await expect(panel).toBeHidden()
+    await expect(modal).toBeVisible()
+  })
+
+  await test.step('Picking writes back and rebuilds the settings', async () => {
+    await modal.locator('.ui-icons-popover__trigger').click()
+    await page.keyboard.type('foo')
+    await panel.locator(`[role="option"][data-icon-id="${iconId}"]`).click()
+
+    await expect(modal.locator('[name="icon[icon_id]"]')).toHaveValue(iconId)
+    await expect(modal.locator('.ui-icons-settings-wrapper details')).toBeVisible()
+  })
+
+  await test.step('Saving the dialog inserts the icon in the editor', async () => {
+    await page.locator('.ui-dialog-buttonpane').getByRole('button', { name: 'Save' }).click()
+    await expect(modal).toBeHidden()
+
+    const icons = await getEditorIcons(page)
+    expect(icons, 'The popover selector must reach the editor like the autocomplete does.').toHaveLength(1)
     expect(icons[0].id).toBe(iconId)
   })
 })

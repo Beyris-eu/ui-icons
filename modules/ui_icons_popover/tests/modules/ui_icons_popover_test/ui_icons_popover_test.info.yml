@@ -1,0 +1,6 @@
+name: 'UI Icons Popover Tests'
+type: module
+description: 'Provides icon packs with groups for the popover tests.'
+package: 'Testing'
+dependencies:
+  - ui_icons_popover:ui_icons_popover

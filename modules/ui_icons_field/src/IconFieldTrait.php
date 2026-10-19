@@ -30,16 +30,16 @@ trait IconFieldTrait {
    *   An array of options for selectors options.
    */
   private function getPickerOptions(): array {
-    if (\Drupal::moduleHandler()->moduleExists('ui_icons_picker')) {
-      return [
-        'icon_autocomplete' => $this->t('Autocomplete'),
-        'icon_picker' => $this->t('Picker'),
-      ];
+    $module_handler = \Drupal::moduleHandler();
+    $options = ['icon_autocomplete' => $this->t('Autocomplete')];
+    if ($module_handler->moduleExists('ui_icons_picker')) {
+      $options['icon_picker'] = $this->t('Picker');
+    }
+    if ($module_handler->moduleExists('ui_icons_popover')) {
+      $options['icon_popover'] = $this->t('Popover');
     }
 
-    return [
-      'icon_autocomplete' => $this->t('Autocomplete'),
-    ];
+    return $options;
   }
 
   /**
