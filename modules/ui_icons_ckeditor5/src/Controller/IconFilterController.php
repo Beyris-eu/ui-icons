@@ -7,6 +7,7 @@ namespace Drupal\ui_icons_ckeditor5\Controller;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\Icon\IconDefinition;
+use Drupal\ui_icons\IconSettings;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -50,8 +51,7 @@ final class IconFilterController implements ContainerInjectionInterface {
     if ($query_settings !== '' && json_validate($query_settings)) {
       $settings = json_decode($query_settings, TRUE);
     }
-    // Icon settings are scalars only, as defined by the Icon API.
-    $settings = is_array($settings) ? array_filter($settings, is_scalar(...)) : [];
+    $settings = IconSettings::filter($icon_full_id, $settings);
 
     $build = IconDefinition::getRenderable($icon_full_id, $settings);
     $html = $this->renderer->renderInIsolation($build);

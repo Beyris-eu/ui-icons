@@ -20,6 +20,7 @@ use Drupal\filter\FilterProcessResult;
 use Drupal\filter\Plugin\FilterBase;
 use Drupal\filter\Plugin\FilterInterface;
 use Drupal\ui_icons\IconSearch;
+use Drupal\ui_icons\IconSettings;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -214,7 +215,8 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
    *   The `<drupal-icon>` node.
    *
    * @return array
-   *   The scalar settings, empty when absent or not valid JSON.
+   *   The scalar settings declared by the icon pack, empty when absent or not
+   *   valid JSON.
    */
   private function extractSettings(\DOMElement $node): array {
     $data_settings = $node->getAttribute('data-icon-settings');
@@ -222,9 +224,7 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       return [];
     }
 
-    // Icon settings are scalars only, as defined by the Icon API.
-    $settings = json_decode($data_settings, TRUE);
-    return is_array($settings) ? array_filter($settings, is_scalar(...)) : [];
+    return IconSettings::filter($node->getAttribute('data-icon-id'), json_decode($data_settings, TRUE));
   }
 
   /**
