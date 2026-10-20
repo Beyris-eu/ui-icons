@@ -9,6 +9,7 @@ use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Security\TrustedCallbackInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Render\RenderContext;
 use Drupal\Core\Render\RendererInterface;
@@ -36,13 +37,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
   weight: 100,
   settings: [
     'allowed_icon_pack' => [],
+    'wrapper' => TRUE,
     'selector_format' => 'icon_autocomplete',
     'result_format' => 'list',
     // Default autocomplete result length. Multiple of 12 to match grid format.
     'max_result' => 24,
   ],
 )]
-class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
+class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface, TrustedCallbackInterface {
 
   /**
    * The ui icons service.
@@ -134,6 +136,13 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       '#element_validate' => [[static::class, 'validateOptions']],
     ];
 
+    $form['wrapper'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Wrap icons in a span'),
+      '#description' => $this->t('Without it, the classes and attributes of an icon go on the icon itself, when its pack renders a single element.'),
+      '#default_value' => $this->settings['wrapper'] ?? TRUE,
+    ];
+
     $form['selector_format'] = [
       '#type' => 'select',
       '#title' => $this->t('Selector format'),
@@ -212,11 +221,11 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
         $node->parentNode->removeChild($node);
         continue;
       }
-      $build = $this->getWrappedRenderable(
-        $icon_full_id,
-        $this->extractSettings($node),
-        $this->extractAttributes($node),
-      );
+      $settings = $this->extractSettings($node);
+      $attributes = $this->extractAttributes($node);
+      $build = ($this->settings['wrapper'] ?? TRUE)
+        ? $this->getWrappedRenderable($icon_full_id, $settings, $attributes)
+        : $this->getUnwrappedRenderable($icon_full_id, $settings, $attributes);
       $this->renderIntoDomNode($build, $node, $result);
     }
 
@@ -326,6 +335,74 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
     $build['#attached']['library'][] = 'ui_icons_text/icon.content';
 
     return $build;
+  }
+
+  /**
+   * Gets the icon renderable without the wrapper.
+   *
+   * @param string $icon_full_id
+   *   The icon full ID.
+   * @param array $settings
+   *   The icon settings.
+   * @param array $attributes
+   *   The attributes of the icon tag.
+   *
+   * @return array
+   *   The icon renderable, which takes the attributes once rendered.
+   */
+  protected function getUnwrappedRenderable(string $icon_full_id, array $settings, array $attributes): array {
+    $attributes['class'][] = 'drupal-icon';
+
+    $build = IconDefinition::getRenderable($icon_full_id, $settings);
+    $build['#icon_embed_attributes'] = $attributes;
+    $build['#post_render'][] = [static::class, 'moveAttributesToIcon'];
+    $build['#attached']['library'][] = 'ui_icons_text/icon.content';
+
+    return $build;
+  }
+
+  /**
+   * Post render callback putting the tag attributes on the icon element.
+   *
+   * Only an icon rendered as a single element can take them. Otherwise, as
+   * for a text before the element or an unknown icon, the wrapper is back.
+   *
+   * @param string $markup
+   *   The rendered icon.
+   * @param array $element
+   *   The icon renderable.
+   *
+   * @return string
+   *   The icon with the attributes.
+   */
+  public static function moveAttributesToIcon(string $markup, array $element): string {
+    $attributes = $element['#icon_embed_attributes'];
+    $dom = Html::load($markup);
+    $nodes = array_filter(
+      iterator_to_array($dom->getElementsByTagName('body')->item(0)->childNodes),
+      // Theme debug comments and indentation are not part of the icon.
+      static fn (\DOMNode $node): bool => !$node instanceof \DOMComment && !($node instanceof \DOMText && trim($node->textContent) === ''),
+    );
+    $icon = count($nodes) === 1 ? reset($nodes) : NULL;
+    if (!$icon instanceof \DOMElement) {
+      return '<span' . new Attribute($attributes) . '>' . $markup . '</span>';
+    }
+
+    foreach ($attributes as $name => $value) {
+      if ('class' === $name) {
+        $value = implode(' ', array_unique(array_merge(array_filter(explode(' ', $icon->getAttribute('class'))), $value)));
+      }
+      $icon->setAttribute($name, TRUE === $value ? 'true' : (string) $value);
+    }
+
+    return Html::serialize($dom);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function trustedCallbacks(): array {
+    return ['moveAttributesToIcon'];
   }
 
   /**

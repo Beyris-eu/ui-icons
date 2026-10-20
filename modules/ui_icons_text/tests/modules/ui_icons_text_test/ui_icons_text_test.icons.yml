@@ -1,0 +1,9 @@
+# A template rendering one element and nothing else, as most packs do.
+test_single_root:
+  label: Test single root
+  extractor: svg
+  config:
+    sources:
+      - icons/*.svg
+  template: >-
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">{{ content }}</svg>

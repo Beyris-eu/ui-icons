@@ -1,0 +1,5 @@
+name: 'UI Icons Text Test'
+type: module
+description: 'Icon pack for the ui_icons_text tests.'
+package: Testing
+core_version_requirement: ^11.3 || ^12.0
