@@ -4,6 +4,7 @@
     "license": "GPL-2.0-or-later",
     "type": "drupal-module",
     "require-dev": {
+        "drupal/field_sample_value": "^1.1",
         "drupal/link_attributes": "^2.0",
         "drupal/linkit": "^7.0",
         "drupal/ui_patterns": "^2",
