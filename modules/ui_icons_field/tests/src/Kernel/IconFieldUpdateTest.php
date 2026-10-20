@@ -10,6 +10,7 @@ use Drupal\field\Entity\FieldConfig;
 use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
 use PHPUnit\Framework\Attributes\CoversFunction;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
@@ -39,50 +40,67 @@ class IconFieldUpdateTest extends KernelTestBase {
   /**
    * Tests the column is added and the stored schema matches the field type.
    */
-  public function testSettingsColumnUpdate(): void {
-    $this->installEntitySchema('entity_test');
+  #[DataProvider('providerSettingsColumnUpdate')]
+  public function testSettingsColumnUpdate(string $entity_type_id, array $tables): void {
+    $this->installEntitySchema($entity_type_id);
     FieldStorageConfig::create([
       'field_name' => 'field_icon',
-      'entity_type' => 'entity_test',
+      'entity_type' => $entity_type_id,
       'type' => 'ui_icon',
     ])->save();
     FieldConfig::create([
       'field_name' => 'field_icon',
-      'entity_type' => 'entity_test',
-      'bundle' => 'entity_test',
+      'entity_type' => $entity_type_id,
+      'bundle' => $entity_type_id,
     ])->save();
+    $storage = \Drupal::entityTypeManager()->getStorage($entity_type_id);
+    $this->assertSame($tables, $storage->getTableMapping()->getAllFieldTableNames('field_icon'));
 
     // Simulate a site installed before the column existed.
     $key_value = \Drupal::keyValue('entity.storage_schema.sql');
-    $installed_schema = $key_value->get('entity_test.field_schema_data.field_icon');
+    $schema_key = $entity_type_id . '.field_schema_data.field_icon';
+    $installed_schema = $key_value->get($schema_key);
     $stored_schema = $installed_schema;
-    unset($stored_schema['entity_test__field_icon']['fields']['field_icon_settings']);
-    $key_value->set('entity_test.field_schema_data.field_icon', $stored_schema);
     $db_schema = \Drupal::database()->schema();
-    $db_schema->dropField('entity_test__field_icon', 'field_icon_settings');
+    foreach ($tables as $table) {
+      unset($stored_schema[$table]['fields']['field_icon_settings']);
+      $db_schema->dropField($table, 'field_icon_settings');
+    }
+    $key_value->set($schema_key, $stored_schema);
 
     // Kernel tests always list uninstalled entity types as changes, so only
     // look at this field.
     $update_manager = \Drupal::entityDefinitionUpdateManager();
-    $this->assertArrayHasKey('field_icon', $update_manager->getChangeList()['entity_test']['field_storage_definitions'] ?? []);
+    $this->assertArrayHasKey('field_icon', $update_manager->getChangeList()[$entity_type_id]['field_storage_definitions'] ?? []);
 
     \Drupal::moduleHandler()->loadInclude('ui_icons_field', 'install');
     $message = (string) ui_icons_field_update_11201();
 
-    $this->assertTrue($db_schema->fieldExists('entity_test__field_icon', 'field_icon_settings'));
-    $this->assertSame($installed_schema, $key_value->get('entity_test.field_schema_data.field_icon'));
-    $this->assertArrayNotHasKey('field_icon', $update_manager->getChangeList()['entity_test']['field_storage_definitions'] ?? []);
+    foreach ($tables as $table) {
+      $this->assertTrue($db_schema->fieldExists($table, 'field_icon_settings'), $table);
+    }
+    $this->assertSame($installed_schema, $key_value->get($schema_key));
+    $this->assertArrayNotHasKey('field_icon', $update_manager->getChangeList()[$entity_type_id]['field_storage_definitions'] ?? []);
     $this->assertSame('Added the icon settings column to 1 icon field(s).', $message);
     // Nothing left to add: a second run is a no-op.
     $this->assertSame('Added the icon settings column to 0 icon field(s).', (string) ui_icons_field_update_11201());
 
     $settings = ['test_settings' => ['width' => 64]];
-    $entity = EntityTest::create([
+    $entity = $storage->create([
       'field_icon' => ['target_id' => 'test_settings:foo', 'settings' => $settings],
     ]);
     $entity->save();
-    $entity = EntityTest::load($entity->id());
-    $this->assertSame($settings, $entity->get('field_icon')->settings);
+    $this->assertSame($settings, $storage->loadUnchanged($entity->id())->get('field_icon')->settings);
+  }
+
+  /**
+   * Data provider for ::testSettingsColumnUpdate().
+   */
+  public static function providerSettingsColumnUpdate(): array {
+    return [
+      'not revisionable' => ['entity_test', ['entity_test__field_icon']],
+      'revisionable' => ['entity_test_rev', ['entity_test_rev__field_icon', 'entity_test_rev_revision__field_icon']],
+    ];
   }
 
   /**
