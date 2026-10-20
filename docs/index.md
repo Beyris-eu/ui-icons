@@ -328,6 +328,15 @@ For support with [Linkit](https://www.drupal.org/project/linkit), enable the
 `UI Icons Linkit Attributes` module adds the `Linkit icon (with attributes)`
 widget.
 
+### Field Sample Value
+
+Core sample values of a **Link** field never have an icon. With
+[Field Sample Value](https://www.drupal.org/project/field_sample_value)
+enabled, edit the field, check **Set sample value** and select the
+`Random link with icon` generator. It adds an icon from the packs the widget
+allows, for every module building its sample entities through Field Sample
+Value. Icon fields need nothing: their default sample is already an icon.
+
 ### UI Patterns
 
 Enable the submodule `UI Icons for UI Patterns` to allow usage with
