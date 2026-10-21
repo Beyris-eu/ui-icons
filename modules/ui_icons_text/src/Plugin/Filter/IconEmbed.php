@@ -20,6 +20,7 @@ use Drupal\filter\FilterProcessResult;
 use Drupal\filter\Plugin\FilterBase;
 use Drupal\filter\Plugin\FilterInterface;
 use Drupal\ui_icons\IconSearch;
+use Drupal\ui_icons\IconSettings;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -183,6 +184,7 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface {
       if ($data_settings && json_validate($data_settings)) {
         $settings = json_decode($data_settings, TRUE);
       }
+      $settings = IconSettings::filter($icon_id, $settings);
 
       $attributes = [];
       if ($class = $node->getAttribute('class')) {

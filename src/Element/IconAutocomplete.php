@@ -19,6 +19,7 @@ use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\Core\Theme\Icon\IconDefinitionInterface;
 use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\ui_icons\IconSearch;
+use Drupal\ui_icons\IconSettings;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -369,8 +370,9 @@ class IconAutocomplete extends FormElementBase {
     }
 
     $settings = [];
-    if (isset($input['icon_settings'][$pack_id])) {
-      $settings[$pack_id] = $input['icon_settings'][$pack_id];
+    if (is_array($input['icon_settings'][$pack_id] ?? NULL)) {
+      // The element value is the raw input, not only the sub-form values.
+      $settings[$pack_id] = IconSettings::filter($icon->getId(), $input['icon_settings'][$pack_id]);
       // @todo validateConfigurationForm from extractor plugin?
     }
 
