@@ -22,12 +22,12 @@ for further information.
 
 !!! note "Drupal compatibility"
 
-    The **2.0.x** branch is for **Drupal 11.3+ and 12**. It no longer ships
+    The **2.1.x** branch is for **Drupal 11.3+ and 12**. It no longer ships
     the empty backport and Iconify submodules: when upgrading from 1.1.x, run
     the database updates, `ui_icons_update_11201` removes them.
 
     The **1.1.x** branch, for **Drupal 11.1+**, is **deprecated**. Upgrade to
-    2.0.x.
+    2.1.x.
 
     The **1.0.x** branch, for **Drupal 10.4 to 11.0**, is **no longer
     maintained**.
@@ -65,7 +65,7 @@ my_icon_pack:
 Icon settings saved in configuration, such as formatter settings, field default
 values or UI Patterns sources, are keyed by pack id, under the
 `ui_icons.icon_pack_settings` schema type, see
-[ui_icons.schema.yml](https://git.drupalcode.org/project/ui_icons/-/blob/2.0.x/config/schema/ui_icons.schema.yml).
+[ui_icons.schema.yml](https://git.drupalcode.org/project/ui_icons/-/blob/2.1.x/config/schema/ui_icons.schema.yml).
 
 UI Icons builds the schema of each pack from its `settings`: `integer`,
 `number`, `boolean`, anything else as a string. To replace it, declare the
@@ -85,7 +85,7 @@ ui_icons.icon_pack_options.my_icon_pack:
 ```
 
 More examples are in the
-[test module schema](https://git.drupalcode.org/project/ui_icons/-/blob/2.0.x/tests/modules/ui_icons_test/config/schema/ui_icons_test.schema.yml).
+[test module schema](https://git.drupalcode.org/project/ui_icons/-/blob/2.1.x/tests/modules/ui_icons_test/config/schema/ui_icons_test.schema.yml).
 
 Third party themes include definition for some icon pack:
 

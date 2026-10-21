@@ -10,7 +10,7 @@ manager `plugin.manager.icon_pack`). This module adds the UI on top: a form
 element to search and configure an icon, plus integrations (field, media, menu,
 CKEditor 5, text filter, UI Patterns, Canvas).
 
-Current branch line is **2.0.x**, Drupal 11.3+ and Drupal 12. The 1.x lines
+Current branch line is **2.1.x**, Drupal 11.3+ and Drupal 12. The 1.x lines
 shipped an API backport through `ui_icons_backport` and `ui_icons_iconify_api`,
 both removed here. 1.1.x is deprecated and 1.0.x is no longer maintained.
 

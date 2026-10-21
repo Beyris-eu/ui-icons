@@ -9,7 +9,7 @@ include:
 variables:
   _PHPUNIT_CONCURRENT: '1'
   _PHPUNIT_TESTGROUPS: 'ui_icons'
-  # 2.0.x declares `^11.3 || ^12.0`, so Drupal 12 has to be covered by CI and
+  # 2.1.x declares `^11.3 || ^12.0`, so Drupal 12 has to be covered by CI and
   # not only by the info files. The next-major variants build against
   # DRUPAL_NEXT_MAJOR (12) and are allow_failure in the templates, so a broken
   # core dev snapshot reports without blocking the pipeline.
