@@ -8,6 +8,7 @@ use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\ui_icons\IconPreview;
+use Drupal\ui_icons\IconSettings;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -58,7 +59,12 @@ class IconPreviewController extends ControllerBase {
         continue;
       }
 
-      $icon_preview = IconPreview::getPreview($icon, $settings);
+      $preview_settings = IconSettings::filter($icon_full_id, $settings);
+      // The size belongs to the preview, not to the icon pack settings.
+      if (is_numeric($settings['size'] ?? NULL)) {
+        $preview_settings['size'] = (int) $settings['size'];
+      }
+      $icon_preview = IconPreview::getPreview($icon, $preview_settings);
       $result[$icon_full_id] = $this->renderer->renderInIsolation($icon_preview);
     }
 
