@@ -14,6 +14,8 @@ use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\TypedData\MapDataDefinition;
+use Drupal\ui_icons_field\TypedData\IconIdPart;
+use Drupal\ui_icons_field\TypedData\ResolvedIconSettings;
 
 /**
  * Plugin implementation of the 'ui_icon' field type.
@@ -32,13 +34,9 @@ class IconType extends FieldItemBase {
   /**
    * The icon id format (`pack_id:icon_id`), as a PCRE.
    *
-   * Used both to validate stored values and to let Canvas's shape matcher
-   * suggest `ui_icon` fields for icon-shaped SDC props: the matcher compares
-   * the field property's Regex constraint against the one Canvas derives from
-   * the prop's JSON Schema `pattern` by value, so this MUST stay in sync with
-   * any icon-shaped prop pattern (`^[a-z0-9_]+:.+$`).
+   * Validates the stored `target_id`.
    *
-   * @see \Drupal\ui_icons_canvas\Hook\UiIconsCanvasHooks::fieldWidgetInfoAlter()
+   * @see \Drupal\Core\Theme\Icon\IconDefinition::getIconDataFromId()
    */
   public const ICON_ID_PCRE = '/^[a-z0-9_]+:.+$/';
 
@@ -100,6 +98,23 @@ class IconType extends FieldItemBase {
       ->setRequired(TRUE)
       ->addConstraint('Regex', ['pattern' => self::ICON_ID_PCRE]);
 
+    // Expose the two halves of the stored `pack_id:icon_id` value as computed
+    // properties, so that consumers expecting the standard `{pack_id, icon_id}`
+    // object shape can read them directly. Storage is unchanged: both are
+    // derived from `target_id`.
+    // @see \Drupal\ui_icons_field\TypedData\IconIdPart
+    $properties['pack_id'] = DataDefinition::create('string')
+      ->setLabel(new TranslatableMarkup('Icon pack ID'))
+      ->setComputed(TRUE)
+      ->setInternal(FALSE)
+      ->setClass(IconIdPart::class);
+
+    $properties['icon_id'] = DataDefinition::create('string')
+      ->setLabel(new TranslatableMarkup('Icon ID within the pack'))
+      ->setComputed(TRUE)
+      ->setInternal(FALSE)
+      ->setClass(IconIdPart::class);
+
     // The icon pack's extractor settings (width, size, title, …, as declared by
     // the pack in its `*.icons.yml`), keyed by icon pack — the structure the
     // form element emits and `ui_icons.icon_value` config schema types.
@@ -107,17 +122,49 @@ class IconType extends FieldItemBase {
       ->setLabel(new TranslatableMarkup('Icon settings, keyed by icon pack'))
       ->setInternal(FALSE);
 
+    // The settings that actually apply to this item's icon: the entry for its
+    // own pack, unwrapped. This is the `settings` member of the standard
+    // `{pack_id, icon_id, settings}` icon shape.
+    // @see \Drupal\ui_icons_field\TypedData\ResolvedIconSettings
+    $properties['resolved_settings'] = MapDataDefinition::create()
+      ->setLabel(new TranslatableMarkup('Icon settings for this icon'))
+      ->setComputed(TRUE)
+      ->setInternal(FALSE)
+      ->setClass(ResolvedIconSettings::class);
+
     return $properties;
   }
 
   /**
    * {@inheritdoc}
+   *
+   * Accepts the icon as the standard `{pack_id, icon_id}` object in addition to
+   * the stored `target_id` string, so that anything speaking the standard icon
+   * shape — SDC props, the Render API, Drupal Canvas — can write to this field
+   * without first having to know about the `pack_id:icon_id` concatenation.
+   *
+   * @see \Drupal\ui_icons_field\TypedData\IconIdPart
    */
   public function setValue($values, $notify = TRUE): void {
     // Settings are stored keyed by icon pack, as `icon_autocomplete` submits
-    // them and `ui_icons.icon_value` config schema types them.
+    // them and `ui_icons.icon_value` config schema types them. The standard
+    // icon shape carries its own pack's settings, flat. The input shape tells
+    // which one arrives, never the installed packs: settings of a pack missing
+    // on load or import would otherwise get keyed a second time.
     // @see \Drupal\ui_icons\Element\IconAutocomplete::buildValue()
-    if (is_array($values) && isset($values['target_id']) && !empty($values['settings']) && is_array($values['settings'])) {
+    // @see \Drupal\ui_icons_field\TypedData\ResolvedIconSettings
+    $has_settings = is_array($values) && !empty($values['settings']) && is_array($values['settings']);
+    if (is_array($values) && !isset($values['target_id'])) {
+      $pack_id = $values['pack_id'] ?? NULL;
+      $icon_id = $values['icon_id'] ?? NULL;
+      if (is_string($pack_id) && $pack_id !== '' && is_string($icon_id) && $icon_id !== '') {
+        $values['target_id'] = IconDefinition::createIconId($pack_id, $icon_id);
+        if ($has_settings) {
+          $values['settings'] = [$pack_id => $values['settings']];
+        }
+      }
+    }
+    elseif ($has_settings) {
       $pack_id = IconDefinition::getIconDataFromId($values['target_id'])['pack_id'] ?? NULL;
       if ($pack_id !== NULL) {
         // Keep only the settings that belong to this item's own icon.

@@ -105,6 +105,8 @@ class MissingIconPackTest extends KernelTestBase {
 
     $entity = EntityTest::load($entity->id());
     $this->assertSame($settings, $entity->icon->settings);
+    // No pack declares them, so none apply.
+    $this->assertSame([], $entity->icon->resolved_settings);
   }
 
   /**

@@ -15,7 +15,8 @@ use Drupal\Core\Field\FieldStorageDefinitionInterface;
  * Adds the `settings` column to every `ui_icon` field.
  *
  * The `ui_icon` field type gained a serialized `settings` column so that an
- * icon can carry its pack's extractor settings.
+ * icon can carry its pack's extractor settings, completing the standard
+ * `{pack_id, icon_id, settings}` icon shape.
  *
  * The columns are changed directly rather than through
  * EntityDefinitionUpdateManager: it refuses a schema change on a field with

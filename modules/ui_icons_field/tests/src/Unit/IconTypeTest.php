@@ -64,6 +64,15 @@ class IconTypeTest extends UnitTestCase {
 
     $this->assertSame('string', $properties['target_id']->getDataType());
     $this->assertSame('map', $properties['settings']->getDataType());
+
+    // The standard `{pack_id, icon_id, settings}` icon shape, computed from the
+    // stored `target_id` and pack-keyed `settings`.
+    foreach (['pack_id', 'icon_id', 'resolved_settings'] as $computed) {
+      $this->assertTrue($properties[$computed]->isComputed(), "$computed is computed");
+    }
+    $this->assertSame('string', $properties['pack_id']->getDataType());
+    $this->assertSame('string', $properties['icon_id']->getDataType());
+    $this->assertSame('map', $properties['resolved_settings']->getDataType());
   }
 
   /**

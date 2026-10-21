@@ -9,8 +9,6 @@ parameters:
       - */node_modules/*
       - */vendor/*
       - */tests/*
-      # Depends on the canvas module, not in require-dev.
-      - */ui_icons_canvas/src/Hook/UiIconsCanvasHooks.php
   fileExtensions:
     - php
     - module

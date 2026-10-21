@@ -1,0 +1,6 @@
+name: 'UI Icons Canvas test'
+type: module
+description: 'Provides SDCs with icon props, to test Drupal Canvas shape matching.'
+package: Testing
+dependencies:
+  - ui_icons:ui_icons

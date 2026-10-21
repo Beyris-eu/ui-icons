@@ -377,19 +377,34 @@ Enable the submodule `UI Icons Canvas` to edit icons in
 [Drupal Canvas](https://www.drupal.org/project/canvas). It requires Canvas and
 `UI Icons Fields`.
 
-A component string prop marked `x-canvas-prop: ui-icon` is edited with the
-`Icon` widget and stored as an Icon field value. The component receives the
-icon full id, `pack_id:icon_id`, without icon settings.
+A component prop with the standard icon shape, an object with `pack_id` and
+`icon_id` strings, is edited with the `Icon` widget and stored as an Icon field
+value. Declare the optional `settings` object to let editors set the icon pack
+settings too: the component receives the settings of the picked icon's pack.
 
 ```yaml
 props:
   type: object
   properties:
     icon:
-      type: string
+      type: object
       title: 'Icon'
-      x-canvas-prop: ui-icon
+      properties:
+        pack_id:
+          type: string
+        icon_id:
+          type: string
+        settings:
+          type: object
 ```
+
+An object with any other member is not an icon prop, Canvas reports it as
+unsupported.
+
+!!! warning "Breaking change"
+
+    The `x-canvas-prop: ui-icon` string prop of 2.0.0 and 2.0.1 is no longer
+    supported. Switch such props to the object shape above.
 
 ## Maintainers
 

@@ -1,0 +1,22 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/HEAD/core/assets/schemas/v1/metadata.schema.json
+name: 'Icon shape with a string settings member'
+status: stable
+props:
+  type: object
+  properties:
+    icon:
+      title: Icon
+      type: object
+      required:
+        - pack_id
+        - icon_id
+      properties:
+        pack_id:
+          type: string
+        icon_id:
+          type: string
+        settings:
+          type: string
+      examples:
+        - pack_id: test_path
+          icon_id: foo

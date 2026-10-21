@@ -112,9 +112,9 @@ the module's require-dev installed: without `linkit`, `link_attributes` and
 `field_sample_value` you get bogus `class.notFound` errors from the field
 submodules.
 
-`phpstan.neon` excludes the file depending on canvas, which is *not* in
-require-dev. If you add a file depending on contrib outside require-dev, add it
-there too.
+`phpstan.neon` excludes no file depending on contrib: canvas and ui_patterns
+are in require-dev. If you add a file depending on contrib outside
+require-dev, exclude it there.
 
 `.phpmd.baseline.xml` holds exactly two entries, `CouplingBetweenObjects` on
 `IconEmbed` and `IconAutocomplete`. Both are inherent to what those classes are
