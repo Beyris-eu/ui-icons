@@ -65,7 +65,7 @@ variables:
 cspell:
   allow_failure: true
   variables:
-    _CSPELL_IGNORE_PATHS: '**/translations/, **/composer.json, *.po, **/build/icon.js, *.neon, **/env.dist, **/*.patch, **/tests/src/Playwright, **/tests/**/*.yml, mkdocs.yml, CHANGELOG.md, CLAUDE.md'
+    _CSPELL_IGNORE_PATHS: '**/translations/, **/composer.json, *.po, **/build/icon.js, *.neon, **/env.dist, **/*.patch, **/tests/src/Playwright, **/tests/**/*.yml, mkdocs.yml, CHANGELOG.md, AGENTS.md'
 
 ## PHPMD job in Drupal CI ##
 

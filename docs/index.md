@@ -26,13 +26,11 @@ for further information.
     the empty backport and Iconify submodules: when upgrading from 1.1.x, run
     the database updates, `ui_icons_update_11201` removes them.
 
-    The **1.0.x** branch is for **Drupal 10.4 to 11.0** and include a backport
-    of Drupal core Icon API.  
-    This branch will be **minimally** maintained.
+    The **1.1.x** branch, for **Drupal 11.1+**, is **deprecated**. Upgrade to
+    2.0.x.
 
-    The **1.1.x** branch is for **Drupal 11.1+** and upgrade from previous
-    version.  
-    This branch include empty backport and Iconify sub modules to be removed.
+    The **1.0.x** branch, for **Drupal 10.4 to 11.0**, is **no longer
+    maintained**.
 
 ## Usage
 
@@ -399,7 +397,6 @@ Current maintainers:
 
 - Jean Valverde - [mogtofu33](https://www.drupal.org/u/mogtofu33)
 - Pierre Dureau - [pdureau](https://www.drupal.org/user/1903334)
-- Florent Torregrosa - [Grimreaper](https://www.drupal.org/user/2388214)
 
 Supporting organizations:
 

@@ -18,7 +18,6 @@ See [online documentation](https://project.pages.drupalcode.org/ui_icons) or loc
 Current maintainers:
 
 - Jean Valverde - [mogtofu33](https://www.drupal.org/u/mogtofu33)
-- Florent Torregrosa - [Grimreaper](https://www.drupal.org/user/2388214)
 - Pierre Dureau - [pdureau](https://www.drupal.org/user/1903334)
 
 Supporting organizations:
