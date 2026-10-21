@@ -26,8 +26,11 @@ for further information.
     the empty backport and Iconify submodules: when upgrading from 1.1.x, run
     the database updates, `ui_icons_update_11201` removes them.
 
-    The **1.1.x** branch, for **Drupal 11.1+**, is **deprecated**. Upgrade to
-    2.1.x.
+    The **2.0.x** branch is **no longer supported**. Update to 2.1.x, it has
+    the same requirements.
+
+    The **1.1.x** branch, for **Drupal 11.1+**, is **deprecated** and gets
+    security fixes only, until **January 31, 2027**. Upgrade to 2.1.x.
 
     The **1.0.x** branch, for **Drupal 10.4 to 11.0**, is **no longer
     maintained**.
