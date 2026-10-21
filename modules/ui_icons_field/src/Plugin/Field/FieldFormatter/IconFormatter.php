@@ -13,6 +13,7 @@ use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\Core\Theme\Icon\Plugin\IconPackManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\ui_icons\IconSettings;
 use Drupal\ui_icons_field\IconFieldHelpers;
 
 /**
@@ -134,7 +135,12 @@ class IconFormatter extends FormatterBase implements ContainerFactoryPluginInter
         $formatter_settings = $item_settings + $formatter_settings;
       }
 
-      $elements[$delta] = IconDefinition::getRenderable($icon_full_id, $formatter_settings);
+      $element = IconDefinition::getRenderable($icon_full_id, $formatter_settings);
+      if ($element !== NULL) {
+        // Stored values can come from REST or JSON:API, not only the widget.
+        $element['#settings'] = IconSettings::filter($icon_full_id, $element['#settings']);
+      }
+      $elements[$delta] = $element;
     }
 
     return $elements;
