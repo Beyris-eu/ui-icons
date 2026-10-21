@@ -356,7 +356,7 @@ class IconAutocompleteUnitTest extends UnitTestCase {
             'icon_id' => 'foo:baz',
             'icon_settings' => [
               'foo' => [
-                'settings_1' => [],
+                'settings_1' => 'bar',
               ],
             ],
           ],
@@ -394,6 +394,9 @@ class IconAutocompleteUnitTest extends UnitTestCase {
     $ui_icon_pack_plugin_manager->method('getIcon')
       ->with($icon->getId())
       ->willReturn($icon);
+    $ui_icon_pack_plugin_manager->method('getDefinition')
+      ->with($pack_id)
+      ->willReturn(['settings' => ['settings_1' => []]]);
     $this->container->set('plugin.manager.icon_pack', $ui_icon_pack_plugin_manager);
 
     $form_state = $this->createMock('Drupal\Core\Form\FormState');

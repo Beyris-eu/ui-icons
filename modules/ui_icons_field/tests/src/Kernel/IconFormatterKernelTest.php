@@ -74,6 +74,7 @@ class IconFormatterKernelTest extends KernelTestBase {
       'item settings win' => [TRUE, ['test_settings' => ['width' => 64]], ['width' => 64]],
       'no item settings' => [TRUE, [], ['width' => 32]],
       'item settings not allowed' => [FALSE, ['test_settings' => ['width' => 64]], ['width' => 32]],
+      'undeclared item settings dropped' => [TRUE, ['test_settings' => ['width' => 64, 'foo' => 'bar']], ['width' => 64]],
     ];
   }
 
