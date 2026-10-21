@@ -72,6 +72,9 @@ protect_breaking_commits = false
 # Assigns commits to groups.
 # Optionally sets the commit's scope and can decide to exclude commits from further processing.
 commit_parsers = [
+    # The 2.0.2 merge, squashed under the title of its last commit. Its
+    # fixes are listed under 2.0.2.
+    { sha = "1afff115f210d12c285e376332d52446138485f2", skip = true },
     { message = "^feat", group = "<!-- 0 -->🚀 Features" },
     { message = "^fix", group = "<!-- 1 -->🐛 Bug Fixes" },
     { message = "^#([0-9]+) fix", group = "<!-- 1 -->🐛 Bug Fixes" },

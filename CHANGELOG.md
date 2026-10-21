@@ -1,3 +1,62 @@
+## [2.1.0] - 2026-10-21
+
+### 🚀 Features
+
+- [#3511794](https://www.drupal.org/project/ui_icons/issues/3511794) Render the icon library with the front theme
+- [#3591899](https://www.drupal.org/project/ui_icons/issues/3591899) Suggest icons as a grid in the icon sources
+- [#3591884](https://www.drupal.org/project/ui_icons/issues/3591884) feature: ui_icons_menu: allow configuring icon selector and allowed icon packs
+- [#3471992](https://www.drupal.org/project/ui_icons/issues/3471992) Plugins must add dependencies to config entities
+- [#3591908](https://www.drupal.org/project/ui_icons/issues/3591908) Store icon settings per value in ui_icon fields
+- Add an in-place icon popover selector with groups
+- Make the icon source selector configurable, default to the popover
+- [#3503792](https://www.drupal.org/project/ui_icons/issues/3503792) Allow removal of span drupal-icon when rendering an icon in RTE
+
+### 🐛 Bug Fixes
+
+- [#3591900](https://www.drupal.org/project/ui_icons/issues/3591900) Automated Drupal 12 compatibility fixes for ui_icons 2.0.x-dev
+- [#3591887](https://www.drupal.org/project/ui_icons/issues/3591887) Disable form submit while the icon autocomplete's own ajax request is still in flight
+- [#3489864](https://www.drupal.org/project/ui_icons/issues/3489864) Do not render icons from packs the text format does not allow
+- [#3591902](https://www.drupal.org/project/ui_icons/issues/3591902) Port 3591901 for 2.x
+- [#3591899](https://www.drupal.org/project/ui_icons/issues/3591899) Display Builder compatibility: selector grid overflow
+- [#3591905](https://www.drupal.org/project/ui_icons/issues/3591905) Improve the icon autocomplete and picker usability and performance
+- [#3482151](https://www.drupal.org/project/ui_icons/issues/3482151) Menu: support non content menu links
+- Add a Field Sample Value generator for link fields with an icon
+- [#3591912](https://www.drupal.org/project/ui_icons/issues/3591912) Cannot clone to a windows file system due to filename with special characters
+
+### 💼 Other
+
+- [#3591897](https://www.drupal.org/project/ui_icons/issues/3591897) Icon settings dialog grows past the viewport, items are not reachable
+- [#3538728](https://www.drupal.org/project/ui_icons/issues/3538728) Missing icon source label with summary
+- [#3591895](https://www.drupal.org/project/ui_icons/issues/3591895) picker.js opens scrolled when there is not enough space
+- [#3477019](https://www.drupal.org/project/ui_icons/issues/3477019) IconPicker focus
+- [#3489858](https://www.drupal.org/project/ui_icons/issues/3489858) Media autocomplete error when not path extractor
+- [#3530859](https://www.drupal.org/project/ui_icons/issues/3530859) Don't show icon source if no icons
+- [#3591903](https://www.drupal.org/project/ui_icons/issues/3591903) Icon picker: typing in “Filter by name” loses cursor position after the auto-search
+- [#3591904](https://www.drupal.org/project/ui_icons/issues/3591904) integration bugs and slow icon searches found in a module review
+- Merge branch '3591908-update-test-revisionable' into 2.0.x
+
+### 📚 Documentation
+
+- Update docs and agents rules
+- Link the help page to the documentation site and exclude dev files from packages
+- Point the branch references at 2.1.x
+
+### 🧪 Testing
+
+- [#3493153](https://www.drupal.org/project/ui_icons/issues/3493153) Save formatter settings through Field UI and complete the test pack schema
+- [#3591906](https://www.drupal.org/project/ui_icons/issues/3591906) Add missing test coverage and update the documentation to 2.0.x
+- [#3591908](https://www.drupal.org/project/ui_icons/issues/3591908) Cover the settings column update on revisionable entities
+## [2.0.2] - 2026-10-20
+
+### 🐛 Bug Fixes
+
+- Accept only scalar icon settings
+- Keep only the icon settings a pack declares
+- Escape the missing icon id in the CKEditor preview
+
+### 🧪 Testing
+
+- Declare the setting in the icon validation test
 ## [2.0.1] - 2026-09-07
 
 ### 🚀 Features
