@@ -1,0 +1,26 @@
+# Exclude files from archive. Those files are not required to build a package.
+/docs                                                  export-ignore
+/tests/src/Playwright                                  export-ignore
+/modules/ui_icons_ckeditor5/js/ckeditor5_plugins       export-ignore
+/modules/ui_icons_ckeditor5/.gitignore                 export-ignore
+/modules/ui_icons_ckeditor5/package.json               export-ignore
+/modules/ui_icons_ckeditor5/webpack.config.js          export-ignore
+/.cspell-project-words.txt                             export-ignore
+/.env.dist                                             export-ignore
+/.eslintignore                                         export-ignore
+/.gitattributes                                        export-ignore
+/.gitignore                                            export-ignore
+/.gitlab-ci.yml                                        export-ignore
+/.php-cs-fixer.php                                     export-ignore
+/.phpcs.xml                                            export-ignore
+/.phpmd.baseline.xml                                   export-ignore
+/.phpmd.xml                                            export-ignore
+/.prettierignore                                       export-ignore
+/AGENTS.md                                             export-ignore
+/cliff.toml                                            export-ignore
+/mkdocs.yml                                            export-ignore
+/package.json                                          export-ignore
+/package-lock.json                                     export-ignore
+/phpstan.neon                                          export-ignore
+/playwright.config.ts                                  export-ignore
+/playwright.local.config.ts                            export-ignore

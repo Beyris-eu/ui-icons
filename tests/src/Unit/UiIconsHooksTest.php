@@ -68,8 +68,10 @@ class UiIconsHooksTest extends UnitTestCase {
   public function testHelp(): void {
     $route_match = $this->createMock('Drupal\Core\Routing\RouteMatchInterface');
 
-    $help = $this->hooks()->help('help.page.ui_icons', $route_match);
-    $this->assertStringContainsString('UI Icons', (string) $help);
+    $help = (string) $this->hooks()->help('help.page.ui_icons', $route_match);
+    $this->assertStringContainsString('href="https://project.pages.drupalcode.org/ui_icons"', $help);
+    $this->assertStringContainsString('href="https://project.pages.drupalcode.org/ui_icons/#field-ui"', $help);
+    $this->assertStringNotContainsString('README.md', $help);
 
     $this->assertNull($this->hooks()->help('help.page.node', $route_match));
   }

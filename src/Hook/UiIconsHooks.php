@@ -30,6 +30,11 @@ class UiIconsHooks {
     'ui_suite_dsfr' => 'ui_icons/ui_icons.dsfr_autocomplete',
   ];
 
+  /**
+   * The documentation site, built from docs/.
+   */
+  private const DOCS = 'https://project.pages.drupalcode.org/ui_icons';
+
   public function __construct(
     protected readonly ThemeManagerInterface $themeManager,
     protected readonly IconPackManagerInterface $iconPackManager,
@@ -90,21 +95,60 @@ class UiIconsHooks {
    */
   #[Hook('help')]
   public function help(string $route_name, RouteMatchInterface $route_match): ?string {
-    switch ($route_name) {
-      case 'help.page.ui_icons':
-        $output = '<h2>' . $this->t('About') . '</h2>';
-        $output .= '<p>' . $this->t('UI Icons is a module that aims to simplify the front-end management of icons. For more information, see the <a href=":docs">online documentation for the UI Icons module</a>.', [
-          ':docs' => 'https://git.drupalcode.org/project/ui_icons/-/blob/1.0.x/README.md',
-        ]) . '</p>';
-        $output .= '<dl>';
-        $output .= '<dt>' . $this->t('General') . '</dt>';
-        $output .= '<dd>' . $this->t('<a href=":docs">UI Icons</a> allow the declaration of icons in a Yaml file to be used globally on your website. The format allow to integrate many source provider for your icons and expose them in all Drupal display tools.', [
-          ':docs' => 'https://git.drupalcode.org/project/ui_icons/-/blob/1.0.x/README.md',
-        ]) . '</dd>';
-        $output .= '</dl>';
-        return $output;
+    if ('help.page.ui_icons' !== $route_name) {
+      return NULL;
     }
-    return NULL;
+    // Keyed by the anchor of the matching section on the documentation site.
+    $uses = [
+      'field-ui' => [
+        $this->t('Fields'),
+        $this->t('UI Icons Fields adds an icon field type, and icons on link fields.'),
+      ],
+      'menu' => [
+        $this->t('Menu links'),
+        $this->t('UI Icons for Menu adds an icon to menu links.'),
+      ],
+      'ckeditor5' => [
+        $this->t('Formatted text'),
+        $this->t('UI Icons for CKEditor 5 adds icons in the editor, UI Icons Text renders them with a text filter.'),
+      ],
+      'media' => [
+        $this->t('Media'),
+        $this->t('UI Icons Media provides an icon media source.'),
+      ],
+      'icon-selector' => [
+        $this->t('Icon selectors'),
+        $this->t('UI Icons Picker adds a modal grid of icons, UI Icons Popover an in-place popover with groups.'),
+      ],
+      'icon-library' => [
+        $this->t('Icon library'),
+        $this->t('UI Icons Library adds pages to browse the icons of every icon pack.'),
+      ],
+      'web-font-extractor' => [
+        $this->t('Web fonts'),
+        $this->t('UI Icons Web fonts adds an extractor for icon packs built on a web font.'),
+      ],
+      'ui-patterns' => [
+        $this->t('UI Patterns'),
+        $this->t('UI Icons for UI Patterns adds an icon prop type and icon sources for components.'),
+      ],
+      'drupal-canvas' => [
+        $this->t('Drupal Canvas'),
+        $this->t('UI Icons Canvas edits component icon props in Drupal Canvas.'),
+      ],
+    ];
+    $output = '<h2>' . $this->t('About') . '</h2>';
+    $output .= '<p>' . $this->t('UI Icons adds icon selectors and integrations on top of the Drupal core Icon API. Modules and themes declare their icon packs in a <code>*.icons.yml</code> file. For more information, see the <a href=":docs">online documentation for the UI Icons module</a>.', [
+      ':docs' => self::DOCS,
+    ]) . '</p>';
+    $output .= '<h2>' . $this->t('Uses') . '</h2>';
+    $output .= '<dl>';
+    foreach ($uses as $anchor => [$title, $description]) {
+      $output .= '<dt><a href="' . self::DOCS . '/#' . $anchor . '">' . $title . '</a></dt>';
+      $output .= '<dd>' . $description . '</dd>';
+    }
+    $output .= '</dl>';
+    return $output;
   }
 
   /**
