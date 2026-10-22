@@ -1,4 +1,4 @@
-## [2.1.0] - 2026-10-21
+## [2.1.0] - 2026-10-22
 
 ### 🚀 Features
 
@@ -22,6 +22,7 @@
 - [#3482151](https://www.drupal.org/project/ui_icons/issues/3482151) Menu: support non content menu links
 - Add a Field Sample Value generator for link fields with an icon
 - [#3591912](https://www.drupal.org/project/ui_icons/issues/3591912) Cannot clone to a windows file system due to filename with special characters
+- [**breaking**] [#3591894](https://www.drupal.org/project/ui_icons/issues/3591894) Use the standard icon prop shape in Drupal Canvas
 
 ### 💼 Other
 
@@ -40,6 +41,7 @@
 - Update docs and agents rules
 - Link the help page to the documentation site and exclude dev files from packages
 - Point the branch references at 2.1.x
+- Mark 2.0.x unsupported and set the 1.1.x end of support
 
 ### 🧪 Testing
 
