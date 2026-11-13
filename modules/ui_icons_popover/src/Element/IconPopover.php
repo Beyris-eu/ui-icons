@@ -59,8 +59,21 @@ class IconPopover extends IconAutocomplete {
     unset($element['icon_id']['#autocomplete_query_parameters']);
     $element['icon_id']['#description'] = new TranslatableMarkup('Enter the icon id as pack_id:icon_id.');
 
+    $element['icon_id']['#attributes']['data-icon-popover'] = 'true';
+    self::setPopoverAttributes($element);
+
+    return $element;
+  }
+
+  /**
+   * Puts the data js/icon.popover.js opens the popover with on the input.
+   *
+   * @param array $element
+   *   An 'icon_popover' or 'icon_autocomplete' element, with its icon_id
+   *   input.
+   */
+  public static function setPopoverAttributes(array &$element): void {
     $attributes = &$element['icon_id']['#attributes'];
-    $attributes['data-icon-popover'] = 'true';
     $attributes['data-index-url'] = Url::fromRoute('ui_icons_popover.index')->toString();
     $attributes['data-previews-url'] = Url::fromRoute('ui_icons_popover.previews')->toString();
     if (!empty($element['#allowed_icon_pack'])) {
@@ -80,8 +93,6 @@ class IconPopover extends IconAutocomplete {
         $element['icon_id']['#attached']['library'][] = $definition['library'];
       }
     }
-
-    return $element;
   }
 
 }
