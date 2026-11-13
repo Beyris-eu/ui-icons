@@ -276,9 +276,9 @@ the grid, Enter or Space picks the icon.
 Enabling the picker also makes the preview box of the default
 `icon_autocomplete` selector clickable, opening the same grid of icons. Both
 ways of choosing then work on the one element: type a name to search, or click
-the preview to browse. With `UI Icons Popover` enabled too, the preview opens
-the popover instead, which wins over the picker. Set `#show_picker` to `FALSE`
-on the element to keep a plain autocomplete with either module.
+the preview to browse. With `UI Icons Popover` enabled, the preview opens the
+popover instead of the picker modal. Set `#show_picker` to `FALSE` on the
+element to keep a plain autocomplete with either module.
 
 Both elements accept these properties:
 
