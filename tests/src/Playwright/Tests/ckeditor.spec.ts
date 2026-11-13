@@ -331,7 +331,10 @@ test('Edit an icon in place from the widget toolbar', { tag: [ '@base' ] }, asyn
   })
 })
 
-test('Pick an icon from the library opened inside the icon dialog', { tag: [ '@base' ] }, async ({ page }) => {
+test('Pick an icon from the library opened inside the icon dialog', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  // The popover takes the preview box over from the picker, and the setup
+  // installs both.
+  await drupal.drush(`php:eval "\\Drupal::service('module_installer')->uninstall(['ui_icons_popover']);"`)
   const iconId = `${PACK_ID}:foo`
   const modal = page.locator('#drupal-modal')
 
