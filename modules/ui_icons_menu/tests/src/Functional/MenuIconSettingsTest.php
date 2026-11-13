@@ -73,6 +73,8 @@ class MenuIconSettingsTest extends BrowserTestBase {
     // The menu overview renders its links through ::linkAlter().
     $this->drupalGet('admin/structure/menu/manage/tools');
     $this->assertSession()->elementExists('css', 'img.icon-foo[src$="foo.png"]');
+    // Rarely changed, so kept closed below the links even once saved.
+    $this->assertSession()->elementExists('css', '#menu-overview ~ details[data-drupal-selector="edit-ui-icons-menu"]:not([open])');
 
     $this->drupalGet('admin/structure/menu/manage/footer');
     $this->assertSession()->elementTextContains('css', 'details[data-drupal-selector="edit-ui-icons-menu"] > summary', 'Icons settings');

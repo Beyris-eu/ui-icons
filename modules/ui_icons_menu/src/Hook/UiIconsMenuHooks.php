@@ -103,8 +103,7 @@ class UiIconsMenuHooks {
     if (!$menu instanceof MenuInterface) {
       return;
     }
-    $own_settings = $menu->getThirdPartySettings('ui_icons_menu');
-    $settings = $own_settings + self::DEFAULT_SETTINGS;
+    $settings = $menu->getThirdPartySettings('ui_icons_menu') + self::DEFAULT_SETTINGS;
 
     $selectors = ['icon_autocomplete' => $this->t('Autocomplete')];
     if ($this->moduleHandler->moduleExists('ui_icons_picker')) {
@@ -119,8 +118,8 @@ class UiIconsMenuHooks {
       '#type' => 'details',
       '#title' => $this->t('Icons settings'),
       '#description' => $this->t('How icons are selected on the links of this menu.'),
-      '#open' => $own_settings !== [],
       '#tree' => TRUE,
+      '#weight' => 10,
     ];
     $element['icon_selector'] = [
       '#type' => 'select',
