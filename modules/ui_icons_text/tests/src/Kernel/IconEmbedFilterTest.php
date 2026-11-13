@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\ui_icons_text\Kernel;
 
+use Drupal\Core\Form\FormState;
 use Drupal\Core\Theme\Icon\IconDefinition;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\ui_icons_text\Plugin\Filter\IconEmbed;
@@ -256,6 +257,19 @@ class IconEmbedFilterTest extends KernelTestBase {
     $processed = $this->filter->process($html, 'en')->getProcessedText();
 
     $this->assertSame('<p><span class="drupal-icon"></span></p>', $processed);
+  }
+
+  /**
+   * Tests the selector list offers only the selectors the site provides.
+   *
+   * A selector saved without its module falls back to the autocomplete in the
+   * icon dialog, so offering one the site lacks saves a choice that is ignored.
+   */
+  public function testSelectorFormatWithoutPicker(): void {
+    $this->filter->setConfiguration(['settings' => ['allowed_icon_pack' => []]]);
+    $form = $this->filter->settingsForm([], new FormState());
+
+    $this->assertSame(['icon_autocomplete'], array_keys($form['selector_format']['#options']));
   }
 
 }
