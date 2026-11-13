@@ -6,6 +6,16 @@ include:
       - "/includes/include.drupalci.variables.yml"
       - "/includes/include.drupalci.workflows.yml"
 
+# The Drupal CI templates declare only build, validate and test, so a job in a
+# `report` stage would fail the pipeline at parse time. Redeclare the upstream
+# list and append the stage the Playwright shard merge job needs.
+# @see https://git.drupalcode.org/project/gitlab_templates/-/blob/main/includes/include.drupalci.main.yml
+stages:
+  - build
+  - validate
+  - test
+  - report
+
 variables:
   _PHPUNIT_CONCURRENT: '1'
   _PHPUNIT_TESTGROUPS: 'ui_icons'
@@ -32,10 +42,39 @@ variables:
     value: 'base'
     description: "The tag to use for E2E tests. Defaults to 'base'."
   PLAYWRIGHT_TEST_WORKERS:
-    value: '4'
+    # Each worker installs its own Drupal site (the DrupalSite fixture is
+    # worker scoped), so this multiplies with `parallel:` on the shards. Keep
+    # it low now that the shards carry the parallelism.
+    value: '2'
     description: 'Number of workers for Playwright job.'
+  # Database for the E2E jobs only - phpunit keeps the Drupal CI default, which
+  # despite what its own description says is MySQL 8, not MariaDB
+  # (`_TARGET_DB_TYPE: $MYSQL_PERCONA_MARIADB` -> 'mysql').
+  # SQLite drops the per-query TCP hop to the service container, which should
+  # help since these jobs are dominated by site installs. The catch is that
+  # `.simpletest-db` hands every worker the same file,
+  # `sites/default/files/db.sqlite`, isolated only by the test-site table
+  # prefix, so the two workers of a shard serialize on one write lock. If that
+  # bites, it shows up as "database is locked" during install, not in a test.
+  # Set back to mysql / 8 to revert.
+  # @see https://git.drupalcode.org/project/gitlab_templates/-/blob/main/includes/include.drupalci.main.yml#L285
+  _E2E_DB_TYPE:
+    value: 'sqlite'
+    description: 'Database for the E2E jobs: sqlite or mysql.'
+  _E2E_DB_VERSION:
+    value: '3'
+    description: 'Database version for the E2E jobs: 3 for sqlite, 8 for mysql.'
   CI_MAIN_PROJECT_NAME: ui_icons
   KUBERNETES_CPU_REQUEST: 16
+  # Test image, @see https://github.com/DevDrupal33/playwright-drupal-tests
+  # What CI takes from it is the Playwright browsers baked at
+  # PLAYWRIGHT_BROWSERS_PATH, and those are tied to the Playwright version in
+  # package-lock.json. `main` moves on every rebuild, which can shift the browser
+  # revisions out from under the lock and make every shard re-download them, so
+  # pin the digest and bump it together with @playwright/test.
+  # Read the digest of a tag with:
+  #   docker buildx imagetools inspect ghcr.io/devdrupal33/playwright-drupal-tests:main
+  _TEST_IMAGE: 'ghcr.io/devdrupal33/playwright-drupal-tests@sha256:5e3da8819979d7e6188469c8135ddc668657fe6f663e04a3ec585dfc45638db0'
 
 .manual-rule: &manual-rule
   - when: manual
@@ -62,6 +101,74 @@ variables:
       - modules/**/config
     when: on_success
 
+composer-lint:
+  allow_failure: false
+  rules:
+    - !reference [.skip-composer-lint-rule]
+    - *is-push-rule
+    - *php-files-change-rule
+    - changes:
+        - composer.json
+      when: on_success
+    - *manual-rule
+
+phpcs:
+  allow_failure: false
+  rules:
+    - !reference [.skip-phpcs-rule]
+    - *is-push-rule
+    - *php-files-change-rule
+    # Also run whenever we catch up to the upstream PHPCS rules.
+    - changes:
+        - .phpcs.xml
+      when: on_success
+    - *manual-rule
+
+phpstan:
+  allow_failure: false
+  rules:
+    - !reference [.skip-phpstan-rule]
+    - *is-push-rule
+    - *php-files-change-rule
+    - *manual-rule
+
+phpunit:
+  allow_failure: false
+  variables:
+    _PHPUNIT_EXTRA: ''
+  rules:
+    - !reference [.skip-phpunit-rule]
+    - *is-push-rule
+    - *php-files-change-rule
+    - *module-config-files-change-rule
+    - *manual-rule
+
+eslint:
+  allow_failure: false
+  before_script:
+    - rm -rf tests/src/Playwright
+  # @todo remove when https://www.drupal.org/project/gitlab_templates/issues/3452183
+  rules:
+    - !reference [.skip-eslint-rule]
+    - *is-push-rule
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.js"
+        - "**/*.yml"
+    - *manual-rule
+
+stylelint:
+  allow_failure: false
+  before_script:
+    - rm -rf tests/src/Playwright
+  rules:
+    - !reference [.skip-stylelint-rule]
+    - *is-push-rule
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.css"
+    - *manual-rule
+
 cspell:
   allow_failure: true
   variables:
@@ -84,8 +191,8 @@ cspell:
     - php --version
     - vendor/bin/phpmd --version
     - |
-      BASELINE_FILE="${_WEB_ROOT}/modules/custom/${CI_PROJECT_NAME}/.phpmd.baseline.xml"
-      PHPMD_CONFIG="${_WEB_ROOT}/modules/custom/${CI_PROJECT_NAME}/.phpmd.xml"
+      BASELINE_FILE="${_WEB_ROOT}/modules/custom/${CI_MAIN_PROJECT_NAME}/.phpmd.baseline.xml"
+      PHPMD_CONFIG="${_WEB_ROOT}/modules/custom/${CI_MAIN_PROJECT_NAME}/.phpmd.xml"
       if [ -f "$BASELINE_FILE" ]; then
         sed -i "s#/builds/project/${CI_MAIN_PROJECT_NAME}#${CI_PROJECT_DIR}#g" "$BASELINE_FILE"
       fi
@@ -94,8 +201,8 @@ cspell:
         if [ -f "$BASELINE_FILE" ]; then
           BASELINE_ARG="--baseline-file $BASELINE_FILE"
         fi
-        vendor/bin/phpmd "${_WEB_ROOT}/modules/custom/${CI_PROJECT_NAME}" gitlab "$PHPMD_CONFIG" --exclude 'tests/*,**/tests/*' $BASELINE_ARG > phpmd-quality-report.json || true
-        vendor/bin/phpmd "${_WEB_ROOT}/modules/custom/${CI_PROJECT_NAME}" text "$PHPMD_CONFIG" --exclude 'tests/*,**/tests/*' $BASELINE_ARG
+        vendor/bin/phpmd "${_WEB_ROOT}/modules/custom/${CI_MAIN_PROJECT_NAME}" gitlab "$PHPMD_CONFIG" --exclude 'tests/*,**/tests/*' $BASELINE_ARG > phpmd-quality-report.json || true
+        vendor/bin/phpmd "${_WEB_ROOT}/modules/custom/${CI_MAIN_PROJECT_NAME}" text "$PHPMD_CONFIG" --exclude 'tests/*,**/tests/*' $BASELINE_ARG
       else
         echo "[Notice] File .phpmd.xml not found at ${PHPMD_CONFIG}, skipping phpmd."
       fi
@@ -133,8 +240,7 @@ phpmd:
     when: on_success
 
 .playwright-base:
-  # @see https://github.com/devdrupal33/display_builder_test
-  image: ghcr.io/devdrupal33/display_builder_test:main
+  image: $_TEST_IMAGE
   extends: .test-variables
   stage: test
   needs: [composer]
@@ -144,7 +250,19 @@ phpmd:
     - *skip-e2e-tests-rule
     - *playwright-tests-exist-rule
     - *manual-rule
+  # Each worker installs its own Drupal site, so a shard pays two installs
+  # whatever it runs. Splitting ~20 tests four ways spends more on installing
+  # than on testing; two shards keep the ratio sane.
+  parallel: 2
   variables:
+    # Scoped here rather than globally so only the E2E jobs move: `.with-database`
+    # interpolates both into the service image name, and `.simpletest-db` reads
+    # the type to build SIMPLETEST_DB. The service container still starts on
+    # SQLite - there is a real `sqlite-3:production` image and it is a no-op -
+    # so its boot time stays in the measurement. Drop the `services:` below too
+    # if SQLite wins and the number is worth chasing.
+    _TARGET_DB_TYPE: $_E2E_DB_TYPE
+    _TARGET_DB_VERSION: $_E2E_DB_VERSION
     # Standard variables for Playwright. Mostly similar to NightwatchJS tests.
     # This is required for the job to work.
     DRUPAL_TEST_BASE_URL: "${SIMPLETEST_BASE_URL}"
@@ -176,17 +294,75 @@ phpmd:
       for p in $(echo "${PLAYWRIGHT_TEST_PROJECT}" | tr ',' ' '); do
         _PROJECT_FLAGS="${_PROJECT_FLAGS} --project ${p}"
       done
-      echo -e "[cmd] npx playwright test ${_PROJECT_FLAGS} --grep @${PLAYWRIGHT_TEST_TAG} --workers ${PLAYWRIGHT_TEST_WORKERS}"
-      npx playwright test ${_PROJECT_FLAGS} --grep @${PLAYWRIGHT_TEST_TAG} --workers ${PLAYWRIGHT_TEST_WORKERS}
-  after_script:
+      echo -e "[cmd] npx playwright test ${_PROJECT_FLAGS} --grep @${PLAYWRIGHT_TEST_TAG} --workers ${PLAYWRIGHT_TEST_WORKERS} --shard=$CI_NODE_INDEX/$CI_NODE_TOTAL --reporter=blob"
+      npx playwright test ${_PROJECT_FLAGS} --grep @${PLAYWRIGHT_TEST_TAG} --workers ${PLAYWRIGHT_TEST_WORKERS} --shard=$CI_NODE_INDEX/$CI_NODE_TOTAL --reporter=blob
+  artifacts:
+    # A shard produces no readable report of its own: the blob carries the
+    # results and the failure attachments (traces, screenshots, videos), and
+    # `reports_playwright` turns them into the HTML report and the link.
+    when: always
+    expire_in: 1 day
+    paths:
+      - blob-report/
+
+playwright:
+  extends: .playwright-base
+  allow_failure: false
+  variables:
+    PLAYWRIGHT_TEST_PROJECT: chromium
+    PLAYWRIGHT_TEST_TAG: base
+
+playwright_firefox:
+  extends: .playwright-base
+  allow_failure: false
+  variables:
+    PLAYWRIGHT_TEST_PROJECT: firefox
+    PLAYWRIGHT_TEST_TAG: base
+
+reports_playwright:
+  # Stage declared at the top of this file, the Drupal CI templates stop at
+  # `test`.
+  stage: report
+  image: $_TEST_IMAGE
+  # Fetch the shard blobs only, instead of every artifact of the earlier
+  # stages. Naming the parent job covers all its parallel instances.
+  dependencies:
+    - playwright
+    - playwright_firefox
+  # Runs even when a shard failed, since that is when the report is wanted.
+  # The skip rule comes first so the merge job disappears with the shards
+  # rather than looking for blobs nobody produced.
+  rules:
+    - *skip-e2e-tests-rule
+    - when: always
+  script:
     - |
-      cat > ${CI_PROJECT_DIR}/test-results/links.json << EOF
+      if [ ! -d blob-report ] || [ -z "$(ls -A blob-report 2>/dev/null)" ]; then
+        echo "[Notice] No blob report to merge, the Playwright jobs did not run."
+        exit 0
+      fi
+    # `npm ci` rather than the Playwright shipped in the image: a blob is
+    # version bound, and the shards write it with the version from
+    # package.json.
+    - npm ci
+    - mkdir -p test-results
+    # Merge all blob reports into a single HTML report. The junit reporter
+    # writes to stdout, so it takes a second pass of its own, and it is what
+    # gives Drupal CI a test report again now that the shards only emit blobs.
+    - npx playwright merge-reports --reporter=html ./blob-report
+    - npx playwright merge-reports --reporter=junit ./blob-report > test-results/playwright.xml
+    # The report is only reachable by browsing the artifacts, so expose it as a
+    # named link on the job and in the merge request widget. Points at this
+    # job's own artifacts, which is why it lives here and not on the shards.
+    # Dies with the artifacts, hence the same `expire_in` on both.
+    - |
+      cat > test-results/links.json << EOF
       {
         "playwright": [
           {
             "external_link": {
               "label": "Playwright report",
-              "url": "https://project.pages.drupalcode.org/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/playwright-report/index.html"
+              "url": "https://${CI_PROJECT_ROOT_NAMESPACE}.${CI_PAGES_DOMAIN:-pages.drupalcode.org}/-/${CI_PROJECT_NAME}/-/jobs/${CI_JOB_ID}/artifacts/playwright-report/index.html"
             }
           }
         ]
@@ -195,7 +371,6 @@ phpmd:
   artifacts:
     expose_as: 'Playwright Test Reports'
     when: always
-    expire_in: 3 mos
     paths:
       - playwright-report/
       - test-results/
@@ -203,10 +378,5 @@ phpmd:
       junit:
         - test-results/playwright.xml
       annotations: test-results/links.json
-
-playwright:
-  extends: .playwright-base
-  allow_failure: false
-  variables:
-    PLAYWRIGHT_TEST_PROJECT: firefox, chromium
-    PLAYWRIGHT_TEST_TAG: base
+    # The link above resolves through these artifacts, so it dies with them.
+    expire_in: 30 days
