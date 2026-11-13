@@ -263,3 +263,54 @@
     height: 50vh;
   }
 }
+
+/*
+ * The trigger filling the preview box of an icon_autocomplete. Variables come
+ * from ui_icons/css/icon.autocomplete.css.
+ */
+.ui-icons-preview:has(> .ui-icons-popover__preview-trigger) {
+  transition:
+    border-color 100ms linear,
+    background-color 100ms linear;
+}
+
+.ui-icons-preview:has(> .ui-icons-popover__preview-trigger:hover) {
+  border-color: var(--input--focus-border-color, #1976d2);
+  background-color: var(--color-gray-100, #e1e1e1);
+}
+
+.ui-icons-popover__preview-trigger {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  font: inherit;
+}
+
+.ui-icons-popover__preview-trigger:focus-visible {
+  outline: 2px solid var(--input--focus-border-color, #1976d2);
+  outline-offset: 2px;
+}
+
+.ui-icons-popover__placeholder {
+  width: calc(var(--ui-icons--preview-size, 2.89rem) * 0.6);
+  height: calc(var(--ui-icons--preview-size, 2.89rem) * 0.6);
+  opacity: 0.55;
+  color: var(--color-gray-600, #717171);
+}
+
+.ui-icons-popover__preview-trigger:hover .ui-icons-popover__placeholder {
+  opacity: 0.9;
+}
+
+/* Layout builder off-canvas, where the preview box is smaller. */
+#drupal-off-canvas-wrapper .ui-icons-popover__placeholder {
+  width: calc(var(--off-canvas-padding) - 4px);
+  height: calc(var(--off-canvas-padding) - 4px);
+}

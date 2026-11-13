@@ -425,6 +425,10 @@ test('The grid marks the current icon', { tag: [ '@base' ] }, async ({ page }) =
 })
 
 test('Open the grid from the autocomplete preview', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  // The popover takes the preview box over from the picker. A popover test
+  // run earlier in the worker leaves it installed. Unlike pm:uninstall, the
+  // module installer does nothing for a module that is not installed.
+  await drupal.drush(`php:eval "\\Drupal::service('module_installer')->uninstall(['ui_icons_popover']);"`)
   await useAutocompleteWidget(drupal)
   await page.goto(config.contentTypeAdd.replace('{bundle}', BUNDLE_ID))
 
