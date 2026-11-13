@@ -841,12 +841,16 @@
    * @param {HTMLInputElement} input
    *   The autocomplete input, which keeps holding the value.
    *
-   * @return {HTMLButtonElement}
-   *   The trigger, in the preview box.
+   * @return {HTMLButtonElement|null}
+   *   The trigger, in the preview box. Null when the theme renders no preview
+   *   box, the input then stays a plain autocomplete.
    */
   function enhancePreview(input) {
     const wrapper = input.closest('.ui-icons-input-wrapper');
-    const preview = wrapper.querySelector('.ui-icons-preview');
+    const preview = wrapper?.querySelector('.ui-icons-preview');
+    if (!preview) {
+      return null;
+    }
     const label = Drupal.t('Browse icons');
     const trigger = create('button', {
       type: 'button',
@@ -856,7 +860,7 @@
       'aria-label': label,
       title: label,
     });
-    if (preview.children.length) {
+    if (preview.querySelector('.ui-icons-preview-icon')) {
       trigger.append(...preview.childNodes);
     } else {
       trigger.innerHTML = placeholder;
@@ -928,7 +932,10 @@
         'input[data-icon-popover-trigger]',
         context,
       ).forEach((input) => {
-        restoreFocus(input, enhancePreview(input));
+        const trigger = enhancePreview(input);
+        if (trigger) {
+          restoreFocus(input, trigger);
+        }
       });
     },
   };
