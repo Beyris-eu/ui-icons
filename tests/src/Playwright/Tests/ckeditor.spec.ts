@@ -331,7 +331,10 @@ test('Edit an icon in place from the widget toolbar', { tag: [ '@base' ] }, asyn
   })
 })
 
-test('Pick an icon from the library opened inside the icon dialog', { tag: [ '@base' ] }, async ({ page }) => {
+test('Pick an icon from the library opened inside the icon dialog', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  // The popover takes the preview box over from the picker, and the setup
+  // installs both.
+  await drupal.drush(`php:eval "\\Drupal::service('module_installer')->uninstall(['ui_icons_popover']);"`)
   const iconId = `${PACK_ID}:foo`
   const modal = page.locator('#drupal-modal')
 
@@ -467,6 +470,54 @@ test('Use the icon_popover selector in the icon dialog', { tag: [ '@base' ] }, a
 
     const icons = await getEditorIcons(page)
     expect(icons, 'The popover selector must reach the editor like the autocomplete does.').toHaveLength(1)
+    expect(icons[0].id).toBe(iconId)
+  })
+})
+
+test('Pick an icon from the popover opened by the autocomplete preview in the icon dialog', { tag: [ '@base' ] }, async ({ page }) => {
+  const iconId = `${PACK_ID}:foo`
+  const modal = page.locator('#drupal-modal')
+  const panel = modal.locator('.ui-icons-popover__panel')
+  const preview = modal.getByRole('button', { name: 'Browse icons' })
+
+  await test.step('The dialog keeps the input and offers the preview', async () => {
+    await openEditor(page)
+    await page.getByRole('button', { name: 'Insert Icon' }).click()
+    await expect(modal).toBeVisible()
+
+    await expect(modal.locator('[name="icon[icon_id]"]')).toBeVisible()
+    await expect(preview).toBeVisible()
+  })
+
+  await test.step('Escape closes the panel and leaves the dialog open', async () => {
+    await preview.click()
+    await expect(panel).toBeVisible()
+    await expect(panel).toBeInViewport()
+
+    await page.keyboard.press('Escape')
+    await expect(panel).toBeHidden()
+    await expect(modal).toBeVisible()
+    await expect(preview).toBeFocused()
+  })
+
+  await test.step('Picking writes back and rebuilds the element', async () => {
+    await preview.click()
+    await page.keyboard.type('foo')
+    await panel.locator(`[role="option"][data-icon-id="${iconId}"]`).click()
+
+    await expect(modal.locator('[name="icon[icon_id]"]')).toHaveValue(iconId)
+    await expect(modal.locator('.ui-icons-preview-icon img[src$="foo.png"]')).toBeVisible()
+    await expect(modal.locator('.ui-icons-settings-wrapper details')).toBeVisible()
+    // The rebuild replaces the preview button, the new one takes the focus.
+    await expect(preview).toBeFocused()
+  })
+
+  await test.step('Saving the dialog inserts the icon in the editor', async () => {
+    await page.locator('.ui-dialog-buttonpane').getByRole('button', { name: 'Save' }).click()
+    await expect(modal).toBeHidden()
+
+    const icons = await getEditorIcons(page)
+    expect(icons).toHaveLength(1)
     expect(icons[0].id).toBe(iconId)
   })
 })

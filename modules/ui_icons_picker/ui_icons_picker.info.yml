@@ -5,3 +5,5 @@ package: User interface
 core_version_requirement: ^11.3 || ^12.0
 dependencies:
   - ui_icons:ui_icons
+lifecycle: deprecated
+lifecycle_link: https://git.drupalcode.org/project/ui_icons/-/work_items/3591920

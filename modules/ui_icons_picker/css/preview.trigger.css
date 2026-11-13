@@ -7,7 +7,9 @@ Variables come from ui_icons/css/icon.autocomplete.css.
 .ui-icons-preview--picker {
   align-items: center;
   cursor: pointer;
-  transition: border-color 100ms linear, background-color 100ms linear;
+  transition:
+    border-color 100ms linear,
+    background-color 100ms linear;
 }
 
 .ui-icons-preview--picker:hover {
@@ -26,8 +28,8 @@ Variables come from ui_icons/css/icon.autocomplete.css.
   justify-content: center;
   width: 100%;
   height: 100%;
-  color: var(--color-gray-600, #717171);
   opacity: 0.55;
+  color: var(--color-gray-600, #717171);
 
   svg {
     width: calc(var(--ui-icons--preview-size, 2.89rem) * 0.6);

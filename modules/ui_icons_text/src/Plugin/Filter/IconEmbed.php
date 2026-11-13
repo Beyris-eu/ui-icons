@@ -495,10 +495,10 @@ class IconEmbed extends FilterBase implements ContainerFactoryPluginInterface, T
    *   Icon selector format options.
    */
   private function getSelectorFormat(): array {
-    $options = [
-      'icon_autocomplete' => $this->t('Autocomplete'),
-      'icon_picker' => $this->t('Picker'),
-    ];
+    $options = ['icon_autocomplete' => $this->t('Autocomplete')];
+    if ($this->moduleHandler->moduleExists('ui_icons_picker')) {
+      $options['icon_picker'] = $this->t('Picker');
+    }
     if ($this->moduleHandler->moduleExists('ui_icons_popover')) {
       $options['icon_popover'] = $this->t('Popover');
     }

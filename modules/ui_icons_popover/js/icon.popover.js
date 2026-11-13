@@ -24,6 +24,24 @@
   let pendingFocus = null;
 
   /**
+   * Grid glyph filling an empty autocomplete preview box.
+   *
+   * Without it an empty preview box is a blank square with nothing to suggest
+   * it can be clicked.
+   */
+  const placeholder = `<svg class="ui-icons-popover__placeholder" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+    <rect x="3" y="3" width="5" height="5" rx="1"/>
+    <rect x="9.5" y="3" width="5" height="5" rx="1"/>
+    <rect x="16" y="3" width="5" height="5" rx="1"/>
+    <rect x="3" y="9.5" width="5" height="5" rx="1"/>
+    <rect x="9.5" y="9.5" width="5" height="5" rx="1"/>
+    <rect x="16" y="9.5" width="5" height="5" rx="1"/>
+    <rect x="3" y="16" width="5" height="5" rx="1"/>
+    <rect x="9.5" y="16" width="5" height="5" rx="1"/>
+    <rect x="16" y="16" width="5" height="5" rx="1"/>
+  </svg>`;
+
+  /**
    * Creates an element.
    *
    * @param {string} tag
@@ -52,60 +70,22 @@
   };
 
   /**
-   * Turns an icon_popover input into a trigger button and its popover.
+   * Builds the popover panel of an input, opened by a trigger.
    *
    * @param {HTMLInputElement} input
-   *   The input the server rendered, which keeps holding the value.
+   *   The input holding the value, which a pick sets and changes.
+   * @param {HTMLButtonElement} trigger
+   *   The button opening the panel, which the panel is anchored on.
+   * @param {Function} onPick
+   *   Called with the icon id and its index entry, before the change event.
    *
-   * @return {HTMLButtonElement}
-   *   The trigger.
+   * @return {HTMLDivElement}
+   *   The panel, for the caller to put in the page.
    */
-  function enhance(input) {
+  function buildPanel(input, trigger, onPick = () => {}) {
     const data = Drupal.uiIconsPopover;
     const { id } = input;
     const allowed = input.dataset.allowedIconPack || '';
-    const wrapper = input.closest('.ui-icons-input-wrapper');
-    const serverPreview = wrapper.querySelector('.ui-icons-preview');
-
-    const preview = create('span', {
-      class: 'ui-icons-popover__preview',
-      'aria-hidden': 'true',
-    });
-    const serverIcon = serverPreview?.querySelector('.ui-icons-preview-icon');
-    if (serverIcon) {
-      preview.append(...serverIcon.childNodes);
-    }
-    const value = create('span', {
-      class: 'ui-icons-popover__value',
-      id: `${id}--value`,
-      text: input.dataset.iconLabel || Drupal.t('Choose an icon'),
-    });
-    const trigger = create(
-      'button',
-      {
-        type: 'button',
-        class: 'ui-icons-popover__trigger',
-        id: `${id}--trigger`,
-        popovertarget: `${id}--panel`,
-        'aria-haspopup': 'dialog',
-        'aria-describedby': value.id,
-      },
-      [preview, value],
-    );
-    const clear = create(
-      'button',
-      {
-        type: 'button',
-        class: 'ui-icons-popover__clear',
-        'aria-label': Drupal.t('Remove icon'),
-        title: Drupal.t('Remove icon'),
-      },
-      ['×'],
-    );
-    clear.hidden = !input.value || input.required;
-    // A required input the editor cannot reach would silently stop the
-    // browser from submitting the form. The server still enforces it.
-    input.required = false;
 
     const search = create('input', {
       type: 'search',
@@ -154,22 +134,6 @@
         footer,
       ],
     );
-
-    // Next to the input wrapper, not in it: js/icon.autocomplete.js turns any
-    // input in there into an autocomplete, the search box included.
-    wrapper.hidden = true;
-    wrapper.after(
-      create('div', { class: 'ui-icons-popover' }, [trigger, clear, panel]),
-    );
-
-    const label = document.querySelector(`label[for="${CSS.escape(id)}"]`);
-    if (label) {
-      label.htmlFor = trigger.id;
-    }
-    if (input.classList.contains('error')) {
-      trigger.classList.add('error');
-      trigger.setAttribute('aria-invalid', 'true');
-    }
 
     instances += 1;
     const anchor = `--ui-icons-popover-${instances}`;
@@ -630,8 +594,7 @@
       if (data.recent) {
         data.recent.add(iconId);
       }
-      preview.innerHTML = data.previews.get(iconId) ?? '';
-      value.textContent = icon.label;
+      onPick(iconId, icon);
       input.value = iconId;
       pendingFocus = input.name;
       panel.hidePopover();
@@ -782,6 +745,85 @@
       }
     });
 
+    return panel;
+  }
+
+  /**
+   * Turns an icon_popover input into a trigger button and its popover.
+   *
+   * @param {HTMLInputElement} input
+   *   The input the server rendered, which keeps holding the value.
+   *
+   * @return {HTMLButtonElement}
+   *   The trigger.
+   */
+  function enhance(input) {
+    const data = Drupal.uiIconsPopover;
+    const { id } = input;
+    const wrapper = input.closest('.ui-icons-input-wrapper');
+    const serverPreview = wrapper.querySelector('.ui-icons-preview');
+
+    const preview = create('span', {
+      class: 'ui-icons-popover__preview',
+      'aria-hidden': 'true',
+    });
+    const serverIcon = serverPreview?.querySelector('.ui-icons-preview-icon');
+    if (serverIcon) {
+      preview.append(...serverIcon.childNodes);
+    }
+    const value = create('span', {
+      class: 'ui-icons-popover__value',
+      id: `${id}--value`,
+      text: input.dataset.iconLabel || Drupal.t('Choose an icon'),
+    });
+    const trigger = create(
+      'button',
+      {
+        type: 'button',
+        class: 'ui-icons-popover__trigger',
+        id: `${id}--trigger`,
+        popovertarget: `${id}--panel`,
+        'aria-haspopup': 'dialog',
+        'aria-describedby': value.id,
+      },
+      [preview, value],
+    );
+    const clear = create(
+      'button',
+      {
+        type: 'button',
+        class: 'ui-icons-popover__clear',
+        'aria-label': Drupal.t('Remove icon'),
+        title: Drupal.t('Remove icon'),
+      },
+      ['×'],
+    );
+    clear.hidden = !input.value || input.required;
+    // A required input the editor cannot reach would silently stop the
+    // browser from submitting the form. The server still enforces it.
+    input.required = false;
+
+    const panel = buildPanel(input, trigger, (iconId, icon) => {
+      preview.innerHTML = data.previews.get(iconId) ?? '';
+      value.textContent = icon.label;
+    });
+
+    // Next to the input wrapper, not in it: js/icon.autocomplete.js turns any
+    // input in there into an autocomplete, the search box included.
+    wrapper.hidden = true;
+    wrapper.after(
+      create('div', { class: 'ui-icons-popover' }, [trigger, clear, panel]),
+    );
+
+    const label = document.querySelector(`label[for="${CSS.escape(id)}"]`);
+    if (label) {
+      label.htmlFor = trigger.id;
+    }
+    if (input.classList.contains('error')) {
+      trigger.classList.add('error');
+      trigger.setAttribute('aria-invalid', 'true');
+    }
+
     clear.addEventListener('click', () => {
       input.value = '';
       pendingFocus = input.name;
@@ -789,6 +831,68 @@
     });
 
     return trigger;
+  }
+
+  /**
+   * Turns the preview box of an icon_autocomplete into a popover trigger.
+   *
+   * The input stays as it is, so typing a name still autocompletes.
+   *
+   * @param {HTMLInputElement} input
+   *   The autocomplete input, which keeps holding the value.
+   *
+   * @return {HTMLButtonElement|null}
+   *   The trigger, in the preview box. Null when the theme renders no preview
+   *   box, the input then stays a plain autocomplete.
+   */
+  function enhancePreview(input) {
+    const wrapper = input.closest('.ui-icons-input-wrapper');
+    const preview = wrapper?.querySelector('.ui-icons-preview');
+    if (!preview) {
+      return null;
+    }
+    const label = Drupal.t('Browse icons');
+    const trigger = create('button', {
+      type: 'button',
+      class: 'ui-icons-popover__preview-trigger',
+      popovertarget: `${input.id}--panel`,
+      'aria-haspopup': 'dialog',
+      'aria-label': label,
+      title: label,
+    });
+    if (preview.querySelector('.ui-icons-preview-icon')) {
+      trigger.append(...preview.childNodes);
+    } else {
+      trigger.innerHTML = placeholder;
+    }
+    preview.append(trigger);
+
+    // Next to the input wrapper, not in it: js/icon.autocomplete.js turns any
+    // input in there into an autocomplete, the search box included.
+    wrapper.after(
+      create('div', { class: 'ui-icons-popover' }, [
+        buildPanel(input, trigger),
+      ]),
+    );
+
+    return trigger;
+  }
+
+  /**
+   * Focuses the new trigger of an input an icon was just picked in.
+   *
+   * @param {HTMLInputElement} input
+   *   The input the element rebuild brought in.
+   * @param {HTMLButtonElement} trigger
+   *   Its trigger.
+   */
+  function restoreFocus(input, trigger) {
+    if (pendingFocus === input.name) {
+      pendingFocus = null;
+      if (document.activeElement === document.body) {
+        trigger.focus({ preventScroll: true });
+      }
+    }
   }
 
   /**
@@ -805,15 +909,34 @@
       }
       once('icon-popover', 'input[data-icon-popover]', context).forEach(
         (input) => {
-          const trigger = enhance(input);
-          if (pendingFocus === input.name) {
-            pendingFocus = null;
-            if (document.activeElement === document.body) {
-              trigger.focus({ preventScroll: true });
-            }
-          }
+          restoreFocus(input, enhance(input));
         },
       );
+    },
+  };
+
+  /**
+   * Opens the popover from the preview box of an icon_autocomplete input.
+   *
+   * Browsers without the popover API keep the plain autocomplete.
+   *
+   * @type {Drupal~behavior}
+   */
+  Drupal.behaviors.iconPopoverTrigger = {
+    attach(context) {
+      if (!('togglePopover' in HTMLElement.prototype)) {
+        return;
+      }
+      once(
+        'icon-popover-trigger',
+        'input[data-icon-popover-trigger]',
+        context,
+      ).forEach((input) => {
+        const trigger = enhancePreview(input);
+        if (trigger) {
+          restoreFocus(input, trigger);
+        }
+      });
     },
   };
 })(Drupal, once);

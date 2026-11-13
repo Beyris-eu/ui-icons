@@ -15,6 +15,9 @@ const BUNDLE_ID = 'page'
 // Not picker.spec.ts's field_icon: specs in a worker share one site, and the
 // first to create the field would decide its allowed packs for the other.
 const FIELD_NAME = 'field_icon_popover'
+// picker.spec.ts's field_icon sits on the same form, and gets a panel of its
+// own when one of its tests left the autocomplete selector on.
+const FIELD = `.field--name-${FIELD_NAME.replace(/_/g, '-')}`
 const PACKS = [ 'popover_one', 'popover_two', 'popover_flat' ]
 
 /**
@@ -74,7 +77,7 @@ function trigger (page: Page, delta: number = 0): Locator {
  * @returns {Locator} The panel locator.
  */
 function panel (page: Page, delta: number = 0): Locator {
-  return page.locator('.ui-icons-popover__panel').nth(delta)
+  return page.locator(`${FIELD} .ui-icons-popover__panel`).nth(delta)
 }
 
 /**
@@ -467,5 +470,127 @@ test('Rows stay on one line whether the grid scrolls or not', { tag: [ '@base' ]
     await browser.close()
     const packs = PACKS.map((pack) => `'${pack}' => '${pack}'`).join(', ')
     await updateField(drupal, `setSetting('allowed_icon_pack', [${packs}])`)
+  }
+})
+
+/**
+ * Switch the field widget over to the autocomplete selector.
+ *
+ * The popover then opens from the preview box, next to the input. Run inside
+ * the test: the beforeEach hook puts the icon_popover selector back.
+ *
+ * @param {Drupal} drupal - The Drupal object.
+ * @returns {Promise<void>}
+ */
+async function useAutocompleteWidget (drupal: Drupal): Promise<void> {
+  const php = [
+    `\\Drupal::service('entity_display.repository')->getFormDisplay('node', '${BUNDLE_ID}')`,
+    `->setComponent('${FIELD_NAME}', ['type' => 'icon_widget', 'settings' => ['icon_selector' => 'icon_autocomplete']])->save();`,
+  ].join(' ')
+  await drupal.drush(`php:eval "${php}"`)
+}
+
+/**
+ * The preview box button opening the popover of an autocomplete.
+ *
+ * @param {Page} page - The Playwright page.
+ * @param {number} delta - The field item delta.
+ * @returns {Locator} The button locator.
+ */
+function previewTrigger (page: Page, delta: number = 0): Locator {
+  return page.locator(`${FIELD} .ui-icons-popover__preview-trigger`).nth(delta)
+}
+
+test('The autocomplete preview opens the panel', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  await useAutocompleteWidget(drupal)
+  await page.goto(config.contentTypeAdd.replace('{bundle}', BUNDLE_ID))
+
+  await test.step('The preview opens the panel, the input stays', async () => {
+    await expect(input(page)).toBeVisible()
+    await expect(previewTrigger(page)).toHaveAccessibleName('Browse icons')
+    await previewTrigger(page).click()
+    await expect(panel(page)).toBeVisible()
+    await expect(tiles(page).first()).toBeVisible()
+
+    const results = await new AxeBuilder({ page }).include('.ui-icons-wrapper').analyze()
+    expect(results.violations).toEqual([])
+  })
+
+  await test.step('Picking fills the input and rebuilds the preview', async () => {
+    await tile(page, 'popover_two:dot.name').click()
+    await expect(panel(page)).toBeHidden()
+    await expect(input(page)).toHaveValue('popover_two:dot.name')
+    await expect(previewTrigger(page).locator('img[src$="dot.name.svg"]')).toBeVisible()
+    await drupal.ajaxReady()
+    await expect(previewTrigger(page)).toBeFocused()
+  })
+})
+
+test('Typing still autocompletes with the popover on', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  await useAutocompleteWidget(drupal)
+  await page.goto(config.contentTypeAdd.replace('{bundle}', BUNDLE_ID))
+  await expect(previewTrigger(page)).toBeVisible()
+
+  await input(page).fill('arrow')
+  await expect(page.locator('ul.ui-autocomplete .ui-icons-result').first()).toBeVisible()
+})
+
+test('Escape closes the panel only', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  await useAutocompleteWidget(drupal)
+  await page.goto(config.contentTypeAdd.replace('{bundle}', BUNDLE_ID))
+  // Stands in for a dialog the element sits in, which closes on Escape.
+  await page.evaluate(() => document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      document.body.dataset.escaped = 'true'
+    }
+  }))
+
+  await previewTrigger(page).click()
+  await expect(panel(page)).toBeVisible()
+  await page.keyboard.press('Escape')
+
+  await expect(panel(page)).toBeHidden()
+  await expect(previewTrigger(page)).toBeFocused()
+  await expect(page.locator('body')).not.toHaveAttribute('data-escaped')
+})
+
+test('Two autocomplete previews open their own panel', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  const setCardinality = async (cardinality: number) => {
+    await drupal.drush(`php:eval "\\Drupal\\field\\Entity\\FieldStorageConfig::loadByName('node', '${FIELD_NAME}')->setCardinality(${cardinality})->save();"`)
+  }
+  await useAutocompleteWidget(drupal)
+  await setCardinality(2)
+  try {
+    await page.goto(config.contentTypeAdd.replace('{bundle}', BUNDLE_ID))
+    // The open panel covers the second preview, so reach it with the keyboard.
+    await previewTrigger(page, 0).click()
+    await expect(panel(page, 0)).toBeVisible()
+    await previewTrigger(page, 1).focus()
+    await page.keyboard.press('Enter')
+    await expect(panel(page, 0)).toBeHidden()
+    await expect(panel(page, 1)).toBeVisible()
+
+    await tile(page, 'popover_one:sun').click()
+    await expect(input(page, 1)).toHaveValue('popover_one:sun')
+    await expect(input(page, 0)).toHaveValue('')
+  }
+  finally {
+    await setCardinality(1)
+  }
+})
+
+test('A required autocomplete keeps its input required', { tag: [ '@base' ] }, async ({ page, drupal }) => {
+  await useAutocompleteWidget(drupal)
+  await updateField(drupal, 'setRequired(TRUE)')
+  try {
+    await page.goto(config.contentTypeAdd.replace('{bundle}', BUNDLE_ID))
+    await expect(previewTrigger(page)).toBeVisible()
+
+    // The input stays in reach, so the browser validation can speak for it.
+    await expect(input(page)).toBeVisible()
+    await expect(input(page)).toHaveAttribute('required')
+  }
+  finally {
+    await updateField(drupal, 'setRequired(FALSE)')
   }
 })

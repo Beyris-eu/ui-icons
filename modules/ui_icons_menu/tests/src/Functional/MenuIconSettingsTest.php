@@ -8,6 +8,7 @@ use Drupal\Tests\BrowserTestBase;
 use Drupal\ui_icons_menu\Hook\UiIconsMenuHooks;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 
 /**
@@ -18,6 +19,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 #[RunTestsInSeparateProcesses]
 #[CoversClass(UiIconsMenuHooks::class)]
 #[Group('ui_icons')]
+#[IgnoreDeprecations]
 class MenuIconSettingsTest extends BrowserTestBase {
 
   /**
